@@ -1,0 +1,70 @@
+<!-- Cabeçalho -->
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-bold">Alunos</h1>
+    <p class="mt-1 text-ink-soft">{{ activeCount }} alunos ativos</p>
+  </div>
+
+  <label class="relative block">
+    <app-icon
+      name="search"
+      class="pointer-events-none absolute left-4 top-1/2 size-4.5 -translate-y-1/2 text-ink-soft"
+    />
+    <input
+      type="search"
+      placeholder="Buscar aluno..."
+      class="w-64 rounded-full border border-line bg-white py-2.5 pl-11 pr-4 text-sm placeholder:text-ink-soft/60 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+    />
+  </label>
+</div>
+
+<!-- Tabela de alunos -->
+<app-card class="mt-6 overflow-x-auto">
+  <table class="w-full text-left">
+    <thead>
+      <tr class="border-b border-line text-xs uppercase tracking-wider text-ink-soft">
+        <th scope="col" class="px-3 pb-4 font-bold">Aluno</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Responsável</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Plano</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Frequência</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Mensalidade</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-line/70">
+      @for (student of students; track student.name) {
+        <tr>
+          <td class="px-3 py-4">
+            <div class="flex items-center gap-4">
+              <span
+                class="flex size-11 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-extrabold text-ink-soft"
+              >
+                {{ initials(student.name) }}
+              </span>
+              <span class="whitespace-nowrap text-lg font-bold">{{ student.name }}</span>
+            </div>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ student.guardian }}</td>
+          <td class="px-3 py-4">
+            <span
+              class="inline-block rounded-full px-3.5 py-1 text-sm font-bold"
+              [class]="planStyles[student.plan]"
+            >
+              {{ student.plan }}
+            </span>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ student.frequency }}</td>
+          <td class="whitespace-nowrap px-3 py-4 font-bold">{{ student.fee }}</td>
+          <td class="px-3 py-4">
+            <span
+              class="inline-block whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-bold"
+              [class]="statusStyles[student.status]"
+            >
+              {{ student.status }}
+            </span>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</app-card>

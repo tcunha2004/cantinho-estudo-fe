@@ -17,9 +17,22 @@ export const routes: Routes = [
     loadComponent: () => import('./layout/shell/shell').then((m) => m.Shell),
     children: [
       // admin
-      { path: 'painel', loadComponent: placeholder, title: pageTitle('Painel'), data: { title: 'Painel' } },
-      { path: 'alunos', loadComponent: placeholder, title: pageTitle('Alunos'), data: { title: 'Alunos' } },
-      { path: 'professores', loadComponent: placeholder, title: pageTitle('Professores'), data: { title: 'Professores' } },
+      {
+        path: 'painel',
+        loadComponent: () => import('./pages/admin/painel/painel').then((m) => m.Painel),
+        title: pageTitle('Painel'),
+      },
+      {
+        path: 'alunos',
+        loadComponent: () => import('./pages/admin/alunos/alunos').then((m) => m.Alunos),
+        title: pageTitle('Alunos'),
+      },
+      {
+        path: 'professores',
+        loadComponent: () =>
+          import('./pages/admin/professores/professores').then((m) => m.Professores),
+        title: pageTitle('Professores'),
+      },
       { path: 'financeiro', loadComponent: placeholder, title: pageTitle('Financeiro'), data: { title: 'Financeiro' } },
       // compartilhada (admin, professor e aluno)
       { path: 'agenda', loadComponent: placeholder, title: pageTitle('Agenda'), data: { title: 'Agenda' } },

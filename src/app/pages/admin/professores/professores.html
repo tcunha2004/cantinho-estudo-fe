@@ -1,0 +1,42 @@
+<h1 class="font-display text-3xl font-bold">Professores</h1>
+
+<!-- Total a pagar no mês -->
+<section class="mt-6 rounded-3xl bg-accent-soft px-7 py-6">
+  <p class="text-ink-soft">Total a pagar aos professores · {{ month }}</p>
+  <p class="mt-1 font-display text-4xl font-extrabold text-accent">{{ totalDue }}</p>
+</section>
+
+<!-- Cards de professores -->
+<div class="mt-6 grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-5">
+  @for (teacher of teachers; track teacher.name) {
+    <app-card>
+      <div class="flex items-center gap-4">
+        <span
+          class="flex size-14 shrink-0 items-center justify-center rounded-full font-display font-bold text-white"
+          [class]="teacher.avatarColor"
+        >
+          {{ initials(teacher.name) }}
+        </span>
+        <div class="min-w-0">
+          <h2 class="truncate text-xl font-bold">{{ teacher.name }}</h2>
+          <p class="truncate text-ink-soft">{{ teacher.subject }}</p>
+        </div>
+      </div>
+
+      <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+        <div class="flex items-baseline justify-between py-3">
+          <dt class="text-ink-soft">Aulas no mês</dt>
+          <dd class="font-bold">{{ teacher.lessonsInMonth }}</dd>
+        </div>
+        <div class="flex items-baseline justify-between py-3">
+          <dt class="text-ink-soft">Valor / aula</dt>
+          <dd class="font-bold">{{ teacher.pricePerLesson }}</dd>
+        </div>
+        <div class="flex items-baseline justify-between py-3">
+          <dt class="text-ink-soft">A receber</dt>
+          <dd class="font-bold text-subject-green">{{ teacher.amountDue }}</dd>
+        </div>
+      </dl>
+    </app-card>
+  }
+</div>
