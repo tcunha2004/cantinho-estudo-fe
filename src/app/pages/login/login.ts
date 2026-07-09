@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-
-export type Role = 'admin' | 'professor' | 'aluno';
+import { Role } from '../../core/session';
 
 interface RoleOption {
   value: Role;

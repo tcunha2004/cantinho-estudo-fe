@@ -1,0 +1,8 @@
+/* Item ativo da navegação (classe aplicada pelo routerLinkActive).
+   O :hover repetido garante que o pill coral não seja sobrescrito
+   pelo hover:bg-cream do link. */
+.nav-link.active,
+.nav-link.active:hover {
+  background-color: var(--color-accent-soft);
+  color: var(--color-accent);
+}
