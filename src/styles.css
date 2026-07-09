@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens do Cantinho do Estudo.
+ * A cor de destaque (--color-accent) é configurável: basta sobrescrever
+ * a variável em :root para trocar o coral por outra cor em todo o app.
+ */
+@theme {
+  --font-display: 'Baloo 2', ui-rounded, system-ui, sans-serif;
+  --font-sans: 'Nunito', system-ui, sans-serif;
+
+  /* base */
+  --color-cream: #faf7f2;
+  --color-line: #ece4d8;
+  --color-ink: #453f38;
+  --color-ink-soft: #8d857a;
+
+  /* destaque (configurável) */
+  --color-accent: #fb5e5e;
+  --color-accent-strong: #e94a4a;
+  --color-accent-soft: #feefec;
+
+  /* cores de apoio — matérias e status */
+  --color-subject-blue: #5b8def;
+  --color-subject-green: #4bb587;
+  --color-subject-purple: #9b7ded;
+  --color-subject-amber: #f0a541;
+}
+
+body {
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
