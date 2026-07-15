@@ -1,0 +1,51 @@
+<h1 class="font-display text-3xl font-bold">Minhas aulas</h1>
+<p class="mt-1 text-ink-soft">Próximas aulas e histórico</p>
+
+<div class="mt-6 grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
+  <!-- Próximas aulas -->
+  <app-card>
+    <h2 class="font-display text-2xl font-bold">Próximas aulas</h2>
+
+    <div class="mt-5 space-y-3">
+      @for (item of upcoming; track item.time + item.student) {
+        <div class="flex items-center gap-4 rounded-2xl bg-cream px-5 py-4">
+          <div class="flex w-24 flex-col items-start gap-0.5 shrink-0">
+            <span class="text-coral font-bold">{{ item.day }}</span>
+            <span class="font-display text-lg font-bold">{{ item.time }}</span>
+          </div>
+
+          <span class="h-10 w-1 shrink-0 rounded-full" [class]="item.barColor"></span>
+
+          <div class="min-w-0">
+            <p class="truncate text-lg font-bold">{{ item.student }}</p>
+            <p class="truncate text-ink-soft">{{ item.subject }}</p>
+          </div>
+        </div>
+      }
+    </div>
+  </app-card>
+
+  <!-- Histórico recente -->
+  <app-card>
+    <h2 class="font-display text-2xl font-bold">Histórico recente</h2>
+
+    <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+      @for (h of history; track h.student + h.date) {
+        <div class="flex items-baseline justify-between py-4">
+          <div>
+            <p class="font-bold">{{ h.student }}</p>
+            <p class="text-ink-soft">{{ h.date }} · {{ h.subject }}</p>
+          </div>
+
+          <div>
+            <span
+              class="rounded-full px-3 py-1 text-sm font-bold"
+              [class]="statusStyles[h.status]"
+              >{{ h.status }}</span
+            >
+          </div>
+        </div>
+      }
+    </dl>
+  </app-card>
+</div>
