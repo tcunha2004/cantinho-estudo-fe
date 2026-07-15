@@ -1,0 +1,41 @@
+<h1 class="font-display text-3xl font-bold">Meus ganhos</h1>
+<p class="mt-1 text-ink-soft">Aulas dadas e pagamentos</p>
+
+<div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+  <app-card>
+    <p class="text-ink-soft">Aulas no mês</p>
+    <p class="mt-3 font-display text-4xl font-extrabold">{{ lessonsInMonth }}</p>
+    <p class="mt-2 text-ink-soft">{{ canceledCount }} canceladas em &lt; 24h (cobradas)</p>
+  </app-card>
+
+  <app-card>
+    <p class="text-ink-soft">Valor por aula</p>
+    <p class="mt-3 font-display text-4xl font-extrabold">{{ valuePerLesson }}</p>
+    <p class="mt-2 text-ink-soft">Aulas individuais</p>
+  </app-card>
+
+  <app-card class="bg-accent-soft">
+    <p class="text-ink-soft">A receber</p>
+    <p class="mt-3 font-display text-4xl font-extrabold text-accent">{{ amountDue }}</p>
+    <p class="mt-2 text-ink-soft">Pagamento em {{ payoutDate }}</p>
+  </app-card>
+</div>
+
+<app-card class="mt-6">
+  <h2 class="font-display text-2xl font-bold">Aulas por semana · {{ month }}</h2>
+
+  <div class="mt-6 flex items-end justify-between gap-6 px-6 py-8">
+    @for (week of weeks; track week.label) {
+      <div class="flex w-full flex-col items-center gap-3">
+        <div class="font-bold">{{ week.count }}</div>
+        <div class="h-48 flex items-end">
+          <div
+            class="mx-auto h-full w-28 rounded-lg bg-accent"
+            [style.height.%]="(week.count / maxWeek) * 100"
+          ></div>
+        </div>
+        <div class="mt-3 text-ink-soft">{{ week.label }}</div>
+      </div>
+    }
+  </div>
+</app-card>

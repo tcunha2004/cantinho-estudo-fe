@@ -54,7 +54,7 @@ export const routes: Routes = [
       },
       {
         path: 'ganhos',
-        loadComponent: placeholder,
+        loadComponent: () => import('./pages/admin/ganhos/ganhos').then((m) => m.Ganhos),
         title: pageTitle('Meus ganhos'),
         data: { title: 'Meus ganhos' },
       },
