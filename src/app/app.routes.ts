@@ -33,7 +33,12 @@ export const routes: Routes = [
           import('./pages/admin/professores/professores').then((m) => m.Professores),
         title: pageTitle('Professores'),
       },
-      { path: 'financeiro', loadComponent: placeholder, title: pageTitle('Financeiro'), data: { title: 'Financeiro' } },
+      {
+        path: 'financeiro',
+        loadComponent: () =>
+          import('./pages/admin/financeiro/financeiro').then((m) => m.Financeiro),
+        title: pageTitle('Financeiro'),
+      },
       // compartilhada (admin, professor e aluno)
       { path: 'agenda', loadComponent: placeholder, title: pageTitle('Agenda'), data: { title: 'Agenda' } },
       // professor
