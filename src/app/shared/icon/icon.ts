@@ -12,7 +12,8 @@ export type IconName =
   | 'credit-card'
   | 'log-out'
   | 'search'
-  | 'plus';
+  | 'plus'
+  | 'check';
 
 @Component({
   selector: 'app-icon',
@@ -92,6 +93,9 @@ export type IconName =
         @case ('plus') {
           <path d="M5 12h14" />
           <path d="M12 5v14" />
+        }
+        @case ('check') {
+          <path d="M20 6 9 17l-5-5" />
         }
       }
     </svg>

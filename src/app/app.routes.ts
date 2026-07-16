@@ -61,15 +61,13 @@ export const routes: Routes = [
       // aluno
       {
         path: 'plano',
-        loadComponent: placeholder,
+        loadComponent: () => import('./pages/aluno/plano/plano').then((m) => m.Plano),
         title: pageTitle('Meu plano'),
-        data: { title: 'Meu plano' },
       },
       {
         path: 'pagamentos',
-        loadComponent: placeholder,
+        loadComponent: () => import('./pages/aluno/pagamentos/pagamentos').then((m) => m.Pagamentos),
         title: pageTitle('Pagamentos'),
-        data: { title: 'Pagamentos' },
       },
     ],
   },

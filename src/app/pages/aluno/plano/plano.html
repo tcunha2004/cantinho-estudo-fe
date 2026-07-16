@@ -1,0 +1,78 @@
+<h1 class="font-display text-3xl font-bold">Meu plano</h1>
+<p class="mt-1 text-ink-soft">{{ planName }} · {{ frequency }}</p>
+
+<!-- Destaque do plano atual -->
+<section class="mt-6 flex flex-wrap items-start justify-between gap-6 rounded-3xl bg-subject-amber/12 px-7 py-6">
+  <div class="min-w-0">
+    <div class="flex flex-wrap items-center gap-3">
+      <h2 class="font-display text-2xl font-bold text-subject-amber">{{ planName }}</h2>
+      <span class="rounded-full bg-white px-3.5 py-1 text-sm font-bold text-subject-amber shadow-xs">
+        Ativo
+      </span>
+    </div>
+    <p class="mt-2 font-bold text-amber-800/80">{{ frequency }} · aulas individuais</p>
+    <p class="mt-4 font-display text-4xl font-extrabold">
+      {{ monthlyPrice }}<span class="text-lg font-bold text-ink-soft">/mês</span>
+    </p>
+    <p class="mt-4 text-amber-800/70">{{ enrollmentNote }}</p>
+  </div>
+
+  <!-- Uso de aulas no mês -->
+  <app-card class="w-full sm:w-64 sm:shrink-0">
+    <p class="text-ink-soft">Aulas usadas em {{ usageMonth }}</p>
+    <p class="mt-2 font-display text-4xl font-extrabold">
+      {{ lessonsUsed }}<span class="text-lg font-bold text-ink-soft"> / {{ lessonsTotal }}</span>
+    </p>
+    <div class="mt-4 h-2 overflow-hidden rounded-full bg-line/60">
+      <div class="h-full rounded-full bg-subject-amber" [style.width.%]="usagePercent"></div>
+    </div>
+    <p class="mt-3 text-sm text-ink-soft">{{ lessonsRemaining }} aulas restantes</p>
+  </app-card>
+</section>
+
+<div class="mt-6 grid items-start gap-5 lg:grid-cols-2">
+  <!-- O que está incluído -->
+  <app-card>
+    <h2 class="font-display text-2xl font-bold">O que está incluído</h2>
+
+    <ul class="mt-5 space-y-4">
+      @for (item of includes; track item) {
+        <li class="flex items-center gap-3">
+          <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-subject-green/15 text-subject-green">
+            <app-icon name="check" class="size-4" />
+          </span>
+          <span class="font-bold">{{ item }}</span>
+        </li>
+      }
+    </ul>
+
+    <p class="mt-6 rounded-2xl bg-accent-soft px-5 py-4 text-sm text-ink">
+      <span class="font-bold">Regra de cancelamento:</span> {{ cancellationRule }}
+    </p>
+  </app-card>
+
+  <!-- Outros planos -->
+  <app-card>
+    <h2 class="font-display text-2xl font-bold">Outros planos</h2>
+
+    <div class="mt-5 space-y-3">
+      @for (plan of otherPlans; track plan.name) {
+        <div class="flex items-center gap-4 rounded-2xl bg-cream px-5 py-4">
+          <span class="h-10 w-1.5 shrink-0 rounded-full" [class]="plan.barColor"></span>
+          <div class="min-w-0">
+            <p class="truncate font-bold">{{ plan.name }}</p>
+            <p class="truncate text-sm text-ink-soft">{{ plan.detail }}</p>
+          </div>
+          <p class="ml-auto font-display font-bold">{{ plan.price }}</p>
+        </div>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="mt-5 w-full rounded-2xl bg-accent py-3.5 font-display font-bold text-white shadow-sm transition-colors hover:bg-accent-strong"
+    >
+      Solicitar troca de plano
+    </button>
+  </app-card>
+</div>
