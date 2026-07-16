@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-export type Role = 'admin' | 'professor' | 'aluno';
+export type Role = 'admin' | 'professor' | 'student';
 
 /**
  * Guarda o papel do usuário logado. Por enquanto é apenas visual

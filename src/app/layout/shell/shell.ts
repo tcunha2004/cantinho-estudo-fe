@@ -22,7 +22,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Minhas aulas', path: '/aulas', icon: 'book-open' },
     { label: 'Meus ganhos', path: '/ganhos', icon: 'coins' },
   ],
-  aluno: [
+  student: [
     { label: 'Minha agenda', path: '/agenda', icon: 'calendar' },
     { label: 'Meu plano', path: '/plano', icon: 'clipboard-list' },
     { label: 'Pagamentos', path: '/pagamentos', icon: 'credit-card' },
@@ -46,7 +46,7 @@ export class Shell {
   protected readonly roleOptions: { value: Role; label: string }[] = [
     { value: 'admin', label: 'Admin' },
     { value: 'professor', label: 'Prof.' },
-    { value: 'aluno', label: 'Aluno' },
+    { value: 'student', label: 'Aluno' },
   ];
 
   /** Troca de papel apenas para pré-visualização, enquanto não há login real. */
