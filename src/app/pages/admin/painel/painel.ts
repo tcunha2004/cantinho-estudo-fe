@@ -44,6 +44,7 @@ export class Painel {
   private readonly allTeachersEarningsByMonth = toSignal(
     this.teacherService.getAllTeachersEarningsByMonth(),
   );
+  private readonly upcomingClassesToday = toSignal(this.classService.getUpcomingClassesToday());
 
   protected readonly stats: Signal<Stat[]> = computed(() => [
     {
@@ -76,38 +77,32 @@ export class Painel {
     },
   ]);
 
-  protected readonly today = 'Quarta-feira, 17 de junho';
+  protected readonly today = new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+  });
 
-  protected readonly lessons: Lesson[] = [
-    {
-      time: '14:00',
-      student: 'Théo Nunes',
-      subject: 'Matemática',
-      teacher: 'Renata Lima',
-      barColor: 'bg-subject-blue',
-    },
-    {
-      time: '15:00',
-      student: 'Sofia Martins',
-      subject: 'Português',
-      teacher: 'Carlos Mendes',
-      barColor: 'bg-accent',
-    },
-    {
-      time: '16:00',
-      student: 'Miguel Rocha',
-      subject: 'Matemática',
-      teacher: 'Renata Lima',
-      barColor: 'bg-subject-blue',
-    },
-    {
-      time: '17:00',
-      student: 'Laura Dias',
-      subject: 'Inglês',
-      teacher: 'Juliana Reis',
-      barColor: 'bg-subject-green',
-    },
-  ];
+  protected readonly lessons: Signal<Lesson[]> = computed(() => {
+    const classes = this.upcomingClassesToday() ?? [];
+    return classes.map((cls) => ({
+      time: new Date(cls.scheduledAt).toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      student: cls.studentContract.student.user.name,
+      subject: cls.subject.name,
+      teacher: cls.teacher.user.name,
+      barColor:
+        cls.status === 'scheduled'
+          ? 'bg-subject-blue'
+          : cls.status === 'completed'
+            ? 'bg-subject-green'
+            : cls.status === 'cancelled'
+              ? 'bg-subject-amber'
+              : 'bg-accent',
+    }));
+  });
 
   protected readonly plans: Plan[] = [
     { name: 'Ouro', students: 40, barColor: 'bg-subject-amber' },

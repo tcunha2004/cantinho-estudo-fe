@@ -20,7 +20,10 @@
     <p class="mt-1 text-ink-soft">{{ today }}</p>
 
     <div class="mt-5 space-y-3">
-      @for (lesson of lessons; track lesson.time) {
+      @if (lessons().length === 0) {
+        <p class="text-ink-soft text-center">Nenhuma aula agendada para hoje.</p>
+      }
+      @for (lesson of lessons(); track lesson.time) {
         <div class="flex items-center gap-4 rounded-2xl bg-cream px-5 py-4">
           <span class="w-13 shrink-0 font-display text-lg font-bold">{{ lesson.time }}</span>
           <span class="h-10 w-1 shrink-0 rounded-full" [class]="lesson.barColor"></span>

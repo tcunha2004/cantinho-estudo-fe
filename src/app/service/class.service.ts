@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from './api.config';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+import { Class } from '../model/class.model';
 
 @Injectable({ providedIn: 'root' })
 export class ClassService {
@@ -18,5 +19,9 @@ export class ClassService {
     return this.http
       .get<{ revenue: number }>(`${this.baseUrl}/classes/current-month/revenue`)
       .pipe(map((response) => response.revenue));
+  }
+
+  getUpcomingClassesToday(): Observable<Class[]> {
+    return this.http.get<Class[]>(`${this.baseUrl}/classes/today/upcoming`);
   }
 }
