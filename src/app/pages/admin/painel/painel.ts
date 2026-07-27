@@ -4,6 +4,7 @@ import { Card } from '../../../shared/card/card';
 import { StudentService } from '../../../service/student.service';
 import { ClassService } from '../../../service/class.service';
 import { TeacherService } from '../../../service/teacher.service';
+import { StudentContractService } from '../../../service/student-contract.service';
 
 interface Stat {
   label: string;
@@ -35,6 +36,7 @@ export class Painel {
   private readonly studentService = inject(StudentService);
   private readonly classService = inject(ClassService);
   private readonly teacherService = inject(TeacherService);
+  private readonly studentContractService = inject(StudentContractService);
 
   private readonly activeStudentsCount = toSignal(this.studentService.getActiveStudentsCount());
   private readonly currentWeekClassesCount = toSignal(
@@ -45,6 +47,9 @@ export class Painel {
     this.teacherService.getAllTeachersEarningsByMonth(),
   );
   private readonly upcomingClassesToday = toSignal(this.classService.getUpcomingClassesToday());
+  private readonly activeStudentsByPlanType = toSignal(
+    this.studentContractService.getCountOfActiveStudentsByPlanType(),
+  );
 
   protected readonly stats: Signal<Stat[]> = computed(() => [
     {
@@ -104,12 +109,33 @@ export class Painel {
     }));
   });
 
-  protected readonly plans: Plan[] = [
-    { name: 'Ouro', students: 40, barColor: 'bg-subject-amber' },
-    { name: 'Prata', students: 26, barColor: 'bg-slate-400' },
-    { name: 'Bronze', students: 14, barColor: 'bg-amber-700' },
-    { name: 'Avulsa', students: 6, barColor: 'bg-accent' },
-  ];
+  protected readonly plans: Signal<Plan[]> = computed(() => {
+    const countByPlanType = this.activeStudentsByPlanType();
+    return [
+      {
+        name: 'Ouro',
+        students: countByPlanType?.['ouro'] ?? 0,
+        barColor: 'bg-subject-amber',
+      },
+      {
+        name: 'Prata',
+        students: countByPlanType?.['prata'] ?? 0,
+        barColor: 'bg-slate-400',
+      },
+      {
+        name: 'Bronze',
+        students: countByPlanType?.['bronze'] ?? 0,
+        barColor: 'bg-amber-700',
+      },
+      {
+        name: 'Avulsa',
+        students: countByPlanType?.['avulsa'] ?? 0,
+        barColor: 'bg-accent',
+      },
+    ];
+  });
 
-  protected readonly totalStudents = this.plans.reduce((total, plan) => total + plan.students, 0);
+  protected readonly totalStudents: Signal<number> = computed(() =>
+    this.plans().reduce((total, plan) => total + plan.students, 0),
+  );
 }

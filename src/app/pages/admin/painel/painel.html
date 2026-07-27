@@ -41,7 +41,7 @@
     <h2 class="font-display text-2xl font-bold">Planos ativos</h2>
 
     <div class="mt-5 space-y-5">
-      @for (plan of plans; track plan.name) {
+      @for (plan of plans(); track plan.name) {
         <div>
           <div class="flex items-baseline justify-between">
             <p class="text-lg font-bold">{{ plan.name }}</p>
@@ -51,7 +51,7 @@
             <div
               class="h-full rounded-full"
               [class]="plan.barColor"
-              [style.width.%]="(plan.students / totalStudents) * 100"
+              [style.width.%]="(plan.students / totalStudents()) * 100"
             ></div>
           </div>
         </div>
