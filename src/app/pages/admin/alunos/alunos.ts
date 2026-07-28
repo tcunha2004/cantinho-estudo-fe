@@ -1,19 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { Card } from '../../../shared/card/card';
 import { Icon } from '../../../shared/icon/icon';
 import { initials } from '../../../shared/initials';
-
-type PlanName = 'Ouro' | 'Prata' | 'Bronze' | 'Avulsa';
-type PaymentStatus = 'Em dia' | 'Pendente' | 'Atrasado';
-
-interface Student {
-  name: string;
-  guardian: string;
-  plan: PlanName;
-  frequency: string;
-  fee: string;
-  status: PaymentStatus;
-}
+import { StudentService } from '../../../service/student.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActiveStudentDto } from '../../../model/dto/active-student.dto';
+import { PlanType } from '../../../model/entity/plan.model';
+import { ContractStatus } from '../../../model/entity/student-contract.model';
 
 @Component({
   selector: 'app-alunos',
@@ -22,29 +15,26 @@ interface Student {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Alunos {
-  // Dados mockados até a integração com o backend.
-  protected readonly activeCount = 86;
+  private readonly studentService = inject(StudentService);
 
-  protected readonly students: Student[] = [
-    { name: 'Sofia Martins', guardian: 'Camila Martins', plan: 'Ouro', frequency: '3x/semana', fee: 'R$ 1.860,00', status: 'Em dia' },
-    { name: 'João Pedro Alves', guardian: 'Renato Alves', plan: 'Prata', frequency: '10 aulas/mês', fee: 'R$ 1.800,00', status: 'Em dia' },
-    { name: 'Helena Costa', guardian: 'Bianca Costa', plan: 'Ouro', frequency: '2x/semana', fee: 'R$ 1.320,00', status: 'Pendente' },
-    { name: 'Miguel Rocha', guardian: 'Paula Rocha', plan: 'Bronze', frequency: 'Pacote 10', fee: 'R$ 2.000,00', status: 'Em dia' },
-    { name: 'Laura Dias', guardian: 'Sérgio Dias', plan: 'Avulsa', frequency: '—', fee: 'R$ 220,00', status: 'Em dia' },
-    { name: 'Théo Nunes', guardian: 'Aline Nunes', plan: 'Prata', frequency: '10 aulas/mês', fee: 'R$ 1.800,00', status: 'Atrasado' },
-  ];
+  protected readonly activeStudentsCount = toSignal(this.studentService.getActiveStudentsCount());
+  protected readonly activeStudents = toSignal(this.studentService.getActiveStudents());
 
-  protected readonly planStyles: Record<PlanName, string> = {
-    Ouro: 'bg-subject-amber/15 text-subject-amber',
-    Prata: 'bg-slate-400/20 text-slate-500',
-    Bronze: 'bg-amber-700/15 text-amber-700',
-    Avulsa: 'bg-accent-soft text-accent',
+  protected readonly students: Signal<ActiveStudentDto[]> = computed(() => {
+    return this.activeStudents() ?? [];
+  });
+
+  protected readonly planStyles: Record<PlanType, string> = {
+    ouro: 'bg-subject-amber/15 text-subject-amber',
+    prata: 'bg-slate-400/20 text-slate-500',
+    bronze: 'bg-amber-700/15 text-amber-700',
+    avulsa: 'bg-accent-soft text-accent',
   };
 
-  protected readonly statusStyles: Record<PaymentStatus, string> = {
-    'Em dia': 'bg-subject-green/15 text-subject-green',
-    Pendente: 'bg-subject-amber/15 text-subject-amber',
-    Atrasado: 'bg-accent-soft text-accent',
+  protected readonly statusStyles: Record<ContractStatus, string> = {
+    active: 'bg-subject-green/15 text-subject-green',
+    cancelled: 'bg-subject-amber/15 text-subject-amber',
+    expired: 'bg-accent-soft text-accent',
   };
 
   protected readonly initials = initials;

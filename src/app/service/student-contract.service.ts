@@ -2,8 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from './api.config';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Class } from '../model/class.model';
-import { PlanType } from '../model/plan.model';
+import { PlanType } from '../model/entity/plan.model';
 
 @Injectable({ providedIn: 'root' })
 export class StudentContractService {

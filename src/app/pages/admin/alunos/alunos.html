@@ -2,7 +2,7 @@
 <div class="flex flex-wrap items-end justify-between gap-4">
   <div>
     <h1 class="font-display text-3xl font-bold">Alunos</h1>
-    <p class="mt-1 text-ink-soft">{{ activeCount }} alunos ativos</p>
+    <p class="mt-1 text-ink-soft">{{ activeStudentsCount() }} alunos ativos</p>
   </div>
 
   <label class="relative block">
@@ -32,38 +32,56 @@
       </tr>
     </thead>
     <tbody class="divide-y divide-line/70">
-      @for (student of students; track student.name) {
+      @if (students().length === 0) {
         <tr>
-          <td class="px-3 py-4">
-            <div class="flex items-center gap-4">
-              <span
-                class="flex size-11 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-extrabold text-ink-soft"
-              >
-                {{ initials(student.name) }}
-              </span>
-              <span class="whitespace-nowrap text-lg font-bold">{{ student.name }}</span>
-            </div>
-          </td>
-          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ student.guardian }}</td>
-          <td class="px-3 py-4">
-            <span
-              class="inline-block rounded-full px-3.5 py-1 text-sm font-bold"
-              [class]="planStyles[student.plan]"
-            >
-              {{ student.plan }}
-            </span>
-          </td>
-          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ student.frequency }}</td>
-          <td class="whitespace-nowrap px-3 py-4 font-bold">{{ student.fee }}</td>
-          <td class="px-3 py-4">
-            <span
-              class="inline-block whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-bold"
-              [class]="statusStyles[student.status]"
-            >
-              {{ student.status }}
-            </span>
+          <td colspan="6" class="px-3 py-8 text-center text-ink-soft">
+            Nenhum aluno ativo encontrado.
           </td>
         </tr>
+      } @else {
+        @for (student of students(); track student.name) {
+          <tr>
+            <td class="px-3 py-4">
+              <div class="flex items-center gap-4">
+                <span
+                  class="flex size-11 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-extrabold text-ink-soft"
+                >
+                  {{ initials(student.name) }}
+                </span>
+                <span class="whitespace-nowrap text-lg font-bold">{{ student.name }}</span>
+              </div>
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
+              {{ student.guardian ?? 'Nenhum' }}
+            </td>
+            <td class="px-3 py-4">
+              <span
+                class="inline-block rounded-full px-3.5 py-1 text-sm font-bold"
+                [class]="student.plan ? planStyles[student.plan] : planStyles['avulsa']"
+              >
+                {{ student.plan ?? 'Avulsa' }}
+              </span>
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
+              {{ student.frequency ?? 'Nenhuma' }}
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 font-bold">
+              {{ student.monthlyPrice ?? 'R$ 0,00' }}
+            </td>
+            <td class="px-3 py-4">
+              <span
+                class="inline-block whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-bold"
+                [class]="
+                  student.contractStatus
+                    ? statusStyles[student.contractStatus]
+                    : statusStyles['expired']
+                "
+              >
+                {{ student.contractStatus ?? 'Vencido' }}
+              </span>
+            </td>
+          </tr>
+        }
       }
     </tbody>
   </table>
