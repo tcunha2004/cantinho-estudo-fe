@@ -1,8 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from './api.config';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
-import { Teacher } from '../model/entity/teacher.model';
+import { Observable } from 'rxjs';
 import { TeachersEarningsSummaryDto } from '../model/dto/teachers-earnings-summary.dto';
 
 @Injectable({ providedIn: 'root' })
