@@ -74,7 +74,7 @@ export class Painel {
     {
       label: 'A pagar professores',
       value:
-        this.allTeachersEarningsByMonth()?.toLocaleString('pt-BR', {
+        this.allTeachersEarningsByMonth()?.totalAmountToReceive?.toLocaleString('pt-BR', {
           style: 'currency',
           currency: 'BRL',
         }) ?? 'Error',

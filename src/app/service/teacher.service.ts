@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 import { API_BASE_URL } from './api.config';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
+import { Teacher } from '../model/entity/teacher.model';
+import { TeachersEarningsSummaryDto } from '../model/dto/teachers-earnings-summary.dto';
 
 @Injectable({ providedIn: 'root' })
 export class TeacherService {
@@ -15,12 +17,10 @@ export class TeacherService {
     return `${year}-${month}`;
   }
 
-  getAllTeachersEarningsByMonth(): Observable<number> {
+  getAllTeachersEarningsByMonth(): Observable<TeachersEarningsSummaryDto> {
     const targetMonth = this.getCurrentMonth();
-    return this.http
-      .get<{ totalAmountToReceive: number }>(
-        `${this.baseUrl}/teachers/all/monthly-earnings?month=${targetMonth}`,
-      )
-      .pipe(map((response) => response.totalAmountToReceive));
+    return this.http.get<TeachersEarningsSummaryDto>(
+      `${this.baseUrl}/teachers/all/monthly-earnings?month=${targetMonth}`,
+    );
   }
 }

@@ -1,15 +1,17 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { Card } from '../../../shared/card/card';
 import { initials } from '../../../shared/initials';
+import { TeacherService } from '../../../service/teacher.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TeacherEarningsDto } from '../../../model/dto/teacher-earnings.dto';
 
-interface Teacher {
-  name: string;
-  subject: string;
-  avatarColor: string;
-  lessonsInMonth: number;
-  pricePerLesson: string;
-  amountDue: string;
-}
+const AVATAR_COLORS = [
+  'bg-subject-blue',
+  'bg-subject-green',
+  'bg-subject-purple',
+  'bg-subject-amber',
+  'bg-accent',
+];
 
 @Component({
   selector: 'app-professores',
@@ -18,16 +20,33 @@ interface Teacher {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Professores {
-  // Dados mockados até a integração com o backend.
-  protected readonly month = 'junho';
-  protected readonly totalDue = 'R$ 9.600,00';
+  private readonly teacherService = inject(TeacherService);
 
-  protected readonly teachers: Teacher[] = [
-    { name: 'Renata Lima', subject: 'Matemática', avatarColor: 'bg-subject-blue', lessonsInMonth: 42, pricePerLesson: 'R$ 70,00', amountDue: 'R$ 2.940,00' },
-    { name: 'Carlos Mendes', subject: 'Português', avatarColor: 'bg-accent', lessonsInMonth: 38, pricePerLesson: 'R$ 70,00', amountDue: 'R$ 2.660,00' },
-    { name: 'Juliana Reis', subject: 'Inglês', avatarColor: 'bg-subject-green', lessonsInMonth: 30, pricePerLesson: 'R$ 75,00', amountDue: 'R$ 2.250,00' },
-    { name: 'André Souza', subject: 'Ciências', avatarColor: 'bg-subject-purple', lessonsInMonth: 25, pricePerLesson: 'R$ 70,00', amountDue: 'R$ 1.750,00' },
-  ];
+  protected readonly teachersEarnings = toSignal(
+    this.teacherService.getAllTeachersEarningsByMonth(),
+  );
+
+  protected readonly month = new Date().toLocaleDateString('pt-BR', { month: 'long' });
+  protected readonly totalDue = computed(
+    () =>
+      this.teachersEarnings()?.totalAmountToReceive.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }) ?? 'Error',
+  );
+
+  protected readonly teachers: Signal<TeacherEarningsDto[]> = computed(
+    () => this.teachersEarnings()?.teachers ?? [],
+  );
 
   protected readonly initials = initials;
+
+  /*
+   * Sorteia uma cor da paleta a partir do id do professor: cada professor tem
+   * uma cor própria que não muda entre renderizações.
+   */
+  protected avatarColor(teacherId: string): string {
+    const hash = [...teacherId].reduce((total, char) => total + char.charCodeAt(0), 0);
+    return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+  }
 }
