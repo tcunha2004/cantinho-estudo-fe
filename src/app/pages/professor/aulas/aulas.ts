@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { Card } from '../../../shared/card/card';
+import { ClassService } from '../../../service/class.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 type HistoryStatus = 'Realizada' | 'Cancelada' | 'Cancelada (cobrada)';
 
@@ -25,37 +27,26 @@ interface HistoryItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Aulas {
-  // Mock até integração com backend
-  protected readonly upcoming: UpcomingItem[] = [
-    {
-      day: 'Qua',
-      time: '08:30',
-      student: 'Sofia Martins',
-      subject: 'Matemática',
-      barColor: 'bg-subject-blue',
-    },
-    {
-      day: 'Qua',
-      time: '15:00',
-      student: 'Théo Nunes',
-      subject: 'Matemática',
-      barColor: 'bg-subject-blue',
-    },
-    {
-      day: 'Qui',
-      time: '14:00',
-      student: 'Théo Nunes',
-      subject: 'Matemática',
-      barColor: 'bg-subject-blue',
-    },
-    {
-      day: 'Sex',
-      time: '16:00',
-      student: 'Miguel Rocha',
-      subject: 'Matemática',
-      barColor: 'bg-subject-blue',
-    },
-  ];
+  private readonly classService = inject(ClassService);
+
+  protected readonly teacherUpcomingClasses = toSignal(
+    this.classService.getTeacherUpcomingClasses(),
+  );
+
+  protected readonly upcoming: Signal<UpcomingItem[]> = computed(() => {
+    return (this.teacherUpcomingClasses() ?? []).map((classItem) => {
+      return {
+        day: classItem.scheduledAt,
+        time: new Date(classItem.scheduledAt).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        student: classItem.studentContract.student.user.name,
+        subject: classItem.subject.name,
+        barColor: `bg-subject-blue`,
+      };
+    });
+  });
 
   protected readonly history: HistoryItem[] = [
     { student: 'Sofia Martins', date: '16/06', subject: 'Matemática', status: 'Realizada' },

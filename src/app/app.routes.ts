@@ -47,13 +47,13 @@ export const routes: Routes = [
       // professor
       {
         path: 'aulas',
-        loadComponent: () => import('./pages/admin/aulas/aulas').then((m) => m.Aulas),
+        loadComponent: () => import('./pages/professor/aulas/aulas').then((m) => m.Aulas),
         title: pageTitle('Minhas aulas'),
         data: { title: 'Minhas aulas' },
       },
       {
         path: 'ganhos',
-        loadComponent: () => import('./pages/admin/ganhos/ganhos').then((m) => m.Ganhos),
+        loadComponent: () => import('./pages/professor/ganhos/ganhos').then((m) => m.Ganhos),
         title: pageTitle('Meus ganhos'),
         data: { title: 'Meus ganhos' },
       },

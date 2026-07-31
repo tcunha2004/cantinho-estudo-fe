@@ -24,4 +24,8 @@ export class ClassService {
   getUpcomingClassesToday(): Observable<Class[]> {
     return this.http.get<Class[]>(`${this.baseUrl}/classes/today/upcoming`);
   }
+
+  getTeacherUpcomingClasses(): Observable<Class[]> {
+    return this.http.get<Class[]>(`${this.baseUrl}/classes/teacher/upcoming`);
+  }
 }
