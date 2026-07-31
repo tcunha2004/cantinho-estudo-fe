@@ -1,0 +1,118 @@
+<!-- Cabeçalho + seletor de região -->
+<div class="flex flex-wrap items-end justify-between gap-4">
+  <div>
+    <h1 class="font-display text-3xl font-bold">Tabela de planos</h1>
+    <p class="mt-1 text-ink-soft">Valores e taxas · {{ region().name }}</p>
+  </div>
+
+  <div class="flex items-center gap-3 print:hidden">
+    <div
+      class="flex flex-wrap gap-1 rounded-full border border-line bg-white p-1.5 shadow-xs"
+      role="group"
+      aria-label="Região"
+    >
+      @for (r of regions; track r.slug) {
+        <button
+          type="button"
+          (click)="selectRegion(r.slug)"
+          [attr.aria-pressed]="region().slug === r.slug"
+          class="rounded-full px-4 py-2 text-sm font-bold transition-colors"
+          [class]="
+            region().slug === r.slug ? 'bg-accent-soft text-accent' : 'text-ink-soft hover:bg-cream'
+          "
+        >
+          {{ r.name }}
+        </button>
+      }
+    </div>
+
+    <!-- Baixar PDF da região selecionada -->
+    <button
+      type="button"
+      (click)="downloadPdf()"
+      title="Baixar PDF"
+      [attr.aria-label]="'Baixar PDF · ' + region().name"
+      class="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+    >
+      <app-icon name="download" class="size-4.5" />
+    </button>
+  </div>
+</div>
+
+<div class="mt-6 grid items-start gap-5 lg:grid-cols-4 print:grid-cols-2">
+  <!-- Plano Ouro -->
+  <app-card class="lg:col-span-2 print:col-span-2">
+    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-subject-amber"></div>
+    <div class="flex flex-wrap items-center gap-3">
+      <h3 class="font-display text-2xl font-bold text-subject-amber">Plano Ouro</h3>
+      <span
+        class="rounded-full bg-subject-amber/15 px-3.5 py-1 text-sm font-bold text-subject-amber"
+      >
+        Aulas individuais
+      </span>
+    </div>
+
+    <table class="mt-5 w-full text-left">
+      <thead>
+        <tr class="text-ink-soft">
+          <th scope="col" class="pb-2 font-bold"><span class="sr-only">Frequência</span></th>
+          <th scope="col" class="pb-2 font-bold">Mensal</th>
+          <th scope="col" class="pb-2 font-bold">Hora/aula</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of region().ouro; track row.frequency) {
+          <tr>
+            <td class="py-1.5 font-bold">{{ row.frequency }}</td>
+            <td class="py-1.5 font-bold text-accent">{{ row.monthly }}</td>
+            <td class="py-1.5">{{ row.perLesson }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <p class="mt-5 text-sm text-ink-soft">8, 12 ou 20 aulas por mês, conforme a frequência</p>
+  </app-card>
+
+  <!-- Plano Prata -->
+  <app-card>
+    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-slate-400"></div>
+    <h3 class="font-display text-2xl font-bold text-slate-500">Plano Prata</h3>
+    <p class="mt-4">10 aulas mensais</p>
+    <p class="mt-2 font-display text-4xl font-extrabold">{{ region().prata.total }}</p>
+    <p class="mt-4 text-ink-soft">{{ region().prata.perLesson }} / hora-aula</p>
+  </app-card>
+
+  <!-- Plano Bronze -->
+  <app-card>
+    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-amber-700"></div>
+    <h3 class="font-display text-2xl font-bold text-amber-700">Plano Bronze</h3>
+    <p class="mt-4">Pacote 10 aulas</p>
+    <p class="mt-2 font-display text-4xl font-extrabold">{{ region().bronze.total }}</p>
+    <p class="mt-4 text-ink-soft">{{ region().bronze.perLesson }} / hora-aula · validade 2 meses</p>
+  </app-card>
+
+  <!-- Aula Avulsa -->
+  <app-card class="lg:col-span-2 print:col-span-2">
+    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-accent"></div>
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h3 class="font-display text-2xl font-bold text-accent">Aula Avulsa</h3>
+        <p class="mt-4">Aula individual, sem plano</p>
+      </div>
+      <p class="font-display text-4xl font-extrabold">{{ region().avulsa }}</p>
+    </div>
+  </app-card>
+
+  <!-- Taxa de matrícula -->
+  <app-card class="lg:col-span-2 print:col-span-2">
+    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-line"></div>
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h3 class="font-display text-2xl font-bold">Taxa de matrícula</h3>
+        <p class="mt-4">Planos Ouro e Prata</p>
+      </div>
+      <p class="font-display text-4xl font-extrabold">{{ region().enrollmentFee }}</p>
+    </div>
+  </app-card>
+</div>

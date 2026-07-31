@@ -6,6 +6,7 @@ export type IconName =
   | 'users'
   | 'presentation'
   | 'dollar'
+  | 'info'
   | 'book-open'
   | 'coins'
   | 'clipboard-list'
@@ -13,7 +14,8 @@ export type IconName =
   | 'log-out'
   | 'search'
   | 'plus'
-  | 'check';
+  | 'check'
+  | 'download';
 
 @Component({
   selector: 'app-icon',
@@ -34,7 +36,8 @@ export type IconName =
         @case ('house') {
           <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
           <path
-            d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          />
         }
         @case ('calendar') {
           <path d="M8 2v4" />
@@ -57,10 +60,16 @@ export type IconName =
           <line x1="12" x2="12" y1="2" y2="22" />
           <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
         }
+        @case ('info') {
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 16v-4" />
+          <path d="M12 8h.01" />
+        }
         @case ('book-open') {
           <path d="M12 7v14" />
           <path
-            d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
+            d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"
+          />
         }
         @case ('coins') {
           <circle cx="8" cy="8" r="6" />
@@ -70,8 +79,7 @@ export type IconName =
         }
         @case ('clipboard-list') {
           <rect width="8" height="4" x="8" y="2" rx="1" ry="1" />
-          <path
-            d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
           <path d="M12 11h4" />
           <path d="M12 16h4" />
           <path d="M8 11h.01" />
@@ -96,6 +104,11 @@ export type IconName =
         }
         @case ('check') {
           <path d="M20 6 9 17l-5-5" />
+        }
+        @case ('download') {
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" x2="12" y1="15" y2="3" />
         }
       }
     </svg>

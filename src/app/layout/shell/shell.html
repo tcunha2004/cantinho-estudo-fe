@@ -1,5 +1,7 @@
 <div class="min-h-dvh bg-cream">
-  <aside class="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-line bg-white">
+  <aside
+    class="fixed inset-y-0 left-0 flex w-64 flex-col border-r border-line bg-white print:hidden"
+  >
     <!-- Logo -->
     <div class="px-6 pb-5 pt-7">
       <img src="cantinho-estudo-logo.jpeg" alt="Cantinho do Estudo" class="w-36" />
@@ -55,7 +57,7 @@
   </aside>
 
   <!-- Área de conteúdo -->
-  <main class="ml-64 min-h-dvh p-8">
+  <main class="ml-64 min-h-dvh p-8 print:ml-0 print:min-h-0 print:p-0">
     <router-outlet />
   </main>
 </div>

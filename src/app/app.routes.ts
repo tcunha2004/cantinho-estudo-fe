@@ -33,10 +33,9 @@ export const routes: Routes = [
         title: pageTitle('Professores'),
       },
       {
-        path: 'financeiro',
-        loadComponent: () =>
-          import('./pages/admin/financeiro/financeiro').then((m) => m.Financeiro),
-        title: pageTitle('Financeiro'),
+        path: 'info',
+        loadComponent: () => import('./pages/admin/info/info').then((m) => m.Info),
+        title: pageTitle('Info'),
       },
       // compartilhada (admin, professor e aluno)
       {
@@ -66,7 +65,8 @@ export const routes: Routes = [
       },
       {
         path: 'pagamentos',
-        loadComponent: () => import('./pages/aluno/pagamentos/pagamentos').then((m) => m.Pagamentos),
+        loadComponent: () =>
+          import('./pages/aluno/pagamentos/pagamentos').then((m) => m.Pagamentos),
         title: pageTitle('Pagamentos'),
       },
     ],

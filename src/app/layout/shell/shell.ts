@@ -15,7 +15,7 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
     { label: 'Agenda', path: '/agenda', icon: 'calendar' },
     { label: 'Alunos', path: '/alunos', icon: 'users' },
     { label: 'Professores', path: '/professores', icon: 'presentation' },
-    { label: 'Financeiro', path: '/financeiro', icon: 'dollar' },
+    { label: 'Informações', path: '/info', icon: 'info' },
   ],
   professor: [
     { label: 'Minha agenda', path: '/agenda', icon: 'calendar' },

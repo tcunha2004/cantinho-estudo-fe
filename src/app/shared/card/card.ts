@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  */
 @Component({
   selector: 'app-card',
-  host: { class: 'block rounded-3xl border border-line bg-white p-6 shadow-xs' },
+  host: { class: 'block break-inside-avoid rounded-3xl border border-line bg-white p-6 shadow-xs' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<ng-content />`,
 })
