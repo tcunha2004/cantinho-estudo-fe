@@ -1,13 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Role } from '../core/session';
+import { UserRole } from '../model/entity/user.model';
 import { API_BASE_URL } from './api.config';
 
 export interface LoginRequest {
   email: string;
   password: string;
-  role: Role;
+  role: UserRole;
 }
 
 export interface LoginResponse {

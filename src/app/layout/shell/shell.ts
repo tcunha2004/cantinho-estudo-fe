@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { Role, Session } from '../../core/session';
+import { Auth } from '../../core/auth';
+import { UserRole } from '../../model/entity/user.model';
 import { Icon, IconName } from '../../shared/icon/icon';
 
 interface NavItem {
@@ -9,7 +10,7 @@ interface NavItem {
   icon: IconName;
 }
 
-const NAV_BY_ROLE: Record<Role, NavItem[]> = {
+const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
   admin: [
     { label: 'Painel', path: '/painel', icon: 'house' },
     { label: 'Agenda', path: '/agenda', icon: 'calendar' },
@@ -37,21 +38,17 @@ const NAV_BY_ROLE: Record<Role, NavItem[]> = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Shell {
-  private readonly session = inject(Session);
   private readonly router = inject(Router);
+  private readonly auth = inject(Auth);
 
-  protected readonly role = this.session.role;
-  protected readonly navItems = computed(() => NAV_BY_ROLE[this.role()]);
+  protected readonly role = this.auth.role;
+  protected readonly navItems = computed(() => {
+    const role = this.role();
+    return role ? NAV_BY_ROLE[role] : [];
+  });
 
-  protected readonly roleOptions: { value: Role; label: string }[] = [
-    { value: 'admin', label: 'Admin' },
-    { value: 'professor', label: 'Prof.' },
-    { value: 'student', label: 'Aluno' },
-  ];
-
-  /** Troca de papel apenas para pré-visualização, enquanto não há login real. */
-  protected switchRole(role: Role): void {
-    this.session.role.set(role);
-    this.router.navigateByUrl(NAV_BY_ROLE[role][0].path);
+  protected logout(): void {
+    this.auth.logout();
+    this.router.navigateByUrl('/login');
   }
 }

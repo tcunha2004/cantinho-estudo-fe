@@ -2,18 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../core/auth';
-import { Role } from '../../core/session';
+import { HOME_BY_ROLE } from '../../core/home-by-role';
+import { UserRole } from '../../model/entity/user.model';
 
 interface RoleOption {
-  value: Role;
+  value: UserRole;
   label: string;
 }
-
-const HOME_BY_ROLE: Record<Role, string> = {
-  admin: '/painel',
-  professor: '/agenda',
-  student: '/agenda',
-};
 
 @Component({
   selector: 'app-login',
@@ -32,7 +27,7 @@ export class Login {
     { value: 'admin', label: 'Admin' },
   ];
 
-  protected readonly selectedRole = signal<Role>('student');
+  protected readonly selectedRole = signal<UserRole>('student');
   protected readonly showPassword = signal(false);
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -42,7 +37,7 @@ export class Login {
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
-  protected selectRole(role: Role): void {
+  protected selectRole(role: UserRole): void {
     this.selectedRole.set(role);
   }
 

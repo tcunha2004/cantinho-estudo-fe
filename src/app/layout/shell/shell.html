@@ -24,35 +24,14 @@
 
     <!-- Rodapé -->
     <div class="border-t border-line p-4">
-      <!-- Seletor temporário de papel, até existir login real -->
-      <p class="px-2 text-[11px] font-bold uppercase tracking-wide text-ink-soft/70">
-        Visualizar como
-      </p>
-      <div class="mt-2 grid grid-cols-3 gap-1">
-        @for (option of roleOptions; track option.value) {
-          <button
-            type="button"
-            (click)="switchRole(option.value)"
-            [attr.aria-pressed]="role() === option.value"
-            class="rounded-lg px-1 py-1.5 text-xs font-bold transition-colors"
-            [class]="
-              role() === option.value
-                ? 'bg-accent-soft text-accent'
-                : 'text-ink-soft hover:bg-cream'
-            "
-          >
-            {{ option.label }}
-          </button>
-        }
-      </div>
-
-      <a
-        routerLink="/login"
-        class="mt-3 flex items-center gap-3.5 rounded-2xl px-4 py-2.5 font-bold text-ink-soft transition-colors hover:bg-cream"
+      <button
+        type="button"
+        (click)="logout()"
+        class="flex w-full items-center gap-3.5 rounded-2xl px-4 py-2.5 text-left font-bold text-ink-soft transition-colors hover:bg-cream"
       >
         <app-icon name="log-out" class="size-5 shrink-0" />
         Sair
-      </a>
+      </button>
     </div>
   </aside>
 
