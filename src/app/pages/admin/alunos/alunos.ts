@@ -37,5 +37,11 @@ export class Alunos {
     expired: 'bg-accent-soft text-accent',
   };
 
+  protected readonly statusLabels: Record<ContractStatus, string> = {
+    active: 'Ativo',
+    cancelled: 'Cancelado',
+    expired: 'Vencido',
+  };
+
   protected readonly initials = initials;
 }

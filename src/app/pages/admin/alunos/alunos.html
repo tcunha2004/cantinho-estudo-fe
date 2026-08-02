@@ -77,7 +77,7 @@
                     : statusStyles['expired']
                 "
               >
-                {{ student.contractStatus ?? 'Vencido' }}
+                {{ student.contractStatus ? statusLabels[student.contractStatus] : '-' }}
               </span>
             </td>
           </tr>
