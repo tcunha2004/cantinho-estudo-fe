@@ -1,10 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { Card } from '../../../shared/card/card';
-
-interface Week {
-  label: string;
-  count: number;
-}
+import { ClassService } from '../../../service/class.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-ganhos',
@@ -13,20 +10,33 @@ interface Week {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Ganhos {
-  // Mock até integração com backend
-  protected readonly month = 'junho';
-  protected readonly lessonsInMonth = 42;
-  protected readonly canceledCount = 2;
-  protected readonly valuePerLesson = 'R$ 70';
-  protected readonly amountDue = 'R$ 2.940';
-  protected readonly payoutDate = '05/07';
+  private readonly classService = inject(ClassService);
 
-  protected readonly weeks: Week[] = [
-    { label: 'Sem 1', count: 9 },
-    { label: 'Sem 2', count: 12 },
-    { label: 'Sem 3', count: 11 },
-    { label: 'Sem 4', count: 10 },
-  ];
+  protected readonly lessonsInMonth: Signal<number | undefined> = toSignal(
+    this.classService.getTeacherMonthlyClassesCount(),
+  );
+  protected readonly amountToReceive: Signal<number | undefined> = toSignal(
+    this.classService.getTeacherMonthlyEarnings(),
+  );
+  protected readonly valuePerLesson: Signal<string> = computed(() => {
+    const lessons = this.lessonsInMonth();
+    const amount = this.amountToReceive();
+    return lessons && amount
+      ? (amount / lessons).toLocaleString('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+        })
+      : '-';
+  });
 
-  protected readonly maxWeek = Math.max(...this.weeks.map((w) => w.count));
+  protected readonly monthlyClassesCountByWeek: Signal<
+    { week: number; count: number | null }[] | undefined
+  > = toSignal(this.classService.getTeacherMonthlyClassesCountByWeek());
+
+  protected readonly month = new Date().toLocaleDateString('pt-BR', { month: 'long' });
+
+  protected readonly maxWeek: Signal<number> = computed(() => {
+    const weeks = this.monthlyClassesCountByWeek() ?? [];
+    return Math.max(1, ...weeks.map((w) => w.count ?? 0));
+  });
 }
