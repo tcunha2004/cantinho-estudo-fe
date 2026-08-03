@@ -6,7 +6,7 @@
   <app-card>
     <h2 class="font-display text-2xl font-bold">Próximas aulas</h2>
 
-    <div class="mt-5 space-y-3">
+    <div class="mt-6 space-y-3">
       @if (upcoming().length === 0) {
         <p class="text-ink-soft text-center">Nenhuma aula agendada.</p>
       }
@@ -32,23 +32,27 @@
   <app-card>
     <h2 class="font-display text-2xl font-bold">Histórico recente</h2>
 
-    <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
-      @for (h of history; track h.student + h.date) {
-        <div class="flex items-baseline justify-between py-4">
-          <div>
-            <p class="font-bold">{{ h.student }}</p>
-            <p class="text-ink-soft">{{ h.date }} · {{ h.subject }}</p>
-          </div>
+    @if (history().length === 0) {
+      <p class="text-ink-soft text-center mt-6">Nenhum histórico de aulas.</p>
+    } @else {
+      <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+        @for (h of history(); track h.student + h.date) {
+          <div class="flex items-baseline justify-between py-4">
+            <div>
+              <p class="font-bold">{{ h.student }}</p>
+              <p class="text-ink-soft">{{ h.date }} · {{ h.subject }}</p>
+            </div>
 
-          <div>
-            <span
-              class="rounded-full px-3 py-1 text-sm font-bold"
-              [class]="statusStyles[h.status]"
-              >{{ h.status }}</span
-            >
+            <div>
+              <span
+                class="rounded-full px-3 py-1 text-sm font-bold"
+                [class]="statusStyles[h.status]"
+                >{{ h.status }}</span
+              >
+            </div>
           </div>
-        </div>
-      }
-    </dl>
+        }
+      </dl>
+    }
   </app-card>
 </div>

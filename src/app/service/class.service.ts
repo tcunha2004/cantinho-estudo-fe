@@ -28,4 +28,8 @@ export class ClassService {
   getTeacherUpcomingClasses(): Observable<Class[]> {
     return this.http.get<Class[]>(`${this.baseUrl}/classes/teacher/upcoming`);
   }
+
+  getTeacherRecentClasses(): Observable<Class[]> {
+    return this.http.get<Class[]>(`${this.baseUrl}/classes/teacher/recent-history`)
+  }
 }

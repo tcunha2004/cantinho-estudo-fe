@@ -1,9 +1,17 @@
 import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { Card } from '../../../shared/card/card';
 import { ClassService } from '../../../service/class.service';
+import { ClassStatus } from '../../../model/entity/class.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-type HistoryStatus = 'Realizada' | 'Cancelada' | 'Cancelada (cobrada)';
+type HistoryStatus = 'Agendada' | 'Realizada' | 'Cancelada' | 'Cancelada (cobrada)';
+
+const STATUS_LABELS: Record<ClassStatus, HistoryStatus> = {
+  scheduled: 'Agendada',
+  completed: 'Realizada',
+  cancelled: 'Cancelada',
+  no_show: 'Cancelada (cobrada)',
+};
 
 interface UpcomingItem {
   day: string;
@@ -32,11 +40,15 @@ export class Aulas {
   protected readonly teacherUpcomingClasses = toSignal(
     this.classService.getTeacherUpcomingClasses(),
   );
+  protected readonly teacherRecentClasses = toSignal(this.classService.getTeacherRecentClasses());
 
   protected readonly upcoming: Signal<UpcomingItem[]> = computed(() => {
     return (this.teacherUpcomingClasses() ?? []).map((classItem) => {
       return {
-        day: classItem.scheduledAt,
+        day: new Date(classItem.scheduledAt).toLocaleString('pt-br', {
+          day: '2-digit',
+          month: 'short',
+        }),
         time: new Date(classItem.scheduledAt).toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
@@ -48,22 +60,24 @@ export class Aulas {
     });
   });
 
-  protected readonly history: HistoryItem[] = [
-    { student: 'Sofia Martins', date: '16/06', subject: 'Matemática', status: 'Realizada' },
-    { student: 'João Pedro', date: '15/06', subject: 'Matemática', status: 'Realizada' },
-    {
-      student: 'Helena Costa',
-      date: '13/06',
-      subject: 'Matemática',
-      status: 'Cancelada (cobrada)',
-    },
-    { student: 'Miguel Rocha', date: '12/06', subject: 'Matemática', status: 'Realizada' },
-    { student: 'Théo Nunes', date: '10/06', subject: 'Matemática', status: 'Cancelada' },
-  ];
+  protected readonly history: Signal<HistoryItem[]> = computed(() => {
+    return (this.teacherRecentClasses() ?? []).map((classItem) => {
+      return {
+        student: classItem.studentContract.student.user.name,
+        date: new Date(classItem.scheduledAt).toLocaleString('pt-br', {
+          day: '2-digit',
+          month: '2-digit',
+        }),
+        subject: classItem.subject.name,
+        status: STATUS_LABELS[classItem.status],
+      };
+    });
+  });
 
   protected readonly statusStyles: Record<HistoryStatus, string> = {
+    Agendada: 'bg-accent-soft text-accent',
     Realizada: 'bg-subject-green/15 text-subject-green',
-    Cancelada: 'bg-slate-200 text-slate-500',
-    'Cancelada (cobrada)': 'bg-accent-soft text-accent',
+    Cancelada: 'bg-accent-soft text-accent',
+    'Cancelada (cobrada)': 'bg-slate-200 text-slate-500',
   };
 }
