@@ -3,7 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { API_BASE_URL } from '../service/api.config';
-import { Auth } from './auth';
+import { Session } from './session';
 
 /**
  * Anexa o `access_token` no header `Authorization` de toda requisição
@@ -13,9 +13,9 @@ import { Auth } from './auth';
  * encerra a sessão e devolve o usuário para o login.
  */
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
-  const auth = inject(Auth);
+  const session = inject(Session);
   const router = inject(Router);
-  const token = auth.token();
+  const token = session.token();
 
   if (!token || !request.url.startsWith(API_BASE_URL)) {
     return next(request);
@@ -28,7 +28,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   ).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        auth.logout();
+        session.logout();
         void router.navigateByUrl('/login');
       }
       return throwError(() => error);

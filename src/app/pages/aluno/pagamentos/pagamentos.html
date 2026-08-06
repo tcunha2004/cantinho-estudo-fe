@@ -1,51 +1,49 @@
-<h1 class="font-display text-3xl font-bold">Pagamentos</h1>
-<p class="mt-1 text-ink-soft">Mensalidades e histórico</p>
+<app-page-header title="Pagamentos" subtitle="Mensalidades e histórico" />
 
 <!-- Próximo vencimento -->
-<section
-  class="mt-6 flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-accent-soft px-7 py-6"
->
-  <div>
-    <p class="text-ink-soft">Próximo vencimento</p>
-    <p class="mt-1 font-display text-3xl font-extrabold">
-      {{ nextAmount() }}<span class="text-lg font-bold text-ink-soft"> · {{ nextDueDate() }}</span>
-    </p>
-  </div>
-  <button
-    type="button"
-    class="rounded-2xl bg-accent px-8 py-3.5 font-display font-bold text-white shadow-sm transition-colors hover:bg-accent-strong"
-  >
-    Pagar agora
-  </button>
-</section>
+@if (nextPayment(); as next) {
+  <section class="panel mt-6 flex flex-wrap items-center justify-between gap-6 bg-accent-soft">
+    <div>
+      <p class="text-ink-soft">Próximo vencimento</p>
+      <p class="mt-1 font-display text-3xl font-extrabold">
+        {{ next.amount | currency
+        }}<span class="text-lg font-bold text-ink-soft"> · {{ next.dueDate | date: 'dd/MM' }}</span>
+      </p>
+    </div>
+    <button type="button" class="btn-primary">Pagar agora</button>
+  </section>
+}
 
 <!-- Histórico de pagamentos -->
 <app-card class="mt-6">
   <h2 class="font-display text-2xl font-bold">Histórico de pagamentos</h2>
 
   <ul class="mt-5 divide-y divide-line/70 border-t border-line/70">
-    @if (payments.length == 0) {
-      <p class="text-ink-soft text-center mt-6">Nenhum pagamento encontrado.</p>
-    }
-    @for (payment of payments; track payment.abbr) {
+    @for (payment of payments(); track payment.id) {
+      @let status = paymentStatus[payment.status];
       <li class="flex items-center gap-4 py-4">
         <span
           class="flex size-11 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-extrabold text-ink-soft"
         >
-          {{ payment.abbr }}
+          {{ payment.dueDate | date: 'MMM' | uppercase }}
         </span>
         <div class="min-w-0">
-          <p class="truncate font-bold">{{ payment.label }}</p>
-          <p class="truncate text-sm text-ink-soft">{{ payment.paidAt }}</p>
+          <p class="truncate font-bold">{{ payment.dueDate | date: 'MMMM' }}</p>
+          <p class="truncate text-sm text-ink-soft">
+            @if (payment.paidAt) {
+              Pago em {{ payment.paidAt | date: 'dd/MM/yyyy' }}
+            } @else {
+              Vence em {{ payment.dueDate | date: 'dd/MM/yyyy' }}
+            }
+          </p>
         </div>
-        <p class="ml-auto whitespace-nowrap font-bold">{{ payment.amount }}</p>
-        <span
-          class="w-24 shrink-0 rounded-full py-1 text-center text-sm font-bold"
-          [class]="statusStyles[payment.status]"
-        >
-          {{ payment.status }}
+        <p class="ml-auto whitespace-nowrap font-bold">{{ payment.amount | currency }}</p>
+        <span class="badge min-w-24 shrink-0 text-center" [class]="status.badge">
+          {{ status.label }}
         </span>
       </li>
+    } @empty {
+      <li class="py-6 text-center text-ink-soft">Nenhum pagamento encontrado.</li>
     }
   </ul>
 </app-card>

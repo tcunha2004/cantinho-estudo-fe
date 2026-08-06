@@ -1,4 +1,4 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { UserRole } from '../model/entity/user.model';
 import { AuthService, LoginResponse } from '../service/auth.service';
@@ -45,15 +45,19 @@ function readStoredToken(): string | null {
   return token;
 }
 
+/**
+ * Sessão do usuário: guarda o token e expõe quem está logado. É a única fonte
+ * de verdade sobre autenticação — guardas, interceptor e telas leem daqui.
+ */
 @Injectable({ providedIn: 'root' })
-export class Auth {
+export class Session {
   private readonly authService = inject(AuthService);
-  private readonly tokenSignal = signal<string | null>(readStoredToken());
+  private readonly storedToken = signal<string | null>(readStoredToken());
 
-  readonly token = this.tokenSignal.asReadonly();
+  readonly token = this.storedToken.asReadonly();
 
-  /** Sessão derivada do próprio token — sobrevive a refresh e não pode ser forjada na UI. */
-  readonly user = computed(() => decodeToken(this.tokenSignal()));
+  /** Derivada do próprio token — sobrevive a refresh e não pode ser forjada na UI. */
+  readonly user = computed(() => decodeToken(this.storedToken()));
   readonly role = computed(() => this.user()?.role ?? null);
   readonly isLoggedIn = computed(() => this.user() !== null);
 
@@ -61,13 +65,13 @@ export class Auth {
     return this.authService.login({ email, password, role }).pipe(
       tap(({ access_token }) => {
         localStorage.setItem(TOKEN_KEY, access_token);
-        this.tokenSignal.set(access_token);
+        this.storedToken.set(access_token);
       }),
     );
   }
 
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
-    this.tokenSignal.set(null);
+    this.storedToken.set(null);
   }
 }

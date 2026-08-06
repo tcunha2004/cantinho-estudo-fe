@@ -1,70 +1,45 @@
 import { inject, Injectable } from '@angular/core';
-import { API_BASE_URL } from './api.config';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { WeeklyClassesCountDto } from '../model/dto/weekly-classes-count.dto';
 import { Class } from '../model/entity/class.model';
+import { currentMonth } from '../shared/month';
+import { ApiClient } from './api-client';
 
 @Injectable({ providedIn: 'root' })
 export class ClassService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = API_BASE_URL;
+  private readonly api = inject(ApiClient);
 
-  getCurrentWeekClassesCount(): Observable<number> {
-    return this.http
-      .get<{ count: number }>(`${this.baseUrl}/classes/current-week/count`)
-      .pipe(map((response) => response.count));
+  getCurrentWeekCount(): Observable<number> {
+    return this.api.getField<number>('/classes/current-week/count', 'count');
   }
 
   getCurrentMonthRevenue(): Observable<number> {
-    return this.http
-      .get<{ revenue: number }>(`${this.baseUrl}/classes/current-month/revenue`)
-      .pipe(map((response) => response.revenue));
+    return this.api.getField<number>('/classes/current-month/revenue', 'revenue');
   }
 
-  getUpcomingClassesToday(): Observable<Class[]> {
-    return this.http.get<Class[]>(`${this.baseUrl}/classes/today/upcoming`);
+  getUpcomingToday(): Observable<Class[]> {
+    return this.api.get<Class[]>('/classes/today/upcoming');
   }
 
-  getTeacherUpcomingClasses(): Observable<Class[]> {
-    return this.http.get<Class[]>(`${this.baseUrl}/classes/teacher/upcoming`);
+  getTeacherUpcoming(): Observable<Class[]> {
+    return this.api.get<Class[]>('/classes/teacher/upcoming');
   }
 
-  getTeacherRecentClasses(): Observable<Class[]> {
-    return this.http.get<Class[]>(`${this.baseUrl}/classes/teacher/recent-history`);
+  getTeacherRecent(): Observable<Class[]> {
+    return this.api.get<Class[]>('/classes/teacher/recent-history');
   }
 
-  /* Mês de referência no formato YYYY-MM (ex.: 2026-07) */
-  private getCurrentMonth(): string {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    return `${year}-${month}`;
+  getTeacherMonthlyCount(month = currentMonth()): Observable<number> {
+    return this.api.getField<number>('/classes/teacher/monthly-count', 'count', { month });
   }
 
-  getTeacherMonthlyClassesCount(month: string = this.getCurrentMonth()): Observable<number> {
-    return this.http
-      .get<{ count: number }>(`${this.baseUrl}/classes/teacher/monthly-count`, {
-        params: new HttpParams().set('month', month),
-      })
-      .pipe(map((response) => response.count));
+  getTeacherMonthlyEarnings(month = currentMonth()): Observable<number> {
+    return this.api.getField<number>('/classes/teacher/monthly-earnings', 'amountToReceive', {
+      month,
+    });
   }
 
-  getTeacherMonthlyEarnings(month: string = this.getCurrentMonth()): Observable<number> {
-    return this.http
-      .get<{ amountToReceive: number }>(`${this.baseUrl}/classes/teacher/monthly-earnings`, {
-        params: new HttpParams().set('month', month),
-      })
-      .pipe(map((response) => response.amountToReceive));
-  }
-
-  getTeacherMonthlyClassesCountByWeek(
-    month: string = this.getCurrentMonth(),
-  ): Observable<{ week: number; count: number | null }[]> {
-    return this.http.get<{ week: number; count: number | null }[]>(
-      `${this.baseUrl}/classes/teacher/weekly-count`,
-      {
-        params: new HttpParams().set('month', month),
-      },
-    );
+  getTeacherWeeklyCounts(month = currentMonth()): Observable<WeeklyClassesCountDto[]> {
+    return this.api.get<WeeklyClassesCountDto[]>('/classes/teacher/weekly-count', { month });
   }
 }

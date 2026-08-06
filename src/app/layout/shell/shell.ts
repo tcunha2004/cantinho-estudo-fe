@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { Auth } from '../../core/auth';
+import { Session } from '../../core/session';
 import { UserRole } from '../../model/entity/user.model';
 import { Icon, IconName } from '../../shared/icon/icon';
 
@@ -39,16 +39,15 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
 })
 export class Shell {
   private readonly router = inject(Router);
-  private readonly auth = inject(Auth);
+  private readonly session = inject(Session);
 
-  protected readonly role = this.auth.role;
   protected readonly navItems = computed(() => {
-    const role = this.role();
+    const role = this.session.role();
     return role ? NAV_BY_ROLE[role] : [];
   });
 
   protected logout(): void {
-    this.auth.logout();
-    this.router.navigateByUrl('/login');
+    this.session.logout();
+    void this.router.navigateByUrl('/login');
   }
 }

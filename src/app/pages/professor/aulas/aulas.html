@@ -1,5 +1,4 @@
-<h1 class="font-display text-3xl font-bold">Minhas aulas</h1>
-<p class="mt-1 text-ink-soft">Próximas aulas e histórico</p>
+<app-page-header title="Minhas aulas" subtitle="Próximas aulas e histórico" />
 
 <div class="mt-6 grid items-start gap-5 lg:grid-cols-[3fr_2fr]">
   <!-- Próximas aulas -->
@@ -7,23 +6,27 @@
     <h2 class="font-display text-2xl font-bold">Próximas aulas</h2>
 
     <div class="mt-6 space-y-3">
-      @if (upcoming().length === 0) {
-        <p class="text-ink-soft text-center">Nenhuma aula agendada.</p>
-      }
-      @for (item of upcoming(); track item.time + item.student) {
-        <div class="flex items-center gap-4 rounded-2xl bg-cream px-5 py-4">
-          <div class="flex w-24 flex-col items-start gap-0.5 shrink-0">
-            <span class="font-bold text-accent">{{ item.day }}</span>
-            <span class="font-display text-lg font-bold">{{ item.time }}</span>
+      @for (item of upcoming(); track item.id) {
+        <div class="list-tile">
+          <div class="flex w-24 shrink-0 flex-col items-start gap-0.5">
+            <span class="font-bold text-accent">{{ item.scheduledAt | date: 'dd MMM' }}</span>
+            <span class="font-display text-lg font-bold">
+              {{ item.scheduledAt | date: 'HH:mm' }}
+            </span>
           </div>
 
-          <span class="h-10 w-1 shrink-0 rounded-full" [class]="item.barColor"></span>
+          <span
+            class="h-10 w-1 shrink-0 rounded-full"
+            [class]="classStatus[item.status].bar"
+          ></span>
 
           <div class="min-w-0">
             <p class="truncate text-lg font-bold">{{ item.student }}</p>
             <p class="truncate text-ink-soft">{{ item.subject }}</p>
           </div>
         </div>
+      } @empty {
+        <p class="text-center text-ink-soft">Nenhuma aula agendada.</p>
       }
     </div>
   </app-card>
@@ -32,27 +35,22 @@
   <app-card>
     <h2 class="font-display text-2xl font-bold">Histórico recente</h2>
 
-    @if (history().length === 0) {
-      <p class="text-ink-soft text-center mt-6">Nenhum histórico de aulas.</p>
-    } @else {
-      <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
-        @for (h of history(); track h.student + h.date) {
-          <div class="flex items-baseline justify-between py-4">
-            <div>
-              <p class="font-bold">{{ h.student }}</p>
-              <p class="text-ink-soft">{{ h.date }} · {{ h.subject }}</p>
-            </div>
-
-            <div>
-              <span
-                class="rounded-full px-3 py-1 text-sm font-bold"
-                [class]="statusStyles[h.status]"
-                >{{ h.status }}</span
-              >
-            </div>
+    <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+      @for (item of history(); track item.id) {
+        <div class="flex items-baseline justify-between gap-4 py-4">
+          <div class="min-w-0">
+            <p class="truncate font-bold">{{ item.student }}</p>
+            <p class="truncate text-ink-soft">
+              {{ item.scheduledAt | date: 'dd/MM' }} · {{ item.subject }}
+            </p>
           </div>
-        }
-      </dl>
-    }
+          <span class="badge shrink-0" [class]="classStatus[item.status].badge">
+            {{ classStatus[item.status].label }}
+          </span>
+        </div>
+      } @empty {
+        <p class="mt-6 text-center text-ink-soft">Nenhum histórico de aulas.</p>
+      }
+    </dl>
   </app-card>
 </div>

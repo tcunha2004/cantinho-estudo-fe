@@ -1,26 +1,33 @@
-<h1 class="font-display text-3xl font-bold">Meu plano</h1>
+<app-page-header title="Meu plano" />
 
-<!-- Destaque do plano atual -->
-<section
-  class="mt-6 flex flex-wrap items-start justify-between gap-6 rounded-3xl bg-subject-amber/12 px-7 py-6"
->
-  <div class="min-w-0">
-    <div class="flex flex-wrap items-center gap-3">
-      <h2 class="font-display text-2xl font-bold text-subject-amber">{{ planName() }}</h2>
-      <span
-        class="rounded-full bg-white px-3.5 py-1 text-sm font-bold text-subject-amber shadow-xs"
-      >
-        {{ contractStatus() }}
-      </span>
+@if (plan(); as plan) {
+  @let display = planDisplay[plan.planType];
+  @let status = contractStatus[plan.contractStatus];
+
+  <!-- Destaque do plano atual -->
+  <section
+    class="panel mt-6 flex flex-wrap items-start justify-between gap-6"
+    [class]="display.tint"
+  >
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-center gap-3">
+        <h2 class="font-display text-2xl font-bold" [class]="display.text">{{ display.label }}</h2>
+        <span class="badge bg-white shadow-xs" [class]="display.text">{{ status.label }}</span>
+      </div>
+      <p class="mt-2 font-bold text-ink-soft">
+        @if (plan.frequency) {
+          {{ plan.frequency }}x por semana ·
+        }
+        Aulas individuais
+      </p>
+      <p class="mt-4 font-display text-4xl font-extrabold">
+        {{ plan.monthlyPrice | currency }}<span class="text-lg font-bold text-ink-soft">/mês</span>
+      </p>
     </div>
-    <p class="mt-2 font-bold text-amber-800/80">
-      {{ frequency() }}x por semana · Aulas individuais
-    </p>
-    <p class="mt-4 font-display text-4xl font-extrabold">
-      {{ monthlyPrice() }}<span class="text-lg font-bold text-ink-soft">/mês</span>
-    </p>
-  </div>
-</section>
+  </section>
+} @else {
+  <p class="mt-6 text-ink-soft">Carregando seu plano…</p>
+}
 
 <div class="mt-6 grid items-start gap-5 lg:grid-cols-2">
   <!-- O que está incluído -->
@@ -28,14 +35,14 @@
     <h2 class="font-display text-2xl font-bold">O que está incluído</h2>
 
     <ul class="mt-5 space-y-4">
-      @for (item of includes(); track item) {
+      @for (benefit of benefits(); track benefit) {
         <li class="flex items-center gap-3">
           <span
             class="flex size-6 shrink-0 items-center justify-center rounded-full bg-subject-green/15 text-subject-green"
           >
             <app-icon name="check" class="size-4" />
           </span>
-          <span class="font-bold">{{ item }}</span>
+          <span class="font-bold">{{ benefit }}</span>
         </li>
       }
     </ul>
@@ -50,21 +57,15 @@
     <h2 class="font-display text-2xl font-bold">Outros planos</h2>
 
     <div class="mt-5 space-y-3">
-      @for (plan of outrosplanos(); track $index) {
-        <div class="flex items-center gap-4 rounded-2xl bg-cream px-5 py-4">
-          <span class="h-10 w-1.5 shrink-0 rounded-full" [class]=""></span>
-          <div class="min-w-0">
-            <p class="truncate font-bold">{{ plan }}</p>
-          </div>
+      @for (type of otherPlans(); track type) {
+        @let otherDisplay = planDisplay[type];
+        <div class="list-tile">
+          <span class="h-10 w-1.5 shrink-0 rounded-full" [class]="otherDisplay.bar"></span>
+          <p class="truncate font-bold">{{ otherDisplay.label }}</p>
         </div>
       }
     </div>
 
-    <button
-      type="button"
-      class="mt-5 w-full rounded-2xl bg-accent py-3.5 font-display font-bold text-white shadow-sm transition-colors hover:bg-accent-strong"
-    >
-      Solicitar troca de plano
-    </button>
+    <button type="button" class="btn-primary mt-5 w-full">Solicitar troca de plano</button>
   </app-card>
 </div>

@@ -1,34 +1,19 @@
-import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
+import { CurrencyPipe, DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Card } from '../../../shared/card/card';
-import { StudentService } from '../../../service/student.service';
+import { PLAN_TYPES } from '../../../model/entity/plan.model';
+import { toClassView } from '../../../model/view/class-view';
 import { ClassService } from '../../../service/class.service';
-import { TeacherService } from '../../../service/teacher.service';
 import { StudentContractService } from '../../../service/student-contract.service';
-
-interface Stat {
-  label: string;
-  value: string;
-  dotColor: string;
-}
-
-interface Lesson {
-  time: string;
-  student: string;
-  subject: string;
-  teacher: string;
-  barColor: string;
-}
-
-interface Plan {
-  name: string;
-  students: number;
-  barColor: string;
-}
+import { StudentService } from '../../../service/student.service';
+import { TeacherService } from '../../../service/teacher.service';
+import { Card } from '../../../shared/card/card';
+import { CLASS_STATUS_DISPLAY, PLAN_DISPLAY } from '../../../shared/domain-display';
+import { PageHeader } from '../../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-painel',
-  imports: [Card],
+  imports: [Card, PageHeader, CurrencyPipe, DatePipe],
   templateUrl: './painel.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -36,106 +21,62 @@ export class Painel {
   private readonly studentService = inject(StudentService);
   private readonly classService = inject(ClassService);
   private readonly teacherService = inject(TeacherService);
-  private readonly studentContractService = inject(StudentContractService);
+  private readonly contractService = inject(StudentContractService);
 
-  private readonly activeStudentsCount = toSignal(this.studentService.getActiveStudentsCount());
-  private readonly currentWeekClassesCount = toSignal(
-    this.classService.getCurrentWeekClassesCount(),
-  );
-  private readonly currentMonthRevenue = toSignal(this.classService.getCurrentMonthRevenue());
-  private readonly allTeachersEarningsByMonth = toSignal(
-    this.teacherService.getAllTeachersEarningsByMonth(),
-  );
-  private readonly upcomingClassesToday = toSignal(this.classService.getUpcomingClassesToday());
-  private readonly activeStudentsByPlanType = toSignal(
-    this.studentContractService.getCountOfActiveStudentsByPlanType(),
-  );
+  protected readonly today = new Date();
+  protected readonly classStatus = CLASS_STATUS_DISPLAY;
+  protected readonly planDisplay = PLAN_DISPLAY;
 
-  protected readonly stats: Signal<Stat[]> = computed(() => [
+  private readonly activeStudents = toSignal(this.studentService.getActiveCount(), {
+    initialValue: 0,
+  });
+  private readonly weekClasses = toSignal(this.classService.getCurrentWeekCount(), {
+    initialValue: 0,
+  });
+  private readonly monthRevenue = toSignal(this.classService.getCurrentMonthRevenue(), {
+    initialValue: 0,
+  });
+  private readonly teachersPayout = toSignal(this.teacherService.getEarningsByMonth());
+  private readonly studentsByPlan = toSignal(this.contractService.getActiveCountByPlanType());
+  private readonly upcomingToday = toSignal(this.classService.getUpcomingToday(), {
+    initialValue: [],
+  });
+
+  protected readonly stats = computed(() => [
     {
       label: 'Alunos ativos',
-      value: this.activeStudentsCount()?.toString() ?? 'Error',
-      dotColor: 'bg-subject-blue',
+      value: this.activeStudents(),
+      dot: 'bg-subject-blue',
+      currency: false,
     },
     {
       label: 'Aulas na semana',
-      value: this.currentWeekClassesCount()?.toString() ?? 'Error',
-      dotColor: 'bg-subject-green',
+      value: this.weekClasses(),
+      dot: 'bg-subject-green',
+      currency: false,
     },
     {
       label: 'Receita do mês',
-      value:
-        this.currentMonthRevenue()?.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }) ?? 'Error',
-      dotColor: 'bg-subject-amber',
+      value: this.monthRevenue(),
+      dot: 'bg-subject-amber',
+      currency: true,
     },
     {
       label: 'A pagar professores',
-      value:
-        this.allTeachersEarningsByMonth()?.totalAmountToReceive?.toLocaleString('pt-BR', {
-          style: 'currency',
-          currency: 'BRL',
-        }) ?? 'Error',
-      dotColor: 'bg-accent',
+      value: this.teachersPayout()?.totalAmountToReceive ?? 0,
+      dot: 'bg-accent',
+      currency: true,
     },
   ]);
 
-  protected readonly today = new Date().toLocaleDateString('pt-BR', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-  });
+  protected readonly lessons = computed(() => this.upcomingToday().map(toClassView));
 
-  protected readonly lessons: Signal<Lesson[]> = computed(() => {
-    const classes = this.upcomingClassesToday() ?? [];
-    return classes.map((cls) => ({
-      time: new Date(cls.scheduledAt).toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      student: cls.studentContract.student.user.name,
-      subject: cls.subject.name,
-      teacher: cls.teacher.user.name,
-      barColor:
-        cls.status === 'scheduled'
-          ? 'bg-subject-blue'
-          : cls.status === 'completed'
-            ? 'bg-subject-green'
-            : cls.status === 'cancelled'
-              ? 'bg-subject-amber'
-              : 'bg-accent',
-    }));
-  });
+  /** Alunos ativos por plano, já com a fatia que cada plano ocupa na barra. */
+  protected readonly plans = computed(() => {
+    const countByType = this.studentsByPlan();
+    const rows = PLAN_TYPES.map((type) => ({ type, students: countByType?.[type] ?? 0 }));
+    const total = rows.reduce((sum, row) => sum + row.students, 0) || 1;
 
-  protected readonly plans: Signal<Plan[]> = computed(() => {
-    const countByPlanType = this.activeStudentsByPlanType();
-    return [
-      {
-        name: 'Ouro',
-        students: countByPlanType?.['ouro'] ?? 0,
-        barColor: 'bg-subject-amber',
-      },
-      {
-        name: 'Prata',
-        students: countByPlanType?.['prata'] ?? 0,
-        barColor: 'bg-slate-400',
-      },
-      {
-        name: 'Bronze',
-        students: countByPlanType?.['bronze'] ?? 0,
-        barColor: 'bg-amber-700',
-      },
-      {
-        name: 'Avulsa',
-        students: countByPlanType?.['avulsa'] ?? 0,
-        barColor: 'bg-accent',
-      },
-    ];
+    return rows.map((row) => ({ ...row, share: (row.students / total) * 100 }));
   });
-
-  protected readonly totalStudents: Signal<number> = computed(() =>
-    this.plans().reduce((total, plan) => total + plan.students, 0),
-  );
 }

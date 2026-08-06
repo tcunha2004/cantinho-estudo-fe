@@ -1,22 +1,18 @@
-<!-- Cabeçalho -->
-<div class="flex flex-wrap items-end justify-between gap-4">
-  <div>
-    <h1 class="font-display text-3xl font-bold">Alunos</h1>
-    <p class="mt-1 text-ink-soft">{{ activeStudentsCount() }} alunos ativos</p>
-  </div>
-
+<app-page-header title="Alunos" [subtitle]="students().length + ' alunos ativos'">
   <label class="relative block">
     <app-icon
       name="search"
       class="pointer-events-none absolute left-4 top-1/2 size-4.5 -translate-y-1/2 text-ink-soft"
     />
     <input
+      #searchInput
       type="search"
       placeholder="Buscar aluno..."
-      class="w-64 rounded-full border border-line bg-white py-2.5 pl-11 pr-4 text-sm placeholder:text-ink-soft/60 transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+      (input)="search.set(searchInput.value)"
+      class="field w-64 rounded-full py-2.5 pl-11 pr-4"
     />
   </label>
-</div>
+</app-page-header>
 
 <!-- Tabela de alunos -->
 <app-card class="mt-6 overflow-x-auto">
@@ -32,56 +28,52 @@
       </tr>
     </thead>
     <tbody class="divide-y divide-line/70">
-      @if (students().length === 0) {
+      @for (student of visibleStudents(); track student.id) {
+        <tr>
+          <td class="px-3 py-4">
+            <div class="flex items-center gap-4">
+              <span
+                class="flex size-11 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-extrabold text-ink-soft"
+              >
+                {{ initials(student.name) }}
+              </span>
+              <span class="whitespace-nowrap text-lg font-bold">{{ student.name }}</span>
+            </div>
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
+            {{ student.guardian ?? 'Nenhum' }}
+          </td>
+          <td class="px-3 py-4">
+            @if (student.plan; as plan) {
+              <span class="badge" [class]="planDisplay[plan].badge">
+                {{ planDisplay[plan].label }}
+              </span>
+            } @else {
+              <span class="text-ink-soft">—</span>
+            }
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
+            {{ student.frequency ?? 'Nenhuma' }}
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 font-bold">
+            {{ student.monthlyPrice ? (student.monthlyPrice | currency) : '—' }}
+          </td>
+          <td class="px-3 py-4">
+            @if (student.contractStatus; as status) {
+              <span class="badge" [class]="contractStatus[status].badge">
+                {{ contractStatus[status].label }}
+              </span>
+            } @else {
+              <span class="text-ink-soft">—</span>
+            }
+          </td>
+        </tr>
+      } @empty {
         <tr>
           <td colspan="6" class="px-3 py-8 text-center text-ink-soft">
             Nenhum aluno ativo encontrado.
           </td>
         </tr>
-      } @else {
-        @for (student of students(); track student.name) {
-          <tr>
-            <td class="px-3 py-4">
-              <div class="flex items-center gap-4">
-                <span
-                  class="flex size-11 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-extrabold text-ink-soft"
-                >
-                  {{ initials(student.name) }}
-                </span>
-                <span class="whitespace-nowrap text-lg font-bold">{{ student.name }}</span>
-              </div>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
-              {{ student.guardian ?? 'Nenhum' }}
-            </td>
-            <td class="px-3 py-4">
-              <span
-                class="inline-block rounded-full px-3.5 py-1 text-sm font-bold"
-                [class]="student.plan ? planStyles[student.plan] : planStyles['avulsa']"
-              >
-                {{ student.plan ?? 'Avulsa' }}
-              </span>
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
-              {{ student.frequency ?? 'Nenhuma' }}
-            </td>
-            <td class="whitespace-nowrap px-3 py-4 font-bold">
-              {{ student.monthlyPrice ?? 'R$ 0,00' }}
-            </td>
-            <td class="px-3 py-4">
-              <span
-                class="inline-block whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-bold"
-                [class]="
-                  student.contractStatus
-                    ? statusStyles[student.contractStatus]
-                    : statusStyles['expired']
-                "
-              >
-                {{ student.contractStatus ? statusLabels[student.contractStatus] : '-' }}
-              </span>
-            </td>
-          </tr>
-        }
       }
     </tbody>
   </table>

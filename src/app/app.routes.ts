@@ -1,9 +1,28 @@
-import { Routes } from '@angular/router';
+import { Route, Routes } from '@angular/router';
 import { authGuard, guestGuard, roleGuard } from './core/auth.guard';
+import { UserRole } from './model/entity/user.model';
+
+interface PageConfig {
+  path: string;
+  /* Nome exibido na aba do navegador e no cabeçalho das telas provisórias */
+  title: string;
+  /* Papéis com acesso à rota */
+  roles: UserRole[];
+  loadComponent: Route['loadComponent'];
+}
 
 const placeholder = () => import('./pages/placeholder/placeholder').then((m) => m.Placeholder);
 
-const pageTitle = (name: string) => `${name} · Cantinho do Estudo`;
+/** Monta uma página interna: guarda de papel, título da aba e `data` padronizados. */
+function page({ path, title, roles, loadComponent }: PageConfig): Route {
+  return {
+    path,
+    loadComponent,
+    canActivate: [roleGuard],
+    data: { title, roles },
+    title: `${title} · Cantinho do Estudo`,
+  };
+}
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'login' },
@@ -11,7 +30,7 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: () => import('./pages/login/login').then((m) => m.Login),
     canActivate: [guestGuard],
-    title: pageTitle('Entrar'),
+    title: 'Entrar · Cantinho do Estudo',
   },
   {
     path: '',
@@ -19,74 +38,65 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       // admin
-      {
+      page({
         path: 'painel',
+        title: 'Painel',
+        roles: ['admin'],
         loadComponent: () => import('./pages/admin/painel/painel').then((m) => m.Painel),
-        canActivate: [roleGuard],
-        data: { roles: ['admin'] },
-        title: pageTitle('Painel'),
-      },
-      {
+      }),
+      page({
         path: 'alunos',
+        title: 'Alunos',
+        roles: ['admin'],
         loadComponent: () => import('./pages/admin/alunos/alunos').then((m) => m.Alunos),
-        canActivate: [roleGuard],
-        data: { roles: ['admin'] },
-        title: pageTitle('Alunos'),
-      },
-      {
+      }),
+      page({
         path: 'professores',
+        title: 'Professores',
+        roles: ['admin'],
         loadComponent: () =>
           import('./pages/admin/professores/professores').then((m) => m.Professores),
-        canActivate: [roleGuard],
-        data: { roles: ['admin'] },
-        title: pageTitle('Professores'),
-      },
-      {
+      }),
+      page({
         path: 'info',
+        title: 'Info',
+        roles: ['admin'],
         loadComponent: () => import('./pages/admin/info/info').then((m) => m.Info),
-        canActivate: [roleGuard],
-        data: { roles: ['admin'] },
-        title: pageTitle('Info'),
-      },
+      }),
       // compartilhada (admin, professor e aluno)
-      {
+      page({
         path: 'agenda',
+        title: 'Agenda',
+        roles: ['admin', 'professor', 'student'],
         loadComponent: placeholder,
-        canActivate: [roleGuard],
-        data: { title: 'Agenda', roles: ['admin', 'professor', 'student'] },
-        title: pageTitle('Agenda'),
-      },
+      }),
       // professor
-      {
+      page({
         path: 'aulas',
+        title: 'Minhas aulas',
+        roles: ['professor'],
         loadComponent: () => import('./pages/professor/aulas/aulas').then((m) => m.Aulas),
-        canActivate: [roleGuard],
-        data: { title: 'Minhas aulas', roles: ['professor'] },
-        title: pageTitle('Minhas aulas'),
-      },
-      {
+      }),
+      page({
         path: 'ganhos',
+        title: 'Meus ganhos',
+        roles: ['professor'],
         loadComponent: () => import('./pages/professor/ganhos/ganhos').then((m) => m.Ganhos),
-        canActivate: [roleGuard],
-        data: { title: 'Meus ganhos', roles: ['professor'] },
-        title: pageTitle('Meus ganhos'),
-      },
+      }),
       // aluno
-      {
+      page({
         path: 'plano',
+        title: 'Meu plano',
+        roles: ['student'],
         loadComponent: () => import('./pages/aluno/plano/plano').then((m) => m.Plano),
-        canActivate: [roleGuard],
-        data: { roles: ['student'] },
-        title: pageTitle('Meu plano'),
-      },
-      {
+      }),
+      page({
         path: 'pagamentos',
+        title: 'Pagamentos',
+        roles: ['student'],
         loadComponent: () =>
           import('./pages/aluno/pagamentos/pagamentos').then((m) => m.Pagamentos),
-        canActivate: [roleGuard],
-        data: { roles: ['student'] },
-        title: pageTitle('Pagamentos'),
-      },
+      }),
     ],
   },
 ];

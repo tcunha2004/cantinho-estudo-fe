@@ -3,7 +3,10 @@
 import { Region } from './region.model';
 import { StudentContract } from './student-contract.model';
 
-export type PlanType = 'ouro' | 'prata' | 'bronze' | 'avulsa';
+/* Do mais completo ao mais simples — é a ordem em que os planos são listados. */
+export const PLAN_TYPES = ['ouro', 'prata', 'bronze', 'avulsa'] as const;
+
+export type PlanType = (typeof PLAN_TYPES)[number];
 
 /* Quantidade de aulas por semana — aplica-se apenas ao Plano Ouro. */
 export type Frequency = 2 | 3 | 5;

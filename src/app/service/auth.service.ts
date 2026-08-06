@@ -1,8 +1,7 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { UserRole } from '../model/entity/user.model';
-import { API_BASE_URL } from './api.config';
+import { ApiClient } from './api-client';
 
 export interface LoginRequest {
   email: string;
@@ -16,10 +15,9 @@ export interface LoginResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = API_BASE_URL;
+  private readonly api = inject(ApiClient);
 
   login(body: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, body);
+    return this.api.post<LoginResponse>('/auth/login', body);
   }
 }
