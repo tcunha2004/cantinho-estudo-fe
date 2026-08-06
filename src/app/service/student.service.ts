@@ -3,6 +3,8 @@ import { API_BASE_URL } from './api.config';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { ActiveStudentDto } from '../model/dto/active-student.dto';
+import { StudentPlanDto } from '../model/dto/student-plan.dto';
+import { PlanSummaryDto } from '../model/dto/plan-summary.dto';
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {
@@ -17,5 +19,13 @@ export class StudentService {
 
   getActiveStudents(): Observable<ActiveStudentDto[]> {
     return this.http.get<ActiveStudentDto[]>(`${this.baseUrl}/students/active`);
+  }
+
+  getStudentPlan(): Observable<StudentPlanDto> {
+    return this.http.get<StudentPlanDto>(`${this.baseUrl}/students/me/plan`);
+  }
+
+  getOtherPlans(): Observable<PlanSummaryDto[]> {
+    return this.http.get<PlanSummaryDto[]>(`${this.baseUrl}/students/me/other-plans`);
   }
 }

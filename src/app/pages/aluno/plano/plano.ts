@@ -1,13 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
 import { Card } from '../../../shared/card/card';
 import { Icon } from '../../../shared/icon/icon';
-
-interface OtherPlan {
-  name: string;
-  detail: string;
-  price: string;
-  barColor: string;
-}
+import { StudentService } from '../../../service/student.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { PlanType } from '../../../model/entity/plan.model';
+import { ContractStatus } from '../../../model/entity/student-contract.model';
 
 @Component({
   selector: 'app-plano',
@@ -16,37 +13,69 @@ interface OtherPlan {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Plano {
-  // Dados mockados até a integração com o backend.
-  protected readonly planName = 'Plano Ouro';
-  protected readonly frequency = '3x na semana';
-  protected readonly monthlyPrice = 'R$ 1.860';
-  protected readonly enrollmentNote = 'Matrícula paga · próximo vencimento 10/07';
+  private readonly studentService = inject(StudentService);
 
-  protected readonly lessonsUsed = 9;
-  protected readonly lessonsTotal = 12;
-  protected readonly usageMonth = 'junho';
+  protected readonly studentPlan = toSignal(this.studentService.getStudentPlan());
 
-  protected readonly includes: string[] = [
-    '12 aulas individuais por mês',
-    'Professor fixo por matéria',
-    'Agenda online com remarcação',
-    'Relatório de acompanhamento mensal',
-  ];
+  protected readonly planName = computed(() => {
+    return this.planNames[this.studentPlan()!.planType] ?? '-';
+  });
+
+  protected readonly frequency = computed(() => {
+    return this.studentPlan()?.frequency ?? '-';
+  });
+  
+  protected readonly monthlyPrice = computed(() => {
+    return (
+      Number(this.studentPlan()?.monthlyPrice).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }) ?? '-'
+    );
+  });
+
+  protected readonly contractStatus = computed(() => {
+    return this.planStatus[this.studentPlan()!.contractStatus] ?? '-';
+  });
+
+  protected readonly lessonsTotal = computed(() => {
+    return this.studentPlan()?.classesCount ?? '-';
+  });
+
+  protected readonly month = new Date().toLocaleString('pt-BR', { month: 'long' });
+
+  protected readonly includes: Signal<string[]> = computed(() => {
+    return this.planName() !== 'Avulso'
+      ? [
+          `${this.lessonsTotal()} aulas individuais por mês`,
+          'Professor fixo por matéria',
+          'Agenda online com remarcação',
+        ]
+      : ['Aulas individuais', 'Professor fixo por matéria', 'Agenda online com remarcação'];
+  });
 
   protected readonly cancellationRule =
     'avise com 24h de antecedência. Aulas desmarcadas em cima da hora são cobradas normalmente.';
 
-  protected readonly otherPlans: OtherPlan[] = [
-    { name: 'Plano Prata', detail: '10 aulas mensais', price: 'R$ 1.800', barColor: 'bg-slate-400' },
-    { name: 'Plano Bronze', detail: 'Pacote 10 aulas', price: 'R$ 2.000', barColor: 'bg-amber-700' },
-    { name: 'Aula avulsa', detail: 'Sem fidelidade', price: 'R$ 220', barColor: 'bg-accent' },
-  ];
+  protected readonly otherPlans = toSignal(this.studentService.getOtherPlans());
 
-  protected get lessonsRemaining(): number {
-    return this.lessonsTotal - this.lessonsUsed;
-  }
+  protected readonly planNames: Record<PlanType, string> = {
+    ouro: 'Ouro',
+    prata: 'Prata',
+    bronze: 'Bronze',
+    avulsa: 'Avulso',
+  };
 
-  protected get usagePercent(): number {
-    return (this.lessonsUsed / this.lessonsTotal) * 100;
-  }
+  protected readonly planStatus: Record<ContractStatus, string> = {
+    active: 'Ativo',
+    cancelled: 'Cancelado',
+    expired: 'Expirado',
+  };
+
+  protected readonly planColors: Record<PlanType, string> = {
+    ouro: 'bg-amber-400',
+    prata: 'bg-slate-400',
+    bronze: 'bg-amber-700',
+    avulsa: 'bg-accent',
+  };
 }
