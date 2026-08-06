@@ -1,12 +1,14 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { Card } from '../../../shared/card/card';
+import { StudentService } from '../../../service/student.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 type PaymentStatus = 'Pago' | 'Em aberto';
 
 interface Payment {
   abbr: string;
   label: string;
-  method: string;
+  paidAt: string;
   amount: string;
   status: PaymentStatus;
 }
@@ -18,17 +20,38 @@ interface Payment {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Pagamentos {
-  // Dados mockados até a integração com o backend.
-  protected readonly nextAmount = 'R$ 1.860,00';
-  protected readonly nextDueDate = '10/07';
+  private readonly studentService = inject(StudentService);
 
-  protected readonly payments: Payment[] = [
-    { abbr: 'JUL', label: 'Julho', method: 'Pix · aguardando', amount: 'R$ 1.860,00', status: 'Em aberto' },
-    { abbr: 'JUN', label: 'Junho', method: 'Cartão de crédito', amount: 'R$ 1.860,00', status: 'Pago' },
-    { abbr: 'MAI', label: 'Maio', method: 'Pix', amount: 'R$ 1.860,00', status: 'Pago' },
-    { abbr: 'ABR', label: 'Abril', method: 'Pix', amount: 'R$ 1.860,00', status: 'Pago' },
-    { abbr: 'MAT', label: 'Matrícula 2026', method: 'Cartão de crédito', amount: 'R$ 200,00', status: 'Pago' },
-  ];
+  protected readonly studentPayments = toSignal(this.studentService.getStudentPaymentHistory());
+
+  protected readonly nextAmount = computed(() => {
+    const amount = this.studentPayments()?.find((payment) => payment.status === 'pending')?.amount;
+    return Number(amount).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) ?? '-';
+  });
+
+  protected readonly nextDueDate = computed(() => {
+    const dueDate = this.studentPayments()?.find(
+      (payment) => payment.status === 'pending',
+    )?.dueDate;
+    return dueDate
+      ? new Date(dueDate).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })
+      : '-';
+  });
+
+  protected readonly paymentsHistory = computed(() => {
+    return this.studentPayments()?.map((payment) => ({
+      abbr: new Date(payment.dueDate).toLocaleString('pt-BR', { month: 'short' }).toUpperCase(),
+      label: new Date(payment.dueDate).toLocaleString('pt-BR', { month: 'long' }),
+      paidAt: payment.paidAt ? new Date(payment.paidAt).toLocaleString('pt-BR') : '-',
+      amount: Number(payment.amount).toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+      }),
+      status: payment.status === 'paid' ? 'Pago' : 'Em aberto',
+    })) as Payment[];
+  });
+
+  protected readonly payments: Payment[] = this.paymentsHistory() ?? [];
 
   protected readonly statusStyles: Record<PaymentStatus, string> = {
     Pago: 'bg-subject-green/15 text-subject-green',

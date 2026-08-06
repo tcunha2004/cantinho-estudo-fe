@@ -50,16 +50,12 @@
     <h2 class="font-display text-2xl font-bold">Outros planos</h2>
 
     <div class="mt-5 space-y-3">
-      @for (plan of otherPlans(); track plan.planType) {
+      @for (plan of outrosplanos(); track $index) {
         <div class="flex items-center gap-4 rounded-2xl bg-cream px-5 py-4">
-          <span class="h-10 w-1.5 shrink-0 rounded-full" [class]="planColors[plan.planType]"></span>
+          <span class="h-10 w-1.5 shrink-0 rounded-full" [class]=""></span>
           <div class="min-w-0">
-            <p class="truncate font-bold">
-              {{ planNames[plan.planType] }} ·
-              <span class="text-sm text-ink-soft">{{ plan.frequency ?? '0' }}x por semana</span>
-            </p>
+            <p class="truncate font-bold">{{ plan }}</p>
           </div>
-          <p class="ml-auto font-display font-bold">{{ plan.monthlyPrice }}</p>
         </div>
       }
     </div>

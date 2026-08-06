@@ -2,11 +2,13 @@
 <p class="mt-1 text-ink-soft">Mensalidades e histórico</p>
 
 <!-- Próximo vencimento -->
-<section class="mt-6 flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-accent-soft px-7 py-6">
+<section
+  class="mt-6 flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-accent-soft px-7 py-6"
+>
   <div>
     <p class="text-ink-soft">Próximo vencimento</p>
     <p class="mt-1 font-display text-3xl font-extrabold">
-      {{ nextAmount }}<span class="text-lg font-bold text-ink-soft"> · {{ nextDueDate }}</span>
+      {{ nextAmount() }}<span class="text-lg font-bold text-ink-soft"> · {{ nextDueDate() }}</span>
     </p>
   </div>
   <button
@@ -22,6 +24,9 @@
   <h2 class="font-display text-2xl font-bold">Histórico de pagamentos</h2>
 
   <ul class="mt-5 divide-y divide-line/70 border-t border-line/70">
+    @if (payments.length == 0) {
+      <p class="text-ink-soft text-center mt-6">Nenhum pagamento encontrado.</p>
+    }
     @for (payment of payments; track payment.abbr) {
       <li class="flex items-center gap-4 py-4">
         <span
@@ -31,7 +36,7 @@
         </span>
         <div class="min-w-0">
           <p class="truncate font-bold">{{ payment.label }}</p>
-          <p class="truncate text-sm text-ink-soft">{{ payment.method }}</p>
+          <p class="truncate text-sm text-ink-soft">{{ payment.paidAt }}</p>
         </div>
         <p class="ml-auto whitespace-nowrap font-bold">{{ payment.amount }}</p>
         <span

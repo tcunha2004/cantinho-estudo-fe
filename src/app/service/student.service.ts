@@ -5,6 +5,7 @@ import { map, Observable } from 'rxjs';
 import { ActiveStudentDto } from '../model/dto/active-student.dto';
 import { StudentPlanDto } from '../model/dto/student-plan.dto';
 import { PlanSummaryDto } from '../model/dto/plan-summary.dto';
+import { PaymentHistoryDto } from '../model/dto/payment-history.dto';
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {
@@ -27,5 +28,9 @@ export class StudentService {
 
   getOtherPlans(): Observable<PlanSummaryDto[]> {
     return this.http.get<PlanSummaryDto[]>(`${this.baseUrl}/students/me/other-plans`);
+  }
+
+  getStudentPaymentHistory(): Observable<PaymentHistoryDto[]> {
+    return this.http.get<PaymentHistoryDto[]>(`${this.baseUrl}/students/me/payments`);
   }
 }

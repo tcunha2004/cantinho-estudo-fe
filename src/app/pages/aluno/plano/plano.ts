@@ -24,7 +24,7 @@ export class Plano {
   protected readonly frequency = computed(() => {
     return this.studentPlan()?.frequency ?? '-';
   });
-  
+
   protected readonly monthlyPrice = computed(() => {
     return (
       Number(this.studentPlan()?.monthlyPrice).toLocaleString('pt-BR', {
@@ -57,7 +57,8 @@ export class Plano {
   protected readonly cancellationRule =
     'avise com 24h de antecedência. Aulas desmarcadas em cima da hora são cobradas normalmente.';
 
-  protected readonly otherPlans = toSignal(this.studentService.getOtherPlans());
+  planos = ['Ouro', 'Prata', 'Bronze', 'Avulsa'];
+  outrosplanos = computed(() => this.planos.filter((plano) => plano !== this.planName()));
 
   protected readonly planNames: Record<PlanType, string> = {
     ouro: 'Ouro',
