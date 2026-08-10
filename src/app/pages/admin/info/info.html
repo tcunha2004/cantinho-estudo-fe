@@ -1,27 +1,23 @@
-<!-- Cabeçalho + seletor de região -->
-<div class="flex flex-wrap items-end justify-between gap-4">
-  <div>
-    <h1 class="font-display text-3xl font-bold">Tabela de planos</h1>
-    <p class="mt-1 text-ink-soft">Valores e taxas · {{ region().name }}</p>
-  </div>
-
+<app-page-header title="Tabela de planos" [subtitle]="'Valores e taxas · ' + region().name">
   <div class="flex items-center gap-3 print:hidden">
     <div
       class="flex flex-wrap gap-1 rounded-full border border-line bg-white p-1.5 shadow-xs"
       role="group"
       aria-label="Região"
     >
-      @for (r of regions; track r.slug) {
+      @for (option of regions; track option.slug) {
         <button
           type="button"
-          (click)="selectRegion(r.slug)"
-          [attr.aria-pressed]="region().slug === r.slug"
+          (click)="selectedSlug.set(option.slug)"
+          [attr.aria-pressed]="region().slug === option.slug"
           class="rounded-full px-4 py-2 text-sm font-bold transition-colors"
           [class]="
-            region().slug === r.slug ? 'bg-accent-soft text-accent' : 'text-ink-soft hover:bg-cream'
+            region().slug === option.slug
+              ? 'bg-accent-soft text-accent'
+              : 'text-ink-soft hover:bg-cream'
           "
         >
-          {{ r.name }}
+          {{ option.name }}
         </button>
       }
     </div>
@@ -37,19 +33,15 @@
       <app-icon name="download" class="size-4.5" />
     </button>
   </div>
-</div>
+</app-page-header>
 
 <div class="mt-6 grid items-start gap-5 lg:grid-cols-4 print:grid-cols-2">
   <!-- Plano Ouro -->
   <app-card class="lg:col-span-2 print:col-span-2">
-    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-subject-amber"></div>
+    <div class="card-top-bar bg-subject-amber"></div>
     <div class="flex flex-wrap items-center gap-3">
       <h3 class="font-display text-2xl font-bold text-subject-amber">Plano Ouro</h3>
-      <span
-        class="rounded-full bg-subject-amber/15 px-3.5 py-1 text-sm font-bold text-subject-amber"
-      >
-        Aulas individuais
-      </span>
+      <span class="badge bg-subject-amber/15 text-subject-amber">Aulas individuais</span>
     </div>
 
     <table class="mt-5 w-full text-left">
@@ -76,7 +68,7 @@
 
   <!-- Plano Prata -->
   <app-card>
-    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-slate-400"></div>
+    <div class="card-top-bar bg-slate-400"></div>
     <h3 class="font-display text-2xl font-bold text-slate-500">Plano Prata</h3>
     <p class="mt-4">10 aulas mensais</p>
     <p class="mt-2 font-display text-4xl font-extrabold">{{ region().prata.total }}</p>
@@ -85,7 +77,7 @@
 
   <!-- Plano Bronze -->
   <app-card>
-    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-amber-700"></div>
+    <div class="card-top-bar bg-amber-700"></div>
     <h3 class="font-display text-2xl font-bold text-amber-700">Plano Bronze</h3>
     <p class="mt-4">Pacote 10 aulas</p>
     <p class="mt-2 font-display text-4xl font-extrabold">{{ region().bronze.total }}</p>
@@ -94,7 +86,7 @@
 
   <!-- Aula Avulsa -->
   <app-card class="lg:col-span-2 print:col-span-2">
-    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-accent"></div>
+    <div class="card-top-bar bg-accent"></div>
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
         <h3 class="font-display text-2xl font-bold text-accent">Aula Avulsa</h3>
@@ -106,7 +98,7 @@
 
   <!-- Taxa de matrícula -->
   <app-card class="lg:col-span-2 print:col-span-2">
-    <div class="-mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl bg-line"></div>
+    <div class="card-top-bar bg-line"></div>
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
         <h3 class="font-display text-2xl font-bold">Taxa de matrícula</h3>

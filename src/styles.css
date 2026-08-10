@@ -34,6 +34,49 @@ body {
 }
 
 /*
+ * Peças de UI que aparecem em várias telas. Ficam aqui — e não repetidas nos
+ * templates — para que um ajuste de visual valha para o app inteiro.
+ */
+@layer components {
+  /* Campo de formulário (input/select). */
+  .field {
+    @apply w-full rounded-xl border border-line bg-white px-4 py-2.5 text-sm transition-colors;
+    @apply placeholder:text-ink-soft/60 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20;
+  }
+
+  /* Mensagem de validação abaixo de um campo. */
+  .field-error {
+    @apply mt-1.5 text-xs font-bold text-red-600;
+  }
+
+  /* Botão de ação principal. A cor de fundo vem do destaque configurável. */
+  .btn-primary {
+    @apply rounded-2xl bg-accent px-8 py-3.5 font-display font-bold text-white shadow-sm transition-colors;
+    @apply hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  /* Pílula de status. A cor vem de um mapa em `shared/domain-display.ts`. */
+  .badge {
+    @apply inline-block whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-bold;
+  }
+
+  /* Item de lista sobre fundo creme (aulas, planos, parcelas). */
+  .list-tile {
+    @apply flex items-center gap-4 rounded-2xl bg-cream px-5 py-4;
+  }
+
+  /* Seção de destaque fora de um card — a cor de fundo vem de quem usa. */
+  .panel {
+    @apply rounded-3xl px-7 py-6;
+  }
+
+  /* Faixa colorida no topo de um `app-card`, sangrando até as bordas. */
+  .card-top-bar {
+    @apply -mx-6 -mt-6 mb-6 h-1.5 rounded-t-3xl;
+  }
+}
+
+/*
  * Impressão / "Salvar como PDF": a página imprime só o conteúdo (o menu usa
  * print:hidden) sobre fundo branco, preservando as cores dos cards.
  */

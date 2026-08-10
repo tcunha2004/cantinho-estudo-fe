@@ -1,82 +1,45 @@
-import { ChangeDetectionStrategy, Component, computed, inject, Signal } from '@angular/core';
-import { Card } from '../../../shared/card/card';
-import { Icon } from '../../../shared/icon/icon';
-import { StudentService } from '../../../service/student.service';
+import { CurrencyPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { PlanType } from '../../../model/entity/plan.model';
-import { ContractStatus } from '../../../model/entity/student-contract.model';
+import { PLAN_TYPES } from '../../../model/entity/plan.model';
+import { StudentService } from '../../../service/student.service';
+import { Card } from '../../../shared/card/card';
+import { CONTRACT_STATUS_DISPLAY, PLAN_DISPLAY } from '../../../shared/domain-display';
+import { Icon } from '../../../shared/icon/icon';
+import { PageHeader } from '../../../shared/page-header/page-header';
+
+/** Vale para qualquer plano; a contagem de aulas entra só quando o plano tem pacote. */
+const BASE_BENEFITS = ['Professor fixo por matéria', 'Agenda online com remarcação'];
 
 @Component({
   selector: 'app-plano',
-  imports: [Card, Icon],
+  imports: [Card, Icon, PageHeader, CurrencyPipe],
   templateUrl: './plano.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Plano {
   private readonly studentService = inject(StudentService);
 
-  protected readonly studentPlan = toSignal(this.studentService.getStudentPlan());
+  protected readonly planDisplay = PLAN_DISPLAY;
+  protected readonly contractStatus = CONTRACT_STATUS_DISPLAY;
 
-  protected readonly planName = computed(() => {
-    return this.planNames[this.studentPlan()!.planType] ?? '-';
+  protected readonly plan = toSignal(this.studentService.getMyPlan());
+
+  /** Os demais planos que o aluno pode contratar: a lista fixa menos o atual. */
+  protected readonly otherPlans = computed(() => {
+    const current = this.plan()?.planType;
+    return current ? PLAN_TYPES.filter((type) => type !== current) : [];
   });
 
-  protected readonly frequency = computed(() => {
-    return this.studentPlan()?.frequency ?? '-';
-  });
+  protected readonly benefits = computed(() => {
+    const classesCount = this.plan()?.classesCount;
+    const lessons = classesCount
+      ? `${classesCount} aulas individuais por mês`
+      : 'Aulas individuais';
 
-  protected readonly monthlyPrice = computed(() => {
-    return (
-      Number(this.studentPlan()?.monthlyPrice).toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-      }) ?? '-'
-    );
-  });
-
-  protected readonly contractStatus = computed(() => {
-    return this.planStatus[this.studentPlan()!.contractStatus] ?? '-';
-  });
-
-  protected readonly lessonsTotal = computed(() => {
-    return this.studentPlan()?.classesCount ?? '-';
-  });
-
-  protected readonly month = new Date().toLocaleString('pt-BR', { month: 'long' });
-
-  protected readonly includes: Signal<string[]> = computed(() => {
-    return this.planName() !== 'Avulso'
-      ? [
-          `${this.lessonsTotal()} aulas individuais por mês`,
-          'Professor fixo por matéria',
-          'Agenda online com remarcação',
-        ]
-      : ['Aulas individuais', 'Professor fixo por matéria', 'Agenda online com remarcação'];
+    return [lessons, ...BASE_BENEFITS];
   });
 
   protected readonly cancellationRule =
     'avise com 24h de antecedência. Aulas desmarcadas em cima da hora são cobradas normalmente.';
-
-  planos = ['Ouro', 'Prata', 'Bronze', 'Avulsa'];
-  outrosplanos = computed(() => this.planos.filter((plano) => plano !== this.planName()));
-
-  protected readonly planNames: Record<PlanType, string> = {
-    ouro: 'Ouro',
-    prata: 'Prata',
-    bronze: 'Bronze',
-    avulsa: 'Avulso',
-  };
-
-  protected readonly planStatus: Record<ContractStatus, string> = {
-    active: 'Ativo',
-    cancelled: 'Cancelado',
-    expired: 'Expirado',
-  };
-
-  protected readonly planColors: Record<PlanType, string> = {
-    ouro: 'bg-amber-400',
-    prata: 'bg-slate-400',
-    bronze: 'bg-amber-700',
-    avulsa: 'bg-accent',
-  };
 }

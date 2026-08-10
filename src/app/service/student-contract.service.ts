@@ -1,17 +1,13 @@
 import { inject, Injectable } from '@angular/core';
-import { API_BASE_URL } from './api.config';
-import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { PlanType } from '../model/entity/plan.model';
+import { ApiClient } from './api-client';
 
 @Injectable({ providedIn: 'root' })
 export class StudentContractService {
-  private readonly http = inject(HttpClient);
-  private readonly baseUrl = API_BASE_URL;
+  private readonly api = inject(ApiClient);
 
-  getCountOfActiveStudentsByPlanType(): Observable<Record<PlanType, number>> {
-    return this.http.get<Record<PlanType, number>>(
-      `${this.baseUrl}/student-contracts/active/count-by-plan-type`,
-    );
+  getActiveCountByPlanType(): Observable<Record<PlanType, number>> {
+    return this.api.get<Record<PlanType, number>>('/student-contracts/active/count-by-plan-type');
   }
 }
