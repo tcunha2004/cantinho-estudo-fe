@@ -23,6 +23,10 @@ export class ApiClient {
     return this.http.post<T>(API_BASE_URL + path, body);
   }
 
+  patch<T>(path: string, body: unknown): Observable<T> {
+    return this.http.patch<T>(API_BASE_URL + path, body);
+  }
+
   /** GET cuja resposta é um objeto de um campo só, ex.: `{ count: 12 }` devolve `12`. */
   getField<T>(path: string, field: string, params?: QueryParams): Observable<T> {
     return this.get<Record<string, T>>(path, params).pipe(map((response) => response[field]));
