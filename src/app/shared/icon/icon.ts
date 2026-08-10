@@ -19,7 +19,11 @@ export type IconName =
   | 'graduation-cap'
   | 'shield'
   | 'eye'
-  | 'eye-off';
+  | 'eye-off'
+  | 'chevron-left'
+  | 'chevron-right'
+  | 'pencil'
+  | 'x';
 
 @Component({
   selector: 'app-icon',
@@ -136,6 +140,22 @@ export type IconName =
           <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
           <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
           <line x1="2" x2="22" y1="2" y2="22" />
+        }
+        @case ('chevron-left') {
+          <path d="m15 18-6-6 6-6" />
+        }
+        @case ('chevron-right') {
+          <path d="m9 18 6-6-6-6" />
+        }
+        @case ('pencil') {
+          <path
+            d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
+          />
+          <path d="m15 5 4 4" />
+        }
+        @case ('x') {
+          <path d="M18 6 6 18" />
+          <path d="m6 6 12 12" />
         }
       }
     </svg>
