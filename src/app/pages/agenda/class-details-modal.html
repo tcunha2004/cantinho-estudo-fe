@@ -1,0 +1,136 @@
+<app-modal title="Detalhes da aula" (closed)="closed.emit()">
+  @if (item.value(); as aula) {
+    <div class="mt-4 flex flex-wrap items-center gap-3">
+      <span class="badge" [class]="classStatus[aula.status].badge">
+        {{ classStatus[aula.status].label }}
+      </span>
+      <span class="font-display text-lg font-bold">
+        {{ aula.scheduledAt | date: "EEEE, d 'de' MMMM" }}
+      </span>
+    </div>
+
+    <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+      <div class="flex items-baseline justify-between gap-4 py-3">
+        <dt class="text-ink-soft">Horário</dt>
+        <dd class="text-right font-bold">
+          {{ aula.scheduledAt | date: 'HH:mm' }} – {{ aula.endsAt | date: 'HH:mm' }}
+          <span class="font-normal text-ink-soft">({{ aula.durationMinutes }} min)</span>
+        </dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-4 py-3">
+        <dt class="text-ink-soft">Aluno</dt>
+        <dd class="text-right font-bold">{{ aula.student.name }}</dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-4 py-3">
+        <dt class="text-ink-soft">Professor</dt>
+        <dd class="text-right font-bold">{{ aula.teacher.name }}</dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-4 py-3">
+        <dt class="text-ink-soft">Matéria</dt>
+        <dd class="text-right font-bold">{{ aula.subject.name }}</dd>
+      </div>
+      <div class="flex items-baseline justify-between gap-4 py-3">
+        <dt class="text-ink-soft">Local</dt>
+        <dd class="text-right font-bold">{{ locationLabel[aula.locationType] }}</dd>
+      </div>
+      @if (aula.commissionAmount) {
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Comissão do professor</dt>
+          <dd class="text-right font-bold">{{ aula.commissionAmount | currency }}</dd>
+        </div>
+      }
+      @if (aula.amountCharged) {
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Valor cobrado</dt>
+          <dd class="text-right font-bold">{{ aula.amountCharged | currency }}</dd>
+        </div>
+      }
+      @if (aula.notes) {
+        <div class="py-3">
+          <dt class="text-ink-soft">Observações</dt>
+          <dd class="mt-1 whitespace-pre-line">{{ aula.notes }}</dd>
+        </div>
+      }
+    </dl>
+
+    @if (errorMessage(); as message) {
+      <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+        {{ message }}
+      </p>
+    }
+
+    @if (pending(); as action) {
+      <!-- Confirmação: toda ação daqui mexe em receita ou comissão -->
+      <div class="mt-5 rounded-2xl bg-cream px-5 py-4">
+        <p class="text-sm font-bold">{{ actionCopy[action].question }}</p>
+        <p class="mt-1 text-sm text-ink-soft">{{ actionCopy[action].detail }}</p>
+        <div class="mt-4 flex justify-end gap-3">
+          <button type="button" (click)="pending.set(null)" class="btn-secondary px-5 py-2.5">
+            Voltar
+          </button>
+          <button
+            type="button"
+            (click)="run(action)"
+            [disabled]="running()"
+            class="btn-primary px-5 py-2.5"
+          >
+            {{ running() ? actionCopy[action].pending : actionCopy[action].confirm }}
+          </button>
+        </div>
+      </div>
+    } @else if (canEdit()) {
+      <div class="mt-6 flex flex-wrap justify-end gap-3">
+        @if (isScheduled()) {
+          <button type="button" (click)="pending.set('cancel')" class="btn-secondary px-5 py-2.5">
+            Cancelar aula
+          </button>
+          <button
+            type="button"
+            (click)="edit.emit(aula)"
+            class="btn-secondary flex items-center gap-2 px-5 py-2.5"
+          >
+            <app-icon name="pencil" class="size-4" />
+            Editar
+          </button>
+          @if (canFinalize()) {
+            <button
+              type="button"
+              (click)="pending.set('no_show')"
+              class="btn-secondary px-5 py-2.5"
+            >
+              Registrar falta
+            </button>
+            <button
+              type="button"
+              (click)="pending.set('complete')"
+              class="btn-primary flex items-center gap-2 px-5 py-2.5"
+            >
+              <app-icon name="check" class="size-4" />
+              Marcar realizada
+            </button>
+          }
+        } @else if (isAdmin()) {
+          <button type="button" (click)="pending.set('reopen')" class="btn-secondary px-5 py-2.5">
+            Reabrir aula
+          </button>
+        } @else {
+          <button type="button" (click)="close()" class="btn-secondary px-5 py-2.5">Fechar</button>
+        }
+      </div>
+
+      @if (isScheduled() && !canFinalize()) {
+        <p class="mt-3 text-right text-xs text-ink-soft">
+          A aula só pode ser encerrada depois do horário de início.
+        </p>
+      }
+    } @else {
+      <div class="mt-6 flex justify-end">
+        <button type="button" (click)="close()" class="btn-secondary px-5 py-2.5">Fechar</button>
+      </div>
+    }
+  } @else if (item.error()) {
+    <p class="mt-6 text-center text-ink-soft">Não foi possível carregar a aula.</p>
+  } @else {
+    <p class="mt-6 text-center text-ink-soft">Carregando…</p>
+  }
+</app-modal>

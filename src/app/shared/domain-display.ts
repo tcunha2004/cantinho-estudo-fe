@@ -77,8 +77,9 @@ export const CLASS_STATUS_DISPLAY: Record<
     bar: 'bg-subject-amber',
     badge: 'bg-subject-amber/15 text-subject-amber',
   },
+  /* Aluno faltou sem avisar: a aula é cobrada e o professor recebe a comissão. */
   no_show: {
-    label: 'Cancelada (cobrada)',
+    label: 'Falta (cobrada)',
     bar: 'bg-accent',
     badge: 'bg-accent-soft text-accent',
   },

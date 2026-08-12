@@ -55,6 +55,12 @@ body {
     @apply hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60;
   }
 
+  /* Botão de ação secundária — "Cancelar" e afins, ao lado de um `.btn-primary`. */
+  .btn-secondary {
+    @apply rounded-2xl border border-line bg-white px-6 py-3 font-display font-bold text-ink-soft shadow-xs transition-colors;
+    @apply hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
   /* Pílula de status. A cor vem de um mapa em `shared/domain-display.ts`. */
   .badge {
     @apply inline-block whitespace-nowrap rounded-full px-3.5 py-1 text-sm font-bold;

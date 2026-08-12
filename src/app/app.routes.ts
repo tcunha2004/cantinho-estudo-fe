@@ -11,8 +11,6 @@ interface PageConfig {
   loadComponent: Route['loadComponent'];
 }
 
-const placeholder = () => import('./pages/placeholder/placeholder').then((m) => m.Placeholder);
-
 /** Monta uma página interna: guarda de papel, título da aba e `data` padronizados. */
 function page({ path, title, roles, loadComponent }: PageConfig): Route {
   return {
@@ -68,7 +66,7 @@ export const routes: Routes = [
         path: 'agenda',
         title: 'Agenda',
         roles: ['admin', 'professor', 'student'],
-        loadComponent: placeholder,
+        loadComponent: () => import('./pages/agenda/agenda').then((m) => m.Agenda),
       }),
       // professor
       page({

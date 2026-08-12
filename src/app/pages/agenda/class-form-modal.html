@@ -1,0 +1,104 @@
+<app-modal [title]="initial() ? 'Editar aula' : 'Nova aula'" (closed)="closed.emit()">
+  <form class="mt-5" [formGroup]="form" (ngSubmit)="handleSubmit()">
+    @if (showTeacher()) {
+      <div>
+        <label for="teacherId" class="mb-1.5 block text-sm font-bold">Professor</label>
+        <select id="teacherId" formControlName="teacherId" class="field">
+          <option value="">Selecione…</option>
+          @for (teacher of options().teachers; track teacher.id) {
+            <option [value]="teacher.id">{{ teacher.name }}</option>
+          }
+        </select>
+        @if (form.controls.teacherId.touched && form.controls.teacherId.invalid) {
+          <p class="field-error">Escolha o professor.</p>
+        }
+      </div>
+    }
+
+    <div [class]="showTeacher() ? 'mt-4' : ''">
+      <label for="studentId" class="mb-1.5 block text-sm font-bold">Aluno</label>
+      <select id="studentId" formControlName="studentId" class="field">
+        <option value="">Selecione…</option>
+        @for (student of options().students; track student.id) {
+          <option [value]="student.id">{{ student.name }}</option>
+        }
+      </select>
+      @if (form.controls.studentId.touched && form.controls.studentId.invalid) {
+        <p class="field-error">Escolha o aluno.</p>
+      }
+    </div>
+
+    <div class="mt-4">
+      <label for="subjectId" class="mb-1.5 block text-sm font-bold">Matéria</label>
+      <select id="subjectId" formControlName="subjectId" class="field">
+        <option value="">Selecione…</option>
+        @for (subject of subjects(); track subject.id) {
+          <option [value]="subject.id">{{ subject.name }}</option>
+        }
+      </select>
+      @if (showTeacher() && subjects().length === 0) {
+        <p class="mt-1.5 text-xs text-ink-soft">Escolha um professor para ver as matérias.</p>
+      }
+      @if (form.controls.subjectId.touched && form.controls.subjectId.invalid) {
+        <p class="field-error">Escolha a matéria.</p>
+      }
+    </div>
+
+    <div class="mt-4 grid grid-cols-2 gap-4">
+      <div>
+        <label for="date" class="mb-1.5 block text-sm font-bold">Data</label>
+        <input id="date" type="date" formControlName="date" class="field" />
+        @if (form.controls.date.touched && form.controls.date.invalid) {
+          <p class="field-error">Informe a data.</p>
+        }
+      </div>
+      <div>
+        <label for="time" class="mb-1.5 block text-sm font-bold">Horário</label>
+        <input id="time" type="time" formControlName="time" class="field" />
+        @if (form.controls.time.touched && form.controls.time.invalid) {
+          <p class="field-error">Informe o horário.</p>
+        }
+      </div>
+    </div>
+
+    <div class="mt-4 grid grid-cols-2 gap-4">
+      <div>
+        <label for="durationMinutes" class="mb-1.5 block text-sm font-bold">Duração</label>
+        <select id="durationMinutes" formControlName="durationMinutes" class="field">
+          <!-- ngValue preserva o número; [value] mandaria "60" como texto -->
+          @for (duration of durations; track duration) {
+            <option [ngValue]="duration">{{ duration }} min</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="locationType" class="mb-1.5 block text-sm font-bold">Local</label>
+        <select id="locationType" formControlName="locationType" class="field">
+          @for (location of locations; track location.value) {
+            <option [value]="location.value">{{ location.label }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <label for="notes" class="mb-1.5 block text-sm font-bold">
+        Observações <span class="font-normal text-ink-soft">(opcional)</span>
+      </label>
+      <textarea id="notes" formControlName="notes" rows="2" class="field"></textarea>
+    </div>
+
+    @if (errorMessage(); as message) {
+      <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+        {{ message }}
+      </p>
+    }
+
+    <div class="mt-6 flex justify-end gap-3">
+      <button type="button" (click)="close()" class="btn-secondary">Cancelar</button>
+      <button type="submit" [disabled]="saving()" class="btn-primary px-6 py-3">
+        {{ saving() ? 'Salvando…' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</app-modal>
