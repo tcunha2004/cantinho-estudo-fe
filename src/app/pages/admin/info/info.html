@@ -1,18 +1,21 @@
-<app-page-header title="Tabela de planos" [subtitle]="'Valores e taxas · ' + region().name">
+<app-page-header
+  title="Tabela de planos"
+  [subtitle]="'Valores e taxas' + (region() ? ' · ' + region()!.name : '')"
+>
   <div class="flex items-center gap-3 print:hidden">
     <div
       class="flex flex-wrap gap-1 rounded-full border border-line bg-white p-1.5 shadow-xs"
       role="group"
       aria-label="Região"
     >
-      @for (option of regions; track option.slug) {
+      @for (option of regions(); track option.slug) {
         <button
           type="button"
-          (click)="selectedSlug.set(option.slug)"
-          [attr.aria-pressed]="region().slug === option.slug"
+          (click)="selectRegion(option.slug)"
+          [attr.aria-pressed]="region()?.slug === option.slug"
           class="rounded-full px-4 py-2 text-sm font-bold transition-colors"
           [class]="
-            region().slug === option.slug
+            region()?.slug === option.slug
               ? 'bg-accent-soft text-accent'
               : 'text-ink-soft hover:bg-cream'
           "
@@ -27,7 +30,7 @@
       type="button"
       (click)="downloadPdf()"
       title="Baixar PDF"
-      [attr.aria-label]="'Baixar PDF · ' + region().name"
+      [attr.aria-label]="'Baixar PDF' + (region() ? ' · ' + region()!.name : '')"
       class="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
     >
       <app-icon name="download" class="size-4.5" />
@@ -35,76 +38,87 @@
   </div>
 </app-page-header>
 
-<div class="mt-6 grid items-start gap-5 lg:grid-cols-4 print:grid-cols-2">
-  <!-- Plano Ouro -->
-  <app-card class="lg:col-span-2 print:col-span-2">
-    <div class="card-top-bar bg-subject-amber"></div>
-    <div class="flex flex-wrap items-center gap-3">
-      <h3 class="font-display text-2xl font-bold text-subject-amber">Plano Ouro</h3>
-      <span class="badge bg-subject-amber/15 text-subject-amber">Aulas individuais</span>
-    </div>
+@if (region(); as region) {
+  <div class="mt-6 grid items-start gap-5 lg:grid-cols-4 print:grid-cols-2">
+    <!-- Plano Ouro -->
+    <app-card class="lg:col-span-2 print:col-span-2">
+      <div class="card-top-bar bg-subject-amber"></div>
+      <div class="flex flex-wrap items-center gap-3">
+        <h3 class="font-display text-2xl font-bold text-subject-amber">Plano Ouro</h3>
+        <span class="badge bg-subject-amber/15 text-subject-amber">Aulas individuais</span>
+      </div>
 
-    <table class="mt-5 w-full text-left">
-      <thead>
-        <tr class="text-ink-soft">
-          <th scope="col" class="pb-2 font-bold"><span class="sr-only">Frequência</span></th>
-          <th scope="col" class="pb-2 font-bold">Mensal</th>
-          <th scope="col" class="pb-2 font-bold">Hora/aula</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (row of region().ouro; track row.frequency) {
-          <tr>
-            <td class="py-1.5 font-bold">{{ row.frequency }}</td>
-            <td class="py-1.5 font-bold text-accent">{{ row.monthly }}</td>
-            <td class="py-1.5">{{ row.perLesson }}</td>
+      <table class="mt-5 w-full text-left">
+        <thead>
+          <tr class="text-ink-soft">
+            <th scope="col" class="pb-2 font-bold"><span class="sr-only">Frequência</span></th>
+            <th scope="col" class="pb-2 font-bold">Mensal</th>
+            <th scope="col" class="pb-2 font-bold">Hora/aula</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (row of ouroPlans(); track row.frequency) {
+            <tr>
+              <td class="py-1.5 font-bold">{{ row.frequency }}x na semana</td>
+              <td class="py-1.5 font-bold text-accent">{{ row.monthlyPrice | currency }}</td>
+              <td class="py-1.5">{{ row.hourPrice | currency }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
 
-    <p class="mt-5 text-sm text-ink-soft">8, 12 ou 20 aulas por mês, conforme a frequência</p>
-  </app-card>
+      <p class="mt-5 text-sm text-ink-soft">8, 12 ou 20 aulas por mês, conforme a frequência</p>
+    </app-card>
 
-  <!-- Plano Prata -->
-  <app-card>
-    <div class="card-top-bar bg-slate-400"></div>
-    <h3 class="font-display text-2xl font-bold text-slate-500">Plano Prata</h3>
-    <p class="mt-4">10 aulas mensais</p>
-    <p class="mt-2 font-display text-4xl font-extrabold">{{ region().prata.total }}</p>
-    <p class="mt-4 text-ink-soft">{{ region().prata.perLesson }} / hora-aula</p>
-  </app-card>
+    <!-- Plano Prata -->
+    <app-card>
+      <div class="card-top-bar bg-slate-400"></div>
+      <h3 class="font-display text-2xl font-bold text-slate-500">Plano Prata</h3>
+      <p class="mt-4">{{ prataPlan()?.classesCount }} aulas mensais</p>
+      <p class="mt-2 font-display text-4xl font-extrabold">
+        {{ prataPlan()?.monthlyPrice | currency }}
+      </p>
+      <p class="mt-4 text-ink-soft">{{ prataPlan()?.hourPrice | currency }} / hora-aula</p>
+    </app-card>
 
-  <!-- Plano Bronze -->
-  <app-card>
-    <div class="card-top-bar bg-amber-700"></div>
-    <h3 class="font-display text-2xl font-bold text-amber-700">Plano Bronze</h3>
-    <p class="mt-4">Pacote 10 aulas</p>
-    <p class="mt-2 font-display text-4xl font-extrabold">{{ region().bronze.total }}</p>
-    <p class="mt-4 text-ink-soft">{{ region().bronze.perLesson }} / hora-aula · validade 2 meses</p>
-  </app-card>
+    <!-- Plano Bronze -->
+    <app-card>
+      <div class="card-top-bar bg-amber-700"></div>
+      <h3 class="font-display text-2xl font-bold text-amber-700">Plano Bronze</h3>
+      <p class="mt-4">Pacote {{ bronzePlan()?.classesCount }} aulas</p>
+      <p class="mt-2 font-display text-4xl font-extrabold">
+        {{ bronzePlan()?.monthlyPrice | currency }}
+      </p>
+      <p class="mt-4 text-ink-soft">
+        {{ bronzePlan()?.hourPrice | currency }} / hora-aula · validade
+        {{ bronzePlan()?.validityMonths }} meses
+      </p>
+    </app-card>
 
-  <!-- Aula Avulsa -->
-  <app-card class="lg:col-span-2 print:col-span-2">
-    <div class="card-top-bar bg-accent"></div>
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h3 class="font-display text-2xl font-bold text-accent">Aula Avulsa</h3>
-        <p class="mt-4">Aula individual, sem plano</p>
+    <!-- Aula Avulsa -->
+    <app-card class="lg:col-span-2 print:col-span-2">
+      <div class="card-top-bar bg-accent"></div>
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h3 class="font-display text-2xl font-bold text-accent">Aula Avulsa</h3>
+          <p class="mt-4">Aula individual, sem plano</p>
+        </div>
+        <p class="font-display text-4xl font-extrabold">{{ avulsaPlan()?.hourPrice | currency }}</p>
       </div>
-      <p class="font-display text-4xl font-extrabold">{{ region().avulsa }}</p>
-    </div>
-  </app-card>
+    </app-card>
 
-  <!-- Taxa de matrícula -->
-  <app-card class="lg:col-span-2 print:col-span-2">
-    <div class="card-top-bar bg-line"></div>
-    <div class="flex flex-wrap items-end justify-between gap-4">
-      <div>
-        <h3 class="font-display text-2xl font-bold">Taxa de matrícula</h3>
-        <p class="mt-4">Planos Ouro e Prata</p>
+    <!-- Taxa de matrícula -->
+    <app-card class="lg:col-span-2 print:col-span-2">
+      <div class="card-top-bar bg-line"></div>
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h3 class="font-display text-2xl font-bold">Taxa de matrícula</h3>
+          <p class="mt-4">Planos Ouro e Prata</p>
+        </div>
+        <p class="font-display text-4xl font-extrabold">{{ region.enrollmentFee | currency }}</p>
       </div>
-      <p class="font-display text-4xl font-extrabold">{{ region().enrollmentFee }}</p>
-    </div>
-  </app-card>
-</div>
+    </app-card>
+  </div>
+} @else {
+  <p class="mt-6 text-ink-soft">Carregando tabela de preços...</p>
+}
