@@ -5,7 +5,7 @@ import { Plan } from './plan.model';
 import { Class } from './class.model';
 import { Payment } from './payment.model';
 
-export type ContractStatus = 'active' | 'cancelled' | 'expired';
+export type ContractStatus = 'active' | 'cancelled';
 
 export interface StudentContract {
   id: string;

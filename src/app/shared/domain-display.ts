@@ -55,7 +55,6 @@ export const PLAN_DISPLAY: Record<PlanType, PlanDisplay> = {
 export const CONTRACT_STATUS_DISPLAY: Record<ContractStatus, { label: string; badge: string }> = {
   active: { label: 'Ativo', badge: 'bg-subject-green/15 text-subject-green' },
   cancelled: { label: 'Cancelado', badge: 'bg-subject-amber/15 text-subject-amber' },
-  expired: { label: 'Vencido', badge: 'bg-accent-soft text-accent' },
 };
 
 export const CLASS_STATUS_DISPLAY: Record<
