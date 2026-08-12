@@ -18,6 +18,7 @@ import { ClassService } from '../../service/class.service';
 import { CLASS_STATUS_DISPLAY } from '../../shared/domain-display';
 import { Icon } from '../../shared/icon/icon';
 import { Modal } from '../../shared/modal/modal';
+import { nowNaive } from '../../shared/naive-date';
 
 const LOCATION_LABEL: Record<LocationType, string> = {
   home: 'Casa do aluno',
@@ -115,7 +116,7 @@ export class ClassDetailsModal {
   /* Encerrar uma aula que ainda não começou não faz sentido — e o backend recusa. */
   protected readonly canFinalize = computed(() => {
     const item = this.item.value();
-    return !!item && item.status === 'scheduled' && new Date(item.scheduledAt) <= new Date();
+    return !!item && item.status === 'scheduled' && item.scheduledAt <= nowNaive();
   });
 
   protected close(): void {

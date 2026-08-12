@@ -34,4 +34,21 @@ describe('appConfig · locale pt-BR', () => {
     expect(date.transform('2026-08-06T14:30:00', 'dd/MM')).toBe('06/08');
     expect(date.transform('2026-08-06T14:30:00', 'MMMM')).toBe('agosto');
   });
+
+  /*
+   * O backend devolve hora de parede ingênua de São Paulo, sem sufixo de
+   * fuso — é assim que o DatePipe deve receber toda data da API. Uma string
+   * com `Z` seria reinterpretada como UTC e o pipe a reformataria no fuso
+   * pedido, deslocando um horário que já estava correto. Por isso o `Z`
+   * nunca pode voltar ao payload (ver naiveTimestampTransformer no backend).
+   * O fuso é passado explicitamente ao `transform` (não em `DATE_PIPE_DEFAULT_OPTIONS`,
+   * que deslocaria toda tela) só para tornar o teste determinístico, independente
+   * do fuso da máquina que roda os testes.
+   */
+  it('string com Z desloca o horário; string ingênua não', () => {
+    const date = TestBed.inject(DatePipe);
+
+    expect(date.transform('2026-08-13T09:00:00', 'HH:mm', '-0300')).toBe('09:00');
+    expect(date.transform('2026-08-13T09:00:00.000Z', 'HH:mm', '-0300')).toBe('06:00');
+  });
 });

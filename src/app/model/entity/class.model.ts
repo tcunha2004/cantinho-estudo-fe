@@ -1,5 +1,6 @@
 /* Espelha o JSON serializado de ClassEntity — não a entity do TypeORM.
- * Datas chegam como string ISO e decimais como string (comportamento do driver). */
+ * Datas chegam como string ingênua de São Paulo, sem sufixo de fuso
+ * ('2026-08-10T14:30:00'), e decimais como string (comportamento do driver). */
 
 import { StudentContract } from './student-contract.model';
 import { Teacher } from './teacher.model';
