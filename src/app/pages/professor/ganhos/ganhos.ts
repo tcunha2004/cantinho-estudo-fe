@@ -26,12 +26,6 @@ export class Ganhos {
     initialValue: [],
   });
 
-  /** Média por aula no mês — `null` enquanto não houver aula concluída. */
-  protected readonly amountPerLesson = computed(() => {
-    const lessons = this.lessonsInMonth();
-    return lessons ? this.amountToReceive() / lessons : null;
-  });
-
   /** Altura de referência do gráfico: nunca zero, para não dividir por zero. */
   protected readonly busiestWeek = computed(() =>
     Math.max(1, ...this.weeklyCounts().map((week) => week.count ?? 0)),

@@ -9,6 +9,6 @@ export interface ActiveStudentDto {
   /* Dados referentes ao contrato mais recente do aluno */
   plan: PlanType | null;
   frequency: Frequency | null;
-  monthlyPrice: string | null;
+  region: string | null;
   contractStatus: ContractStatus | null;
 }

@@ -1,17 +1,9 @@
 <app-page-header title="Meus ganhos" subtitle="Aulas dadas e pagamentos" />
 
-<div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-3">
+<div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
   <app-card>
     <p class="text-ink-soft">Aulas no mês</p>
     <p class="mt-3 font-display text-4xl font-extrabold">{{ lessonsInMonth() }}</p>
-  </app-card>
-
-  <app-card>
-    <p class="text-ink-soft">Valor por aula</p>
-    @let perLesson = amountPerLesson();
-    <p class="mt-3 font-display text-4xl font-extrabold">
-      {{ perLesson === null ? '—' : (perLesson | currency) }}
-    </p>
   </app-card>
 
   <app-card class="bg-accent-soft">
