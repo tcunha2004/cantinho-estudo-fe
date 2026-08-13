@@ -1,4 +1,3 @@
-import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { StudentService } from '../../../service/student.service';
@@ -10,7 +9,7 @@ import { PageHeader } from '../../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-alunos',
-  imports: [Card, Icon, PageHeader, CurrencyPipe],
+  imports: [Card, Icon, PageHeader],
   templateUrl: './alunos.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

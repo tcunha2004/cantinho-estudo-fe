@@ -8,7 +8,7 @@ export interface Region {
   name: string;
   slug: string;
   enrollmentFee: string;
-  /* Comissão paga ao professor por aula concluída nesta região */
+  /* Comissão paga ao professor por hora de aula nesta região */
   classCommission: string;
   active: boolean;
   /* Coleções inversas — presentes só quando o endpoint as carrega */

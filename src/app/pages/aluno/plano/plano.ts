@@ -40,6 +40,27 @@ export class Plano {
     return [lessons, ...BASE_BENEFITS];
   });
 
+  /**
+   * Hora/aula por local: sempre a do Cantinho do Estudo, e a da região do
+   * aluno quando ela for diferente — não há mensalidade fixa, o valor de cada
+   * aula depende de onde ela acontece.
+   */
+  protected readonly pricingRows = computed(() => {
+    const plan = this.plan();
+
+    if (!plan) {
+      return [];
+    }
+
+    const cantinho = { label: 'No Cantinho do Estudo', hourPrice: plan.cantinhoHourPrice };
+
+    if (plan.hourPrice === plan.cantinhoHourPrice) {
+      return [cantinho];
+    }
+
+    return [cantinho, { label: `Na sua região (${plan.region})`, hourPrice: plan.hourPrice }];
+  });
+
   protected readonly cancellationRule =
     'avise com 24h de antecedência. Aulas desmarcadas em cima da hora são cobradas normalmente.';
 }

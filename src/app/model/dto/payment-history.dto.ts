@@ -3,7 +3,7 @@ import { PlanType } from '../entity/plan.model';
 
 export interface PaymentHistoryDto {
   id: string;
-  /* Valor da parcela */
+  /* Valor apurado a partir das aulas faturáveis do mês */
   amount: string;
   /* Vencimento da parcela */
   dueDate: string;
@@ -12,4 +12,6 @@ export interface PaymentHistoryDto {
   status: PaymentStatus;
   /* Tipo do plano do contrato ao qual a parcela pertence */
   planType: PlanType;
+  /* Quantas aulas faturáveis compõem o valor da parcela */
+  classesCount: number;
 }
