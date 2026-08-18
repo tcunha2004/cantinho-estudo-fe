@@ -1,0 +1,154 @@
+<app-modal
+  [title]="editing() ? 'Editar professor' : 'Detalhes do professor'"
+  (closed)="closed.emit()"
+>
+  @if (item.value(); as teacher) {
+    @if (!editing()) {
+      <div class="mt-4 flex items-center gap-4">
+        <span
+          class="flex size-12 shrink-0 items-center justify-center rounded-full bg-cream text-sm font-extrabold text-ink-soft"
+        >
+          {{ initials(teacher.name) }}
+        </span>
+        <div class="min-w-0">
+          <h3 class="truncate text-xl font-bold">{{ teacher.name }}</h3>
+          <span
+            class="badge"
+            [class]="
+              teacher.active
+                ? 'bg-subject-green/15 text-subject-green'
+                : 'bg-slate-200 text-slate-500'
+            "
+          >
+            {{ teacher.active ? 'Ativo' : 'Inativo' }}
+          </span>
+        </div>
+      </div>
+
+      <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Email</dt>
+          <dd class="text-right font-bold">{{ teacher.email }}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Matérias</dt>
+          <dd class="text-right font-bold">
+            @for (subject of teacher.subjects; track subject.id) {
+              <span class="badge ml-1 bg-accent-soft text-accent">{{ subject.name }}</span>
+            } @empty {
+              <span class="text-ink-soft">Nenhuma</span>
+            }
+          </dd>
+        </div>
+        @if (teacher.bio) {
+          <div class="py-3">
+            <dt class="text-ink-soft">Apresentação</dt>
+            <dd class="mt-1 whitespace-pre-line">{{ teacher.bio }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (confirmingInactivate()) {
+        <div class="mt-5 rounded-2xl bg-cream px-5 py-4">
+          <p class="text-sm font-bold">Inativar este professor?</p>
+          <p class="mt-1 text-sm text-ink-soft">
+            Ele deixa de aparecer na folha de pagamento do mês. É possível reverter direto no banco,
+            se precisar.
+          </p>
+          @if (errorMessage(); as message) {
+            <p class="mt-3 text-sm font-bold text-red-600">{{ message }}</p>
+          }
+          <div class="mt-4 flex justify-end gap-3">
+            <button
+              type="button"
+              (click)="confirmingInactivate.set(false)"
+              class="btn-secondary px-5 py-2.5"
+            >
+              Voltar
+            </button>
+            <button
+              type="button"
+              (click)="confirmInactivate()"
+              [disabled]="saving()"
+              class="btn-primary px-5 py-2.5"
+            >
+              {{ saving() ? 'Inativando…' : 'Inativar professor' }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="mt-6 flex flex-wrap justify-end gap-3">
+          @if (teacher.active) {
+            <button
+              type="button"
+              (click)="confirmingInactivate.set(true)"
+              class="btn-secondary px-5 py-2.5"
+            >
+              Inativar professor
+            </button>
+          }
+          <button
+            type="button"
+            (click)="startEdit(teacher)"
+            class="btn-secondary flex items-center gap-2 px-5 py-2.5"
+          >
+            <app-icon name="pencil" class="size-4" />
+            Editar
+          </button>
+        </div>
+      }
+    } @else {
+      <form class="mt-5" [formGroup]="form" (ngSubmit)="handleSubmit()">
+        <div>
+          <label for="name" class="mb-1.5 block text-sm font-bold">Nome</label>
+          <input id="name" type="text" formControlName="name" class="field" />
+        </div>
+
+        <div class="mt-4">
+          <label for="email" class="mb-1.5 block text-sm font-bold">Email</label>
+          <input id="email" type="email" formControlName="email" class="field" />
+        </div>
+
+        <div class="mt-4">
+          <label for="bio" class="mb-1.5 block text-sm font-bold">
+            Apresentação <span class="font-normal text-ink-soft">(opcional)</span>
+          </label>
+          <textarea id="bio" formControlName="bio" rows="2" class="field"></textarea>
+        </div>
+
+        <div class="mt-4">
+          <span class="mb-1.5 block text-sm font-bold">Matérias</span>
+          <div class="flex flex-wrap gap-3">
+            @for (subject of allSubjects(); track subject.id) {
+              <label class="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  [checked]="selectedSubjectIds().includes(subject.id)"
+                  (change)="toggleSubject(subject.id, $any($event.target).checked)"
+                />
+                {{ subject.name }}
+              </label>
+            }
+          </div>
+        </div>
+
+        @if (errorMessage(); as message) {
+          <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+            {{ message }}
+          </p>
+        }
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" (click)="cancelEdit()" class="btn-secondary">Cancelar</button>
+          <button type="submit" [disabled]="saving()" class="btn-primary px-6 py-3">
+            {{ saving() ? 'Salvando…' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    }
+  } @else if (item.error()) {
+    <p class="mt-6 text-center text-ink-soft">Não foi possível carregar o professor.</p>
+  } @else {
+    <p class="mt-6 text-center text-ink-soft">Carregando…</p>
+  }
+</app-modal>

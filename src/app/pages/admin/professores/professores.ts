@@ -1,8 +1,11 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { TeacherService } from '../../../service/teacher.service';
+import { CommissionInfoModal } from './commission-info-modal';
+import { TeacherDetailModal } from './teacher-detail-modal';
 import { Card } from '../../../shared/card/card';
+import { Icon } from '../../../shared/icon/icon';
 import { initials } from '../../../shared/initials';
 import { PageHeader } from '../../../shared/page-header/page-header';
 
@@ -16,7 +19,15 @@ const AVATAR_COLORS = [
 
 @Component({
   selector: 'app-professores',
-  imports: [Card, PageHeader, CurrencyPipe, DatePipe],
+  imports: [
+    Card,
+    PageHeader,
+    CurrencyPipe,
+    DatePipe,
+    Icon,
+    CommissionInfoModal,
+    TeacherDetailModal,
+  ],
   templateUrl: './professores.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -26,10 +37,20 @@ export class Professores {
   protected readonly initials = initials;
   protected readonly today = new Date();
 
-  private readonly earnings = toSignal(this.teacherService.getEarningsByMonth());
+  protected readonly selectedTeacherId = signal<string | null>(null);
+  protected readonly showCommissionInfo = signal(false);
 
-  protected readonly teachers = computed(() => this.earnings()?.teachers ?? []);
-  protected readonly totalDue = computed(() => this.earnings()?.totalAmountToReceive ?? 0);
+  private readonly earnings = rxResource({
+    params: () => true,
+    stream: () => this.teacherService.getEarningsByMonth(),
+  });
+
+  protected readonly teachers = computed(() => this.earnings.value()?.teachers ?? []);
+  protected readonly totalDue = computed(() => this.earnings.value()?.totalAmountToReceive ?? 0);
+
+  protected reloadTeachers(): void {
+    this.earnings.reload();
+  }
 
   /*
    * Escolhe uma cor da paleta a partir do id do professor: cada professor tem

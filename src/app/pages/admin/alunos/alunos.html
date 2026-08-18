@@ -29,7 +29,7 @@
     </thead>
     <tbody class="divide-y divide-line/70">
       @for (student of visibleStudents(); track student.id) {
-        <tr>
+        <tr (click)="selectedStudentId.set(student.id)" class="cursor-pointer hover:bg-cream/60">
           <td class="px-3 py-4">
             <div class="flex items-center gap-4">
               <span
@@ -78,3 +78,11 @@
     </tbody>
   </table>
 </app-card>
+
+@if (selectedStudentId(); as id) {
+  <app-student-detail-modal
+    [studentId]="id"
+    (closed)="selectedStudentId.set(null)"
+    (changed)="reloadStudents()"
+  />
+}

@@ -1,0 +1,18 @@
+<app-modal title="Comissão por região" (closed)="closed.emit()">
+  <p class="mt-1 text-sm text-ink-soft">
+    Valor pago ao professor por hora de aula, de acordo com a região onde a aula acontece.
+  </p>
+
+  <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+    @for (region of regions(); track region.id) {
+      <div class="flex items-baseline justify-between gap-4 py-3">
+        <dt class="font-bold">{{ region.name }}</dt>
+        <dd class="text-right font-bold text-subject-green">
+          {{ region.classCommission | currency }}
+        </dd>
+      </div>
+    } @empty {
+      <p class="py-3 text-ink-soft">Nenhuma região cadastrada.</p>
+    }
+  </dl>
+</app-modal>

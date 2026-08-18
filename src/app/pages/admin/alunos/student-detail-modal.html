@@ -1,0 +1,262 @@
+<app-modal [title]="editing() ? 'Editar aluno' : 'Detalhes do aluno'" (closed)="closed.emit()">
+  @if (item.value(); as student) {
+    @if (!editing()) {
+      <div class="mt-4 flex items-center gap-4">
+        <span
+          class="flex size-12 shrink-0 items-center justify-center rounded-full bg-cream text-sm font-extrabold text-ink-soft"
+        >
+          {{ initials(student.name) }}
+        </span>
+        <div class="min-w-0">
+          <h3 class="truncate text-xl font-bold">{{ student.name }}</h3>
+          <span
+            class="badge"
+            [class]="
+              student.active
+                ? 'bg-subject-green/15 text-subject-green'
+                : 'bg-slate-200 text-slate-500'
+            "
+          >
+            {{ student.active ? 'Ativo' : 'Inativo' }}
+          </span>
+        </div>
+      </div>
+
+      <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Email</dt>
+          <dd class="text-right font-bold">{{ student.email }}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Telefone</dt>
+          <dd class="text-right font-bold">{{ student.phone }}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Endereço</dt>
+          <dd class="text-right font-bold">{{ student.address ?? '—' }}</dd>
+        </div>
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="text-ink-soft">Região</dt>
+          <dd class="text-right font-bold">{{ student.region.name }}</dd>
+        </div>
+      </dl>
+
+      <h4 class="mt-5 text-sm font-bold text-ink-soft">Responsável</h4>
+      @if (pickedGuardian(); as guardian) {
+        <dl class="mt-2 divide-y divide-line/70 border-t border-line/70">
+          <div class="flex items-baseline justify-between gap-4 py-3">
+            <dt>
+              {{ guardian.name }}
+              @if (guardian.isFinancialResponsible) {
+                <span class="badge ml-1 bg-accent-soft text-accent">Financeiro</span>
+              }
+            </dt>
+            <dd class="text-right text-ink-soft">{{ guardian.phone }}</dd>
+          </div>
+          <div class="flex items-baseline justify-between gap-4 py-3">
+            <dt class="text-ink-soft">CPF</dt>
+            <dd class="text-right text-ink-soft">{{ guardian.cpf }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="mt-2 text-ink-soft">Nenhum responsável cadastrado.</p>
+      }
+
+      <h4 class="mt-5 text-sm font-bold text-ink-soft">Contratos</h4>
+      <dl class="mt-2 divide-y divide-line/70 border-t border-line/70">
+        @for (contract of student.contracts; track contract.id) {
+          <div class="flex items-baseline justify-between gap-4 py-3">
+            <dt>
+              <span class="badge" [class]="planDisplay[contract.planType].badge">
+                {{ planDisplay[contract.planType].label }}
+              </span>
+              <span class="badge ml-1" [class]="contractStatus[contract.status].badge">
+                {{ contractStatus[contract.status].label }}
+              </span>
+            </dt>
+            <dd class="text-right text-ink-soft">
+              {{ contract.startDate }}
+              @if (contract.endDate) {
+                – {{ contract.endDate }}
+              }
+              @if (contract.discountPercentage) {
+                <br />
+                <span class="text-xs">Desconto: {{ contract.discountPercentage }}%</span>
+              }
+            </dd>
+          </div>
+        } @empty {
+          <p class="py-3 text-ink-soft">Nenhum contrato.</p>
+        }
+      </dl>
+
+      @if (confirmingInactivate()) {
+        <div class="mt-5 rounded-2xl bg-cream px-5 py-4">
+          <p class="text-sm font-bold">Inativar este aluno?</p>
+          <p class="mt-1 text-sm text-ink-soft">
+            Ele deixa de aparecer na lista de alunos ativos. É possível reverter direto no banco, se
+            precisar.
+          </p>
+          @if (errorMessage(); as message) {
+            <p class="mt-3 text-sm font-bold text-red-600">{{ message }}</p>
+          }
+          <div class="mt-4 flex justify-end gap-3">
+            <button
+              type="button"
+              (click)="confirmingInactivate.set(false)"
+              class="btn-secondary px-5 py-2.5"
+            >
+              Voltar
+            </button>
+            <button
+              type="button"
+              (click)="confirmInactivate()"
+              [disabled]="saving()"
+              class="btn-primary px-5 py-2.5"
+            >
+              {{ saving() ? 'Inativando…' : 'Inativar aluno' }}
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="mt-6 flex flex-wrap justify-end gap-3">
+          @if (student.active) {
+            <button
+              type="button"
+              (click)="confirmingInactivate.set(true)"
+              class="btn-secondary px-5 py-2.5"
+            >
+              Inativar aluno
+            </button>
+          }
+          <button
+            type="button"
+            (click)="startEdit(student)"
+            class="btn-secondary flex items-center gap-2 px-5 py-2.5"
+          >
+            <app-icon name="pencil" class="size-4" />
+            Editar
+          </button>
+        </div>
+      }
+    } @else {
+      <form class="mt-5" [formGroup]="form" (ngSubmit)="handleSubmit()">
+        <div>
+          <label for="name" class="mb-1.5 block text-sm font-bold">Nome</label>
+          <input id="name" type="text" formControlName="name" class="field" />
+        </div>
+
+        <div class="mt-4">
+          <label for="email" class="mb-1.5 block text-sm font-bold">Email</label>
+          <input id="email" type="email" formControlName="email" class="field" />
+        </div>
+
+        <div class="mt-4 grid grid-cols-2 gap-4">
+          <div>
+            <label for="phone" class="mb-1.5 block text-sm font-bold">Telefone</label>
+            <input id="phone" type="text" formControlName="phone" class="field" />
+          </div>
+          <div>
+            <label for="regionId" class="mb-1.5 block text-sm font-bold">Região</label>
+            <select id="regionId" formControlName="regionId" class="field">
+              @for (region of regions(); track region.id) {
+                <option [value]="region.id">{{ region.name }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label for="address" class="mb-1.5 block text-sm font-bold">
+            Endereço <span class="font-normal text-ink-soft">(opcional)</span>
+          </label>
+          <textarea id="address" formControlName="address" rows="2" class="field"></textarea>
+        </div>
+
+        @if (currentContract()) {
+          <h4 class="mt-6 text-sm font-bold text-ink-soft">Contrato atual</h4>
+          <div class="mt-2 grid grid-cols-2 gap-4">
+            <div>
+              <label for="planId" class="mb-1.5 block text-sm font-bold">Plano</label>
+              <select id="planId" formControlName="planId" class="field">
+                @for (plan of availablePlans(); track plan.id) {
+                  <option [value]="plan.id">
+                    {{ planDisplay[plan.planType].label }}
+                    @if (plan.frequency) {
+                      · {{ plan.frequency }}x/semana
+                    }
+                  </option>
+                }
+              </select>
+            </div>
+            <div>
+              <label for="contractStatus" class="mb-1.5 block text-sm font-bold">Status</label>
+              <select id="contractStatus" formControlName="contractStatus" class="field">
+                <option value="active">Ativo</option>
+                <option value="cancelled">Cancelado</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-4">
+            <label for="discountPercentage" class="mb-1.5 block text-sm font-bold">
+              Desconto (%) <span class="font-normal text-ink-soft">(opcional)</span>
+            </label>
+            <input
+              id="discountPercentage"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              formControlName="discountPercentage"
+              class="field"
+            />
+          </div>
+          @if (form.controls.contractStatus.value === 'cancelled') {
+            <p class="mt-1.5 text-xs text-ink-soft">
+              Cancelar o contrato também cancela as aulas agendadas dele.
+            </p>
+          }
+        }
+
+        @if (pickedGuardian()) {
+          <h4 class="mt-6 text-sm font-bold text-ink-soft">Responsável</h4>
+          <div class="mt-2">
+            <label for="guardianName" class="mb-1.5 block text-sm font-bold">Nome</label>
+            <input id="guardianName" type="text" formControlName="guardianName" class="field" />
+          </div>
+          <div class="mt-4 grid grid-cols-2 gap-4">
+            <div>
+              <label for="guardianPhone" class="mb-1.5 block text-sm font-bold">Telefone</label>
+              <input id="guardianPhone" type="text" formControlName="guardianPhone" class="field" />
+            </div>
+            <div>
+              <label for="guardianCpf" class="mb-1.5 block text-sm font-bold">CPF</label>
+              <input id="guardianCpf" type="text" formControlName="guardianCpf" class="field" />
+            </div>
+          </div>
+          <label class="mt-3 flex items-center gap-2 text-sm">
+            <input type="checkbox" formControlName="guardianIsFinancialResponsible" />
+            Responsável financeiro
+          </label>
+        }
+
+        @if (errorMessage(); as message) {
+          <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+            {{ message }}
+          </p>
+        }
+
+        <div class="mt-6 flex justify-end gap-3">
+          <button type="button" (click)="cancelEdit()" class="btn-secondary">Cancelar</button>
+          <button type="submit" [disabled]="saving()" class="btn-primary px-6 py-3">
+            {{ saving() ? 'Salvando…' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    }
+  } @else if (item.error()) {
+    <p class="mt-6 text-center text-ink-soft">Não foi possível carregar o aluno.</p>
+  } @else {
+    <p class="mt-6 text-center text-ink-soft">Carregando…</p>
+  }
+</app-modal>

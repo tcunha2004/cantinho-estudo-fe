@@ -1,6 +1,7 @@
 import { Frequency, PlanType } from '../entity/plan.model';
 
 export interface PlanPricingDto {
+  id: string;
   planType: PlanType;
   frequency: Frequency | null;
   monthlyPrice: string;

@@ -1,4 +1,13 @@
-<app-page-header title="Professores" />
+<app-page-header title="Professores">
+  <button
+    type="button"
+    (click)="showCommissionInfo.set(true)"
+    class="flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"
+  >
+    Comissão
+    <app-icon name="help-circle" class="size-4" />
+  </button>
+</app-page-header>
 
 <!-- Total a pagar no mês -->
 <section class="panel mt-6 bg-accent-soft">
@@ -9,7 +18,10 @@
 <!-- Cards de professores -->
 <div class="mt-6 grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-5">
   @for (teacher of teachers(); track teacher.id) {
-    <app-card>
+    <app-card
+      (click)="selectedTeacherId.set(teacher.id)"
+      class="cursor-pointer transition-colors hover:bg-cream/60"
+    >
       <div class="flex items-center gap-4">
         <span
           class="flex size-14 shrink-0 items-center justify-center rounded-full font-display font-bold text-white"
@@ -38,3 +50,15 @@
     <p class="text-ink-soft">Nenhum professor com aulas neste mês.</p>
   }
 </div>
+
+@if (selectedTeacherId(); as id) {
+  <app-teacher-detail-modal
+    [teacherId]="id"
+    (closed)="selectedTeacherId.set(null)"
+    (changed)="reloadTeachers()"
+  />
+}
+
+@if (showCommissionInfo()) {
+  <app-commission-info-modal (closed)="showCommissionInfo.set(false)" />
+}
