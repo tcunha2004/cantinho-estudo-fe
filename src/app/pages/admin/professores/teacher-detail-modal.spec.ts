@@ -213,6 +213,18 @@ describe('TeacherDetailModal', () => {
     ).toBe(false);
   });
 
+  it('professor inativo mostra o botão de reativar, que manda active: true', async () => {
+    await open({ ...teacher, active: false });
+
+    click('Reativar professor');
+
+    const request = http.expectOne(`${API_BASE_URL}/teachers/t1`);
+    expect(request.request.body).toEqual({ active: true });
+
+    request.flush({ ...teacher, active: true });
+    await settleReload({ ...teacher, active: true });
+  });
+
   it('mostra a mensagem de erro que o backend devolveu', async () => {
     await open();
     click('Editar');

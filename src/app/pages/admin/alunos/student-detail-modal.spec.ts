@@ -331,6 +331,25 @@ describe('StudentDetailModal', () => {
     await settleReload({ ...student, active: false });
   });
 
+  it('aluno inativo não oferece o botão de inativar, e sim o de reativar', async () => {
+    await open({ ...student, active: false });
+
+    expect(text()).toContain('Inativo');
+    expect(
+      [...(fixture.nativeElement as HTMLElement).querySelectorAll('button')].some(
+        (button) => button.textContent?.trim() === 'Inativar aluno',
+      ),
+    ).toBe(false);
+
+    click('Reativar aluno');
+
+    const request = http.expectOne(`${API_BASE_URL}/students/s1`);
+    expect(request.request.body).toEqual({ active: true });
+
+    request.flush({ ...student, active: true });
+    await settleReload({ ...student, active: true });
+  });
+
   it('mostra a mensagem de erro que o backend devolveu', async () => {
     await open();
     click('Editar');

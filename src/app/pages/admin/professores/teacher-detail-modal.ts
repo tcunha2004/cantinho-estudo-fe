@@ -109,6 +109,11 @@ export class TeacherDetailModal {
     this.save({ active: false }, () => this.confirmingInactivate.set(false));
   }
 
+  /* Reversível e de baixo risco — sem passo de confirmação, diferente de inativar. */
+  protected reactivate(): void {
+    this.save({ active: true }, () => {});
+  }
+
   private save(payload: UpdateTeacherPayload, onSuccess: () => void): void {
     this.saving.set(true);
     this.errorMessage.set(null);
