@@ -1,3 +1,4 @@
+import { StudentStatus } from '../model/dto/compact-student.dto';
 import { ClassStatus } from '../model/entity/class.model';
 import { PaymentStatus } from '../model/entity/payment.model';
 import { PlanType } from '../model/entity/plan.model';
@@ -50,6 +51,11 @@ export const PLAN_DISPLAY: Record<PlanType, PlanDisplay> = {
     text: 'text-accent',
     tint: 'bg-accent-soft',
   },
+};
+
+export const STUDENT_STATUS_DISPLAY: Record<StudentStatus, { label: string; badge: string }> = {
+  active: { label: 'Ativo', badge: 'bg-subject-green/15 text-subject-green' },
+  inactive: { label: 'Inativo', badge: 'bg-slate-200 text-slate-500' },
 };
 
 export const CONTRACT_STATUS_DISPLAY: Record<ContractStatus, { label: string; badge: string }> = {

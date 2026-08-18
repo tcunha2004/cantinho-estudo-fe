@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ActiveStudentDto } from '../model/dto/active-student.dto';
+import { CompactStudentDto } from '../model/dto/compact-student.dto';
 import { PaymentHistoryDto } from '../model/dto/payment-history.dto';
 import { StudentPlanDto } from '../model/dto/student-plan.dto';
 import { StudentDetailDto } from '../model/dto/student-detail.dto';
@@ -33,8 +33,12 @@ export interface UpdateStudentPayload {
 export class StudentService {
   private readonly api = inject(ApiClient);
 
-  getActive(): Observable<ActiveStudentDto[]> {
-    return this.api.get<ActiveStudentDto[]>('/students/active');
+  getAll(): Observable<CompactStudentDto[]> {
+    return this.api.get<CompactStudentDto[]>('/students/all');
+  }
+
+  getActive(): Observable<CompactStudentDto[]> {
+    return this.api.get<CompactStudentDto[]>('/students/active');
   }
 
   getActiveCount(): Observable<number> {

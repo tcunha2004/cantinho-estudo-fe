@@ -3,7 +3,11 @@ import { rxResource } from '@angular/core/rxjs-interop';
 import { StudentService } from '../../../service/student.service';
 import { StudentDetailModal } from './student-detail-modal';
 import { Card } from '../../../shared/card/card';
-import { CONTRACT_STATUS_DISPLAY, PLAN_DISPLAY } from '../../../shared/domain-display';
+import {
+  CONTRACT_STATUS_DISPLAY,
+  PLAN_DISPLAY,
+  STUDENT_STATUS_DISPLAY,
+} from '../../../shared/domain-display';
 import { Icon } from '../../../shared/icon/icon';
 import { initials } from '../../../shared/initials';
 import { PageHeader } from '../../../shared/page-header/page-header';
@@ -18,7 +22,7 @@ export class Alunos {
   private readonly studentService = inject(StudentService);
 
   protected readonly planDisplay = PLAN_DISPLAY;
-  protected readonly contractStatus = CONTRACT_STATUS_DISPLAY;
+  protected readonly studentStatus = STUDENT_STATUS_DISPLAY;
   protected readonly initials = initials;
 
   protected readonly search = signal('');
@@ -26,7 +30,7 @@ export class Alunos {
 
   private readonly activeStudents = rxResource({
     params: () => true,
-    stream: () => this.studentService.getActive(),
+    stream: () => this.studentService.getAll(),
     defaultValue: [],
   });
 
