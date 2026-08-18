@@ -28,7 +28,8 @@ import { Icon } from '../icon/icon';
       (close)="closed.emit()"
       (click)="handleBackdropClick($event)"
       aria-labelledby="modal-title"
-      class="m-auto w-full max-w-lg rounded-3xl border border-line bg-white p-0 shadow-lg backdrop:bg-ink/40"
+      [class]="widthClass()"
+      class="m-auto w-full rounded-3xl border border-line bg-white p-0 shadow-lg backdrop:bg-ink/40"
     >
       <!-- O padding mora aqui dentro: com padding no próprio <dialog>, clicar
            nele contaria como clique no fundo e fecharia a janela sem querer. -->
@@ -52,6 +53,8 @@ import { Icon } from '../icon/icon';
 })
 export class Modal {
   readonly title = input.required<string>();
+  /* Largura máxima da janela — o padrão serve para formulários e detalhes. */
+  readonly widthClass = input('max-w-lg');
   readonly closed = output<void>();
 
   private readonly dialog = viewChild.required<ElementRef<HTMLDialogElement>>('dialog');

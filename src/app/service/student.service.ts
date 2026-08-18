@@ -53,6 +53,11 @@ export class StudentService {
     return this.api.patch<StudentDetailDto>(`/students/${id}`, payload);
   }
 
+  /* Parcelas de todos os contratos do aluno — visão do admin. */
+  getPayments(id: string): Observable<PaymentHistoryDto[]> {
+    return this.api.get<PaymentHistoryDto[]>(`/students/${id}/payments`);
+  }
+
   getMyPlan(): Observable<StudentPlanDto> {
     return this.api.get<StudentPlanDto>('/students/me/plan');
   }

@@ -3,6 +3,8 @@ import { PlanType } from '../entity/plan.model';
 
 export interface PaymentHistoryDto {
   id: string;
+  /* Contrato ao qual a parcela pertence — agrupa o histórico do admin */
+  contractId: string;
   /* Valor apurado a partir das aulas faturáveis do mês */
   amount: string;
   /* Vencimento da parcela */

@@ -18,6 +18,7 @@ import { CONTRACT_STATUS_DISPLAY, PLAN_DISPLAY } from '../../../shared/domain-di
 import { Icon } from '../../../shared/icon/icon';
 import { initials } from '../../../shared/initials';
 import { Modal } from '../../../shared/modal/modal';
+import { StudentFinanceModal } from './student-finance-modal';
 
 /**
  * Visualização e edição de um aluno para o admin. Nasce em modo leitura;
@@ -29,7 +30,7 @@ import { Modal } from '../../../shared/modal/modal';
  */
 @Component({
   selector: 'app-student-detail-modal',
-  imports: [Icon, Modal, ReactiveFormsModule],
+  imports: [Icon, Modal, ReactiveFormsModule, StudentFinanceModal],
   templateUrl: './student-detail-modal.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -66,6 +67,7 @@ export class StudentDetailModal {
   });
 
   protected readonly editing = signal(false);
+  protected readonly showingFinance = signal(false);
   protected readonly confirmingInactivate = signal(false);
   protected readonly saving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);

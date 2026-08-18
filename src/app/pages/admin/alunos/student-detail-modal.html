@@ -1,4 +1,8 @@
-<app-modal [title]="editing() ? 'Editar aluno' : 'Detalhes do aluno'" (closed)="closed.emit()">
+<app-modal
+  [title]="editing() ? 'Editar aluno' : 'Detalhes do aluno'"
+  widthClass="max-w-2xl"
+  (closed)="closed.emit()"
+>
   @if (item.value(); as student) {
     @if (!editing()) {
       <div class="mt-4 flex items-center gap-4">
@@ -140,6 +144,14 @@
           }
           <button
             type="button"
+            (click)="showingFinance.set(true)"
+            class="btn-secondary flex items-center gap-2 px-5 py-2.5"
+          >
+            <app-icon name="credit-card" class="size-4" />
+            Financeiro
+          </button>
+          <button
+            type="button"
             (click)="startEdit(student)"
             class="btn-secondary flex items-center gap-2 px-5 py-2.5"
           >
@@ -269,3 +281,7 @@
     <p class="mt-6 text-center text-ink-soft">Carregando…</p>
   }
 </app-modal>
+
+@if (showingFinance()) {
+  <app-student-finance-modal [studentId]="studentId()" (closed)="showingFinance.set(false)" />
+}

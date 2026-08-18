@@ -1,0 +1,117 @@
+<app-modal
+  title="Financeiro do aluno"
+  widthClass="max-w-[70vw]"
+  (closed)="closed.emit()"
+>
+  @if (loading()) {
+    <p class="mt-6 text-center text-ink-soft">Carregando…</p>
+  } @else if (student.error() || payments.error()) {
+    <p class="mt-6 text-center text-ink-soft">Não foi possível carregar o financeiro.</p>
+  } @else if (student.value(); as detail) {
+    <p class="mt-1 text-ink-soft">{{ detail.name }}</p>
+
+    <!-- Resumo de todas as parcelas do aluno -->
+    <section class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      @let summary = totals();
+      <div class="panel bg-subject-green/12">
+        <p class="text-sm text-ink-soft">Total pago</p>
+        <p class="mt-1 font-display text-2xl font-extrabold">{{ summary.paid | currency }}</p>
+      </div>
+      <div class="panel bg-subject-amber/12">
+        <p class="text-sm text-ink-soft">Em aberto</p>
+        <p class="mt-1 font-display text-2xl font-extrabold">{{ summary.pending | currency }}</p>
+      </div>
+      <div class="panel bg-accent-soft">
+        <p class="text-sm text-ink-soft">Vencido</p>
+        <p class="mt-1 font-display text-2xl font-extrabold">{{ summary.overdue | currency }}</p>
+      </div>
+      <div class="panel bg-cream">
+        <p class="text-sm text-ink-soft">Parcelas</p>
+        <p class="mt-1 font-display text-2xl font-extrabold">{{ summary.count }}</p>
+      </div>
+    </section>
+
+    <!-- Um bloco por contrato, do mais recente ao mais antigo -->
+    @for (group of groups(); track group.contract?.id ?? 'orfas') {
+      <section class="mt-6 rounded-3xl border border-line p-5">
+        <header class="flex flex-wrap items-center justify-between gap-4">
+          @if (group.contract; as contract) {
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="badge" [class]="planDisplay[contract.planType].badge">
+                {{ planDisplay[contract.planType].label }}
+              </span>
+              @if (contract.frequency) {
+                <span class="text-sm text-ink-soft">{{ contract.frequency }}x/semana</span>
+              }
+              <span class="badge" [class]="contractStatus[contract.status].badge">
+                {{ contractStatus[contract.status].label }}
+              </span>
+              @if (contract.discountPercentage) {
+                <span class="text-sm text-ink-soft">
+                  Desconto {{ contract.discountPercentage }}%
+                </span>
+              }
+            </div>
+            <p class="text-sm text-ink-soft">
+              {{ contract.startDate | date: 'dd/MM/yyyy' }}
+              @if (contract.endDate) {
+                – {{ contract.endDate | date: 'dd/MM/yyyy' }}
+              } @else {
+                – vigente
+              }
+              · Total {{ group.total | currency }}
+            </p>
+          } @else {
+            <p class="font-bold">Parcelas sem contrato listado</p>
+            <p class="text-sm text-ink-soft">Total {{ group.total | currency }}</p>
+          }
+        </header>
+
+        @if (group.payments.length) {
+          <div class="mt-4 overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead class="text-ink-soft">
+                <tr class="border-b border-line/70">
+                  <th class="py-2 font-bold">Competência</th>
+                  <th class="py-2 font-bold">Vencimento</th>
+                  <th class="py-2 font-bold">Aulas</th>
+                  <th class="py-2 font-bold">Valor</th>
+                  <th class="py-2 font-bold">Pagamento</th>
+                  <th class="py-2 font-bold">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (payment of group.payments; track payment.id) {
+                  <tr class="border-b border-line/70 last:border-0">
+                    <td class="py-3 capitalize">{{ payment.dueDate | date: 'MMMM/yyyy' }}</td>
+                    <td class="py-3">{{ payment.dueDate | date: 'dd/MM/yyyy' }}</td>
+                    <td class="py-3">{{ payment.classesCount }}</td>
+                    <td class="py-3 font-bold">{{ payment.amount | currency }}</td>
+                    <td class="py-3">
+                      {{ payment.paidAt ? (payment.paidAt | date: 'dd/MM/yyyy') : '—' }}
+                    </td>
+                    <td class="py-3">
+                      <span class="badge" [class]="paymentStatus[payment.status].badge">
+                        {{ paymentStatus[payment.status].label }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="mt-4 text-ink-soft">Nenhuma parcela neste contrato.</p>
+        }
+      </section>
+    } @empty {
+      <p class="mt-6 text-center text-ink-soft">Nenhum contrato para este aluno.</p>
+    }
+
+    <div class="mt-6 flex justify-end">
+      <button type="button" (click)="close()" class="btn-secondary px-5 py-2.5">
+        Fechar
+      </button>
+    </div>
+  }
+</app-modal>
