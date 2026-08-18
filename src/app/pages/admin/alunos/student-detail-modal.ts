@@ -185,8 +185,13 @@ export class StudentDetailModal {
       regionId,
       ...(this.currentContract()
         ? {
-            planId,
-            discountPercentage: discountPercentage.trim() || null,
+            /* Trocar de região limpa o select de plano (os planos são por
+             * região). Sem plano escolhido, mantém o do contrato atual — em
+             * vez de mandar string vazia, que o backend recusa com 400. */
+            ...(planId ? { planId } : {}),
+            /* `input[type=number]` entrega número, não texto: o backend espera
+             * um decimal em string ("10.50"). */
+            discountPercentage: String(discountPercentage ?? '').trim() || null,
             contractStatus,
           }
         : {}),
