@@ -52,8 +52,8 @@
         <thead>
           <tr class="text-ink-soft">
             <th scope="col" class="pb-2 font-bold"><span class="sr-only">Frequência</span></th>
-            <th scope="col" class="pb-2 font-bold">Mensal</th>
-            <th scope="col" class="pb-2 font-bold">Hora/aula</th>
+            <th scope="col" class="pb-2 font-bold">Mensalidade</th>
+            <th scope="col" class="pb-2 font-bold">Ref./aula</th>
           </tr>
         </thead>
         <tbody>
@@ -67,7 +67,10 @@
         </tbody>
       </table>
 
-      <p class="mt-5 text-sm text-ink-soft">8, 12 ou 20 aulas por mês, conforme a frequência</p>
+      <p class="mt-5 text-sm text-ink-soft">
+        8, 12 ou 20 aulas por mês, conforme a frequência. O aluno paga a mensalidade, não as aulas
+        — o valor por aula é só referência.
+      </p>
     </app-card>
 
     <!-- Plano Prata -->
@@ -78,7 +81,9 @@
       <p class="mt-2 font-display text-4xl font-extrabold">
         {{ prataPlan()?.monthlyPrice | currency }}
       </p>
-      <p class="mt-4 text-ink-soft">{{ prataPlan()?.hourPrice | currency }} / hora-aula</p>
+      <p class="mt-4 text-ink-soft">
+        por mês · {{ prataPlan()?.hourPrice | currency }} por aula de referência
+      </p>
     </app-card>
 
     <!-- Plano Bronze -->
@@ -90,8 +95,8 @@
         {{ bronzePlan()?.monthlyPrice | currency }}
       </p>
       <p class="mt-4 text-ink-soft">
-        {{ bronzePlan()?.hourPrice | currency }} / hora-aula · validade
-        {{ bronzePlan()?.validityMonths }} meses
+        parcela única · validade {{ bronzePlan()?.validityMonths }} meses ·
+        {{ bronzePlan()?.hourPrice | currency }} por aula de referência
       </p>
     </app-card>
 
@@ -101,7 +106,7 @@
       <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h3 class="font-display text-2xl font-bold text-accent">Aula Avulsa</h3>
-          <p class="mt-4">Aula individual, sem plano</p>
+          <p class="mt-4">Aula individual, sem plano — cobrada por aula</p>
         </div>
         <p class="font-display text-4xl font-extrabold">{{ avulsaPlan()?.hourPrice | currency }}</p>
       </div>

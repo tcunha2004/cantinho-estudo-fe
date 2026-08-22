@@ -31,34 +31,57 @@ export class Plano {
     return current ? PLAN_TYPES.filter((type) => type !== current) : [];
   });
 
+  /** Pacote (Bronze) conta as aulas na validade toda; os mensais, por mês. */
   protected readonly benefits = computed(() => {
-    const classesCount = this.plan()?.classesCount;
-    const lessons = classesCount
-      ? `${classesCount} aulas individuais por mês`
-      : 'Aulas individuais';
+    const plan = this.plan();
+    const count = plan?.classesCount;
+
+    if (!plan || !count) {
+      return ['Aulas individuais', ...BASE_BENEFITS];
+    }
+
+    const lessons = plan.validityMonths
+      ? `${count} aulas individuais, para usar em até ${plan.validityMonths} meses`
+      : `${count} aulas individuais por mês`;
 
     return [lessons, ...BASE_BENEFITS];
   });
 
   /**
-   * Hora/aula por local: sempre a do Cantinho do Estudo, e a da região do
-   * aluno quando ela for diferente — não há mensalidade fixa, o valor de cada
-   * aula depende de onde ela acontece.
+   * O que o aluno paga. A avulsa é a única modalidade cobrada por aula; o
+   * Bronze é um pacote pago de uma vez; os demais, mensalidade fixa —
+   * independente de quantas aulas ele faz e de onde as faz.
    */
-  protected readonly pricingRows = computed(() => {
+  protected readonly price = computed(() => {
     const plan = this.plan();
 
     if (!plan) {
-      return [];
+      return null;
     }
 
-    const cantinho = { label: 'No Cantinho do Estudo', hourPrice: plan.cantinhoHourPrice };
-
-    if (plan.hourPrice === plan.cantinhoHourPrice) {
-      return [cantinho];
+    if (plan.planType === 'avulsa') {
+      return { value: plan.hourPrice, unit: '/ hora-aula' };
     }
 
-    return [cantinho, { label: `Na sua região (${plan.region})`, hourPrice: plan.hourPrice }];
+    return {
+      value: plan.monthlyPrice,
+      unit: plan.validityMonths ? '· pacote' : '/ mês',
+    };
+  });
+
+  /** Só o Bronze e a avulsa fogem da mensalidade — cada um com a sua nota. */
+  protected readonly priceNote = computed(() => {
+    const plan = this.plan();
+
+    if (plan?.planType === 'avulsa') {
+      return 'Você paga por aula, sem mensalidade.';
+    }
+
+    if (plan?.validityMonths) {
+      return `Pacote pago de uma vez, válido por ${plan.validityMonths} meses.`;
+    }
+
+    return 'Valor fixo por mês, independente de quantas aulas você faz e de onde elas acontecem.';
   });
 
   protected readonly cancellationRule =

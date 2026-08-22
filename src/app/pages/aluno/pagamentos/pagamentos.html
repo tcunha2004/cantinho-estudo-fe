@@ -1,4 +1,4 @@
-<app-page-header title="Pagamentos" subtitle="Cobranças por aulas realizadas" />
+<app-page-header title="Pagamentos" subtitle="Mensalidades do seu plano" />
 
 <!-- Próximo vencimento -->
 @if (nextPayment(); as next) {
@@ -34,7 +34,7 @@
             } @else {
               Vence em {{ payment.dueDate | date: 'dd/MM/yyyy' }}
             }
-            · {{ payment.classesCount }} aulas
+            · {{ payment.classesCount }} aulas no mês
           </p>
         </div>
         <p class="ml-auto whitespace-nowrap font-bold">{{ payment.amount | currency }}</p>
