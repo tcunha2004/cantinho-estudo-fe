@@ -14,7 +14,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { StudentDetailDto } from '../../../model/dto/student-detail.dto';
 import { StudentService, UpdateStudentPayload } from '../../../service/student.service';
 import { RegionService } from '../../../service/region.service';
-import { CONTRACT_STATUS_DISPLAY, PLAN_DISPLAY } from '../../../shared/domain-display';
+import { PlanType } from '../../../model/entity/plan.model';
+import { PLAN_DISPLAY } from '../../../shared/domain-display';
 import { Icon } from '../../../shared/icon/icon';
 import { initials } from '../../../shared/initials';
 import { Modal } from '../../../shared/modal/modal';
@@ -26,7 +27,8 @@ import { StudentFinanceModal } from './student-finance-modal';
  * Inativar tem confirmação inline, no mesmo esquema do `ClassDetailsModal`.
  *
  * Este é o lugar único pra editar tudo do aluno: dados cadastrais, contrato
- * atual (plano/desconto/status) e responsável financeiro.
+ * atual (plano/desconto/status) e responsável financeiro. O histórico de
+ * contratos e as parcelas ficam no `StudentFinanceModal`, aberto daqui.
  */
 @Component({
   selector: 'app-student-detail-modal',
@@ -46,7 +48,6 @@ export class StudentDetailModal {
   private readonly modal = viewChild.required(Modal);
 
   protected readonly planDisplay = PLAN_DISPLAY;
-  protected readonly contractStatus = CONTRACT_STATUS_DISPLAY;
   protected readonly initials = initials;
 
   protected readonly regions = toSignal(this.regionService.getPricing(), { initialValue: [] });
@@ -71,6 +72,9 @@ export class StudentDetailModal {
   protected readonly confirmingInactivate = signal(false);
   protected readonly saving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  /* Plano da troca que acabou de ser agendada — não nulo enquanto o aviso
+   * pós-salvar está na tela. */
+  protected readonly scheduledPlanType = signal<PlanType | null>(null);
 
   protected readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
@@ -116,6 +120,16 @@ export class StudentDetailModal {
     const contract = this.currentContract();
     const guardian = this.pickedGuardian();
 
+    /*
+     * Com troca de plano agendada, mostra o ALVO agendado pré-selecionado, não
+     * o plano atual do contrato — assim o admin decide se confirma a troca
+     * (deixa como está) ou desiste dela (escolhe o plano atual de volta).
+     */
+    const displayedPlanId = contract?.pendingPlanId ?? contract?.planId ?? '';
+    const displayedDiscount = contract?.pendingPlanId
+      ? (contract.pendingDiscountPercentage ?? '')
+      : (contract?.discountPercentage ?? '');
+
     this.form.patchValue(
       {
         name: student.name,
@@ -123,8 +137,8 @@ export class StudentDetailModal {
         phone: student.phone,
         address: student.address ?? '',
         regionId: student.region.id,
-        planId: contract?.planId ?? '',
-        discountPercentage: contract?.discountPercentage ?? '',
+        planId: displayedPlanId,
+        discountPercentage: displayedDiscount,
         contractStatus: contract?.status ?? 'active',
         guardianName: guardian?.name ?? '',
         guardianPhone: guardian?.phone ?? '',
@@ -134,14 +148,14 @@ export class StudentDetailModal {
       { emitEvent: false },
     );
     /*
-     * O plano do contrato pode ser de uma região diferente da região
-     * cadastrada do aluno (o seed já permite isso, com só um aviso) — então o
-     * select de plano tem que filtrar pela região onde o plano ATUAL
-     * realmente está, não pela região do aluno. Senão o plano nunca aparece
-     * pré-selecionado quando as duas regiões divergem.
+     * O plano exibido pode ser de uma região diferente da região cadastrada do
+     * aluno (o seed já permite isso, com só um aviso) — então o select de
+     * plano tem que filtrar pela região onde esse plano realmente está, não
+     * pela região do aluno. Senão o plano nunca aparece pré-selecionado
+     * quando as duas regiões divergem.
      */
-    const planRegionId = contract
-      ? this.regions().find((region) => region.plans.some((plan) => plan.id === contract.planId))
+    const planRegionId = displayedPlanId
+      ? this.regions().find((region) => region.plans.some((plan) => plan.id === displayedPlanId))
           ?.id
       : undefined;
     this.pickedRegionId.set(planRegionId ?? student.region.id);
@@ -209,7 +223,17 @@ export class StudentDetailModal {
         : {}),
     };
 
-    this.save(payload, () => this.editing.set(false));
+    this.save(payload, (updated) => {
+      this.editing.set(false);
+
+      /* Contrato com parcela em aberto: o backend agendou a troca em vez de
+       * aplicá-la na hora — avisa o admin em vez de deixar a troca some sem
+       * explicação. */
+      const pendingPlanType = updated.contracts[0]?.pendingPlanType ?? null;
+      if (pendingPlanType) {
+        this.scheduledPlanType.set(pendingPlanType);
+      }
+    });
   }
 
   protected confirmInactivate(): void {
@@ -221,16 +245,23 @@ export class StudentDetailModal {
     this.save({ active: true }, () => {});
   }
 
-  private save(payload: UpdateStudentPayload, onSuccess: () => void): void {
+  protected dismissScheduledNotice(): void {
+    this.scheduledPlanType.set(null);
+  }
+
+  private save(
+    payload: UpdateStudentPayload,
+    onSuccess: (updated: StudentDetailDto) => void,
+  ): void {
     this.saving.set(true);
     this.errorMessage.set(null);
 
     this.studentService.update(this.studentId(), payload).subscribe({
-      next: () => {
+      next: (updated) => {
         this.saving.set(false);
         this.item.reload();
         this.changed.emit();
-        onSuccess();
+        onSuccess(updated);
       },
       error: (error: HttpErrorResponse) => {
         this.saving.set(false);

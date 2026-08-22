@@ -66,40 +66,12 @@
         <p class="mt-2 text-ink-soft">Nenhum responsável cadastrado.</p>
       }
 
-      <h4 class="mt-5 text-sm font-bold text-ink-soft">Contratos</h4>
-      <dl class="mt-2 divide-y divide-line/70 border-t border-line/70">
-        @for (contract of student.contracts; track contract.id) {
-          <div class="flex items-baseline justify-between gap-4 py-3">
-            <dt>
-              <span class="badge" [class]="planDisplay[contract.planType].badge">
-                {{ planDisplay[contract.planType].label }}
-              </span>
-              <span class="badge ml-1" [class]="contractStatus[contract.status].badge">
-                {{ contractStatus[contract.status].label }}
-              </span>
-            </dt>
-            <dd class="text-right text-ink-soft">
-              {{ contract.startDate }}
-              @if (contract.endDate) {
-                – {{ contract.endDate }}
-              }
-              @if (contract.discountPercentage) {
-                <br />
-                <span class="text-xs">Desconto: {{ contract.discountPercentage }}%</span>
-              }
-            </dd>
-          </div>
-        } @empty {
-          <p class="py-3 text-ink-soft">Nenhum contrato.</p>
-        }
-      </dl>
-
       @if (confirmingInactivate()) {
         <div class="mt-5 rounded-2xl bg-cream px-5 py-4">
           <p class="text-sm font-bold">Inativar este aluno?</p>
           <p class="mt-1 text-sm text-ink-soft">
-            Ele deixa de aparecer na lista de alunos ativos e o contrato vigente é cancelado. Dá para
-            reativar depois.
+            Ele deixa de aparecer na lista de alunos ativos e o contrato vigente é cancelado. Dá
+            para reativar depois.
           </p>
           @if (errorMessage(); as message) {
             <p class="mt-3 text-sm font-bold text-red-600">{{ message }}</p>
@@ -237,6 +209,14 @@
               Cancelar o contrato também cancela as aulas agendadas dele.
             </p>
           }
+          @if (currentContract()?.pendingPlanId; as pendingPlanId) {
+            <p class="mt-1.5 rounded-xl bg-cream px-3 py-2 text-xs text-ink-soft">
+              Troca para
+              <strong>{{ planDisplay[currentContract()!.pendingPlanType!].label }}</strong>
+              já agendada — entra em vigor quando a parcela em aberto for paga. Pra desistir,
+              escolha o plano atual de volta.
+            </p>
+          }
         }
 
         @if (pickedGuardian()) {
@@ -284,4 +264,19 @@
 
 @if (showingFinance()) {
   <app-student-finance-modal [studentId]="studentId()" (closed)="showingFinance.set(false)" />
+}
+
+@if (scheduledPlanType(); as planType) {
+  <app-modal title="Troca de plano agendada" (closed)="dismissScheduledNotice()">
+    <p class="mt-4 text-ink-soft">
+      A troca para <strong>{{ planDisplay[planType].label }}</strong> foi agendada: o aluno ainda
+      tem uma parcela em aberto no plano atual. Assim que ela for marcada como paga no Financeiro, o
+      novo plano entra em vigor automaticamente.
+    </p>
+    <div class="mt-6 flex justify-end">
+      <button type="button" (click)="dismissScheduledNotice()" class="btn-primary px-5 py-2.5">
+        Entendi
+      </button>
+    </div>
+  </app-modal>
 }

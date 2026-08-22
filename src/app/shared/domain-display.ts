@@ -93,6 +93,5 @@ export const CLASS_STATUS_DISPLAY: Record<
 export const PAYMENT_STATUS_DISPLAY: Record<PaymentStatus, { label: string; badge: string }> = {
   pending: { label: 'Em aberto', badge: 'bg-subject-amber/15 text-subject-amber' },
   paid: { label: 'Pago', badge: 'bg-subject-green/15 text-subject-green' },
-  overdue: { label: 'Vencido', badge: 'bg-accent-soft text-accent' },
   cancelled: { label: 'Cancelado', badge: 'bg-slate-200 text-slate-500' },
 };

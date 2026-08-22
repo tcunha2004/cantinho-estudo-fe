@@ -6,7 +6,9 @@ import { StudentFinanceModal } from './student-finance-modal';
 
 /*
  * O que importa aqui: cada parcela cai no contrato certo (o admin lê o
- * histórico contrato a contrato) e os totais do topo somam por status.
+ * histórico contrato a contrato), os totais do topo somam por status, e mudar
+ * o status de uma parcela só manda o PATCH depois de confirmado — escolher no
+ * select por si só não toca em nada.
  */
 
 const student = {
@@ -69,7 +71,7 @@ const payments = [
     amount: '600.00',
     dueDate: '2026-06-05',
     paidAt: null,
-    status: 'overdue',
+    status: 'pending',
     planType: 'prata',
     classesCount: 8,
   },
@@ -113,6 +115,34 @@ describe('StudentFinanceModal', () => {
     await tick();
   }
 
+  function section(index: number): HTMLElement {
+    return [...(fixture.nativeElement as HTMLElement).querySelectorAll('section.rounded-3xl')][
+      index
+    ] as HTMLElement;
+  }
+
+  /* Primeira linha da tabela do bloco. */
+  function statusSelect(scope: Element): HTMLSelectElement {
+    return scope.querySelector('tbody tr select') as HTMLSelectElement;
+  }
+
+  function button(scope: Element, text: string): HTMLButtonElement {
+    const match = [...scope.querySelectorAll('tbody tr button')].find((el) =>
+      el.textContent?.trim().startsWith(text),
+    );
+
+    if (!match) {
+      throw new Error(`Botão "${text}" não encontrado`);
+    }
+
+    return match as HTMLButtonElement;
+  }
+
+  function selectStatus(select: HTMLSelectElement, status: string): void {
+    select.value = status;
+    select.dispatchEvent(new Event('change'));
+  }
+
   afterEach(() => http.verify());
 
   it('agrupa as parcelas por contrato, na ordem dos contratos', async () => {
@@ -127,17 +157,111 @@ describe('StudentFinanceModal', () => {
     expect(sections[0].textContent).toContain('Ouro');
     expect(sections[0].querySelectorAll('tbody tr').length).toBe(2);
 
-    /* Contrato cancelado depois, com a parcela vencida. */
+    /* Contrato cancelado depois, com a parcela em aberto. */
     expect(sections[1].textContent).toContain('Prata');
     expect(sections[1].textContent).toContain('Cancelado');
     expect(sections[1].querySelectorAll('tbody tr').length).toBe(1);
-    expect(sections[1].textContent).toContain('Vencido');
+    expect(statusSelect(sections[1]).value).toBe('pending');
   });
 
   it('soma os totais por status', async () => {
     await open();
 
     const totals = fixture.componentInstance['totals']();
-    expect(totals).toEqual({ paid: 450, pending: 900, overdue: 600, count: 3 });
+    expect(totals).toEqual({ paid: 450, pending: 1500, count: 3 });
+  });
+
+  it('só mudar o select não manda nada — precisa confirmar', async () => {
+    await open();
+
+    selectStatus(statusSelect(section(0)), 'paid');
+    await tick();
+
+    http.expectNone(`${API_BASE_URL}/students/s1/payments/pg3`);
+    expect(button(section(0), 'Confirmar')).toBeTruthy();
+  });
+
+  it('cancelar desiste da troca sem tocar no backend', async () => {
+    await open();
+
+    const select = statusSelect(section(0));
+    selectStatus(select, 'paid');
+    await tick();
+
+    button(section(0), 'Cancelar').click();
+    await tick();
+
+    http.expectNone(`${API_BASE_URL}/students/s1/payments/pg3`);
+    expect(select.value).toBe('pending');
+  });
+
+  it('escolher outra parcela desfaz a troca preparada anterior', async () => {
+    await open();
+
+    const first = statusSelect(section(0));
+    selectStatus(first, 'paid');
+    await tick();
+
+    const second = statusSelect(section(1));
+    selectStatus(second, 'paid');
+    await tick();
+
+    /* A primeira volta ao valor real; só a segunda continua preparada. */
+    expect(first.value).toBe('pending');
+    expect(() => button(section(0), 'Confirmar')).toThrow();
+    expect(button(section(1), 'Confirmar')).toBeTruthy();
+  });
+
+  it('confirmar fecha uma parcela: manda o PATCH e recarrega a lista', async () => {
+    await open();
+
+    selectStatus(statusSelect(section(0)), 'paid');
+    await tick();
+    button(section(0), 'Confirmar').click();
+    await tick();
+
+    const request = http.expectOne(`${API_BASE_URL}/students/s1/payments/pg3`);
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ status: 'paid' });
+    request.flush({ ...payments[0], status: 'paid', paidAt: '2026-08-18 09:00:00' });
+    await tick();
+
+    /* Reload: os totais, a data de pagamento e o contrato (uma troca de plano
+     * pode ter sido efetivada) vêm do backend, não do otimismo. */
+    http.expectOne(`${API_BASE_URL}/students/s1`).flush(student);
+    http
+      .expectOne(`${API_BASE_URL}/students/s1/payments`)
+      .flush([
+        { ...payments[0], status: 'paid', paidAt: '2026-08-18 09:00:00' },
+        ...payments.slice(1),
+      ]);
+    await tick();
+
+    expect(statusSelect(section(0)).value).toBe('paid');
+    expect(fixture.componentInstance['totals']().paid).toBe(1350);
+    /* Confirmada, a troca não fica mais preparada — some Confirmar/Cancelar. */
+    expect(() => button(section(0), 'Confirmar')).toThrow();
+  });
+
+  it('erro no PATCH mostra a mensagem do backend e desfaz o select', async () => {
+    await open();
+
+    selectStatus(statusSelect(section(0)), 'paid');
+    await tick();
+    button(section(0), 'Confirmar').click();
+    await tick();
+
+    http
+      .expectOne(`${API_BASE_URL}/students/s1/payments/pg3`)
+      .flush(
+        { message: 'Parcela não encontrada para este aluno' },
+        { status: 404, statusText: 'Not Found' },
+      );
+    await tick();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'Parcela não encontrada para este aluno',
+    );
+    expect(statusSelect(section(0)).value).toBe('pending');
   });
 });

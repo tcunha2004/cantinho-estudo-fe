@@ -5,10 +5,13 @@ import {
   inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { PaymentHistoryDto } from '../../../model/dto/payment-history.dto';
+import { PaymentStatus } from '../../../model/entity/payment.model';
 import { StudentDetailDto } from '../../../model/dto/student-detail.dto';
 import { StudentService } from '../../../service/student.service';
 import {
@@ -28,10 +31,21 @@ interface ContractGroup {
   total: number;
 }
 
+/* Troca de status escolhida no select, aguardando confirmação — nada foi
+ * enviado ao backend ainda. */
+interface StagedChange {
+  paymentId: string;
+  status: PaymentStatus;
+  originalStatus: PaymentStatus;
+  select: HTMLSelectElement;
+}
+
 /**
  * Histórico financeiro completo de um aluno para o admin: todos os contratos
- * (ativos e cancelados) e as parcelas de cada um. Só leitura — editar contrato
- * continua sendo no `StudentDetailModal`, que abre este.
+ * (ativos e cancelados) e as parcelas de cada um. A única edição aqui é o
+ * status da parcela (fechar o que o aluno pagou, em duas etapas — escolher no
+ * select e confirmar); editar contrato continua sendo no `StudentDetailModal`,
+ * que abre este.
  */
 @Component({
   selector: 'app-student-finance-modal',
@@ -50,6 +64,14 @@ export class StudentFinanceModal {
   protected readonly planDisplay = PLAN_DISPLAY;
   protected readonly contractStatus = CONTRACT_STATUS_DISPLAY;
   protected readonly paymentStatus = PAYMENT_STATUS_DISPLAY;
+  protected readonly statuses = Object.keys(PAYMENT_STATUS_DISPLAY) as PaymentStatus[];
+
+  /* Troca preparada por vez: mexer no select de outra parcela substitui esta,
+   * devolvendo o select anterior ao valor original. */
+  protected readonly staged = signal<StagedChange | null>(null);
+  /* Id da parcela cujo PATCH está em voo — trava o select e os botões dela. */
+  protected readonly confirmingId = signal<string | null>(null);
+  protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly student = rxResource({
     params: () => this.studentId(),
@@ -62,8 +84,10 @@ export class StudentFinanceModal {
     defaultValue: [],
   });
 
+  /* Só a primeira carga mostra "Carregando…": no reload depois de confirmar
+   * uma troca a tabela continua na tela em vez de piscar. */
   protected readonly loading = computed(
-    () => this.student.isLoading() || this.payments.isLoading(),
+    () => this.student.isLoading() || (this.payments.isLoading() && !this.payments.value().length),
   );
 
   /* Somatórios do topo — `amount` é decimal em string, vindo do backend. */
@@ -77,7 +101,6 @@ export class StudentFinanceModal {
     return {
       paid: sum('paid'),
       pending: sum('pending'),
-      overdue: sum('overdue'),
       count: payments.length,
     };
   });
@@ -106,6 +129,79 @@ export class StudentFinanceModal {
 
   protected close(): void {
     this.modal().close();
+  }
+
+  /* Só prepara a troca — nada é enviado até `confirmChange()`. */
+  protected stageChange(payment: PaymentHistoryDto, event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const status = select.value as PaymentStatus;
+
+    const previous = this.staged();
+    if (previous && previous.paymentId !== payment.id) {
+      previous.select.value = previous.originalStatus;
+    }
+
+    if (status === payment.status) {
+      this.staged.set(null);
+      return;
+    }
+
+    this.staged.set({
+      paymentId: payment.id,
+      status,
+      originalStatus: payment.status,
+      select,
+    });
+  }
+
+  /* Desiste da troca preparada, sem tocar no backend. */
+  protected cancelChange(): void {
+    const staged = this.staged();
+
+    if (!staged) {
+      return;
+    }
+
+    staged.select.value = staged.originalStatus;
+    this.staged.set(null);
+  }
+
+  /* Recarrega tudo em vez de remendar a parcela na lista: `paidAt` e a
+   * eventual parcela do mês seguinte vêm do backend, não de otimismo local.
+   * Recarrega o aluno também, não só as parcelas: pagar a parcela pode
+   * efetivar uma troca de plano agendada, e o agrupamento por contrato usa a
+   * lista de contratos do aluno — sem recarregá-la, a parcela nova (já no
+   * contrato trocado) não bate com nenhum contrato conhecido e cai em
+   * "Parcelas sem contrato listado" até a página ser recarregada na mão. */
+  protected confirmChange(): void {
+    const staged = this.staged();
+
+    if (!staged) {
+      return;
+    }
+
+    this.confirmingId.set(staged.paymentId);
+    this.errorMessage.set(null);
+
+    this.studentService
+      .updatePaymentStatus(this.studentId(), staged.paymentId, staged.status)
+      .subscribe({
+        next: () => {
+          this.confirmingId.set(null);
+          this.staged.set(null);
+          this.student.reload();
+          this.payments.reload();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.confirmingId.set(null);
+          this.errorMessage.set(
+            (error.error as { message?: string } | null)?.message ??
+              'Não foi possível atualizar a parcela. Tente novamente.',
+          );
+          staged.select.value = staged.originalStatus;
+          this.staged.set(null);
+        },
+      });
   }
 
   private toGroup(contract: Contract | null, payments: PaymentHistoryDto[]): ContractGroup {

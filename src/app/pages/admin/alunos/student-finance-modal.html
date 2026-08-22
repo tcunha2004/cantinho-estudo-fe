@@ -1,8 +1,4 @@
-<app-modal
-  title="Financeiro do aluno"
-  widthClass="max-w-[70vw]"
-  (closed)="closed.emit()"
->
+<app-modal title="Financeiro do aluno" widthClass="max-w-[70vw]" (closed)="closed.emit()">
   @if (loading()) {
     <p class="mt-6 text-center text-ink-soft">Carregando…</p>
   } @else if (student.error() || payments.error()) {
@@ -11,7 +7,7 @@
     <p class="mt-1 text-ink-soft">{{ detail.name }}</p>
 
     <!-- Resumo de todas as parcelas do aluno -->
-    <section class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <section class="mt-5 grid gap-4 sm:grid-cols-3">
       @let summary = totals();
       <div class="panel bg-subject-green/12">
         <p class="text-sm text-ink-soft">Total pago</p>
@@ -20,10 +16,6 @@
       <div class="panel bg-subject-amber/12">
         <p class="text-sm text-ink-soft">Em aberto</p>
         <p class="mt-1 font-display text-2xl font-extrabold">{{ summary.pending | currency }}</p>
-      </div>
-      <div class="panel bg-accent-soft">
-        <p class="text-sm text-ink-soft">Vencido</p>
-        <p class="mt-1 font-display text-2xl font-extrabold">{{ summary.overdue | currency }}</p>
       </div>
       <div class="panel bg-cream">
         <p class="text-sm text-ink-soft">Parcelas</p>
@@ -82,7 +74,10 @@
               </thead>
               <tbody>
                 @for (payment of group.payments; track payment.id) {
-                  <tr class="border-b border-line/70 last:border-0">
+                  <tr
+                    class="border-b border-line/70 last:border-0"
+                    [class.border-0]="staged()?.paymentId === payment.id"
+                  >
                     <td class="py-3 capitalize">{{ payment.dueDate | date: 'MMMM/yyyy' }}</td>
                     <td class="py-3">{{ payment.dueDate | date: 'dd/MM/yyyy' }}</td>
                     <td class="py-3">{{ payment.classesCount }}</td>
@@ -91,11 +86,52 @@
                       {{ payment.paidAt ? (payment.paidAt | date: 'dd/MM/yyyy') : '—' }}
                     </td>
                     <td class="py-3">
-                      <span class="badge" [class]="paymentStatus[payment.status].badge">
-                        {{ paymentStatus[payment.status].label }}
-                      </span>
+                      <select
+                        class="field w-auto py-1.5 text-sm"
+                        [disabled]="confirmingId() === payment.id"
+                        (change)="stageChange(payment, $event)"
+                        [attr.aria-label]="
+                          'Status da parcela de ' + (payment.dueDate | date: 'MM/yyyy')
+                        "
+                      >
+                        @for (status of statuses; track status) {
+                          <option [value]="status" [selected]="status === payment.status">
+                            {{ paymentStatus[status].label }}
+                          </option>
+                        }
+                      </select>
                     </td>
                   </tr>
+                  @if (staged()?.paymentId === payment.id) {
+                    <!-- Linha própria em vez de botões ao lado do select: assim a
+                         confirmação não força a coluna de Status a crescer e
+                         espremer as outras. -->
+                    <tr class="border-b border-line/70 last:border-0">
+                      <td colspan="6" class="pb-3">
+                        <div
+                          class="flex flex-wrap items-center justify-end gap-3 rounded-xl bg-cream px-4 py-2.5"
+                        >
+                          <span class="text-sm text-ink-soft">Confirmar mudança de status?</span>
+                          <button
+                            type="button"
+                            class="btn-secondary px-4 py-2 text-sm"
+                            [disabled]="confirmingId() === payment.id"
+                            (click)="cancelChange()"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            class="btn-primary px-4 py-2 text-sm"
+                            [disabled]="confirmingId() === payment.id"
+                            (click)="confirmChange()"
+                          >
+                            {{ confirmingId() === payment.id ? 'Confirmando…' : 'Confirmar' }}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
                 }
               </tbody>
             </table>
@@ -108,10 +144,14 @@
       <p class="mt-6 text-center text-ink-soft">Nenhum contrato para este aluno.</p>
     }
 
+    @if (errorMessage(); as message) {
+      <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+        {{ message }}
+      </p>
+    }
+
     <div class="mt-6 flex justify-end">
-      <button type="button" (click)="close()" class="btn-secondary px-5 py-2.5">
-        Fechar
-      </button>
+      <button type="button" (click)="close()" class="btn-secondary px-5 py-2.5">Fechar</button>
     </div>
   }
 </app-modal>

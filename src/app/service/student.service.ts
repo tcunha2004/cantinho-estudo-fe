@@ -5,6 +5,7 @@ import { PaymentHistoryDto } from '../model/dto/payment-history.dto';
 import { StudentPlanDto } from '../model/dto/student-plan.dto';
 import { StudentDetailDto } from '../model/dto/student-detail.dto';
 import { ContractStatus } from '../model/entity/student-contract.model';
+import { PaymentStatus } from '../model/entity/payment.model';
 import { ApiClient } from './api-client';
 
 /* Corpo de edição do aluno pelo admin. Todos os campos opcionais — só o que
@@ -56,6 +57,17 @@ export class StudentService {
   /* Parcelas de todos os contratos do aluno — visão do admin. */
   getPayments(id: string): Observable<PaymentHistoryDto[]> {
     return this.api.get<PaymentHistoryDto[]>(`/students/${id}/payments`);
+  }
+
+  /* Fecha (ou reabre) uma parcela. `paidAt` é derivado do status no backend. */
+  updatePaymentStatus(
+    studentId: string,
+    paymentId: string,
+    status: PaymentStatus,
+  ): Observable<PaymentHistoryDto> {
+    return this.api.patch<PaymentHistoryDto>(`/students/${studentId}/payments/${paymentId}`, {
+      status,
+    });
   }
 
   getMyPlan(): Observable<StudentPlanDto> {

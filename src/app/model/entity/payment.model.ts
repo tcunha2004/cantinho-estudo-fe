@@ -2,7 +2,7 @@
 
 import { StudentContract } from './student-contract.model';
 
-export type PaymentStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
+export type PaymentStatus = 'pending' | 'paid' | 'cancelled';
 
 export interface Payment {
   id: string;

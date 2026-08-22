@@ -88,6 +88,18 @@ const pricing = [
   },
 ];
 
+const studentWithPendingChange = {
+  ...student,
+  contracts: [
+    {
+      ...student.contracts[0],
+      pendingPlanId: 'plano-vila-prata',
+      pendingPlanType: 'prata',
+      pendingDiscountPercentage: '5.00',
+    },
+  ],
+};
+
 describe('StudentDetailModal', () => {
   let fixture: ComponentFixture<StudentDetailModal>;
   let http: HttpTestingController;
@@ -164,9 +176,9 @@ describe('StudentDetailModal', () => {
   }
 
   function submit(): void {
-    (fixture.nativeElement as HTMLElement).querySelector('form')!.dispatchEvent(
-      new Event('submit'),
-    );
+    (fixture.nativeElement as HTMLElement)
+      .querySelector('form')!
+      .dispatchEvent(new Event('submit'));
     fixture.detectChanges();
   }
 
@@ -180,8 +192,8 @@ describe('StudentDetailModal', () => {
     expect(text()).toContain('Vila da Serra');
     expect(text()).toContain('Marta Souza');
     expect(text()).toContain('Ativo');
-    /* Contrato atual aparece com o desconto. */
-    expect(text()).toContain('Desconto: 10.00%');
+    /* Contratos/parcelas ficam no modal Financeiro, não aqui. */
+    expect(text()).not.toContain('Desconto: 10.00%');
   });
 
   it('pré-carrega o formulário com o que já está cadastrado', async () => {
@@ -207,9 +219,9 @@ describe('StudentDetailModal', () => {
 
     fill('#regionId', 'r-cantinho');
 
-    expect(
-      [...(fixture.nativeElement as HTMLElement).querySelectorAll('#planId option')],
-    ).toHaveLength(1);
+    expect([
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll('#planId option'),
+    ]).toHaveLength(1);
   });
 
   it('envia cadastro, contrato e responsável num único PATCH', async () => {
@@ -364,5 +376,49 @@ describe('StudentDetailModal', () => {
     fixture.detectChanges();
 
     expect(text()).toContain('Aluno não possui um contrato para editar');
+  });
+
+  it('com troca de plano agendada, pré-carrega o alvo agendado e avisa no formulário', async () => {
+    await open(studentWithPendingChange);
+    click('Editar');
+
+    /* Mostra o ALVO da troca (Prata/5%), não o plano atual do contrato
+     * (Ouro/10%) — senão o admin não teria como ver o que está agendado. */
+    expect(field('#planId').value).toBe('plano-vila-prata');
+    expect(field('#discountPercentage').value).toBe('5.00');
+    expect(text()).toContain('já agendada');
+  });
+
+  it('quando o backend agenda a troca (parcela em aberto), mostra o aviso pós-salvar', async () => {
+    await open();
+    click('Editar');
+
+    fill('#planId', 'plano-vila-prata');
+    submit();
+
+    const request = http.expectOne(`${API_BASE_URL}/students/s1`);
+    request.flush(studentWithPendingChange);
+    await settleReload(studentWithPendingChange);
+
+    expect(text()).toContain('Troca de plano agendada');
+    expect(text()).toContain('Prata');
+
+    click('Entendi');
+    expect(text()).not.toContain('Troca de plano agendada');
+  });
+
+  it('troca aplicada na hora (sem parcela em aberto) não mostra o aviso', async () => {
+    await open();
+    click('Editar');
+
+    fill('#planId', 'plano-vila-prata');
+    submit();
+
+    const request = http.expectOne(`${API_BASE_URL}/students/s1`);
+    /* Resposta sem pendingPlanType: o backend trocou na hora. */
+    request.flush(student);
+    await settleReload(student);
+
+    expect(text()).not.toContain('Troca de plano agendada');
   });
 });
