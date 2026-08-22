@@ -25,17 +25,23 @@ describe('Painel', () => {
 
   function text(): string {
     /* pt-BR usa espaço não-quebrável depois de "R$". */
-    return ((fixture.nativeElement as HTMLElement).textContent ?? '').replace(/[\u00a0\u202f]/g, ' ');
+    return ((fixture.nativeElement as HTMLElement).textContent ?? '').replace(
+      /[\u00a0\u202f]/g,
+      ' ',
+    );
   }
 
-  async function render(overrides: Record<string, object> = {}): Promise<void> {
+  async function render(
+    overrides: Record<string, object> = {},
+    earnings = { totalCompletedClasses: 8, totalAmountToReceive: 320, teachers: [] },
+  ): Promise<void> {
     fixture = TestBed.createComponent(Painel);
     fixture.detectChanges();
 
     const responses: Record<string, object> = {
       '/students/active/count': { count: 12 },
-      '/classes/current-week/count': { count: 9 },
-      '/classes/current-month/revenue': { revenue: 1320 },
+      '/teachers/active/count': { count: 4 },
+      '/classes/current-month/count': { count: 9 },
       '/classes/today/upcoming': [],
       '/student-contracts/active/count-by-plan-type': {
         ouro: 3,
@@ -51,14 +57,8 @@ describe('Painel', () => {
     }
     /* Ganhos do mês levam query string. */
     http
-      .expectOne(
-        (request) => request.url === `${API_BASE_URL}/teachers/all/monthly-earnings`,
-      )
-      .flush({
-        totalCompletedClasses: 8,
-        totalAmountToReceive: 320,
-        teachers: [],
-      });
+      .expectOne((request) => request.url === `${API_BASE_URL}/teachers/all/monthly-earnings`)
+      .flush(earnings);
 
     await Promise.resolve();
     await Promise.resolve();
@@ -70,18 +70,22 @@ describe('Painel', () => {
 
     expect(text()).toContain('Alunos ativos');
     expect(text()).toContain('12');
-    expect(text()).toContain('Aulas na semana');
+    expect(text()).toContain('Professores ativos');
+    expect(text()).toContain('4');
+    expect(text()).toContain('Aulas no mês');
     expect(text()).toContain('9');
-    expect(text()).toContain('R$ 1.320,00');
     expect(text()).toContain('R$ 320,00');
   });
 
   it('não mostra NaN nem undefined quando a API devolve zero', async () => {
-    await render({
-      '/students/active/count': { count: 0 },
-      '/classes/current-week/count': { count: 0 },
-      '/classes/current-month/revenue': { revenue: 0 },
-    });
+    await render(
+      {
+        '/students/active/count': { count: 0 },
+        '/teachers/active/count': { count: 0 },
+        '/classes/current-month/count': { count: 0 },
+      },
+      { totalCompletedClasses: 0, totalAmountToReceive: 0, teachers: [] },
+    );
 
     expect(text()).not.toContain('NaN');
     expect(text()).not.toContain('undefined');
@@ -120,9 +124,7 @@ describe('Painel', () => {
     await render();
 
     const bars = [
-      ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
-        '[style*="width"]',
-      ),
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('[style*="width"]'),
     ].map((element) => element.style.width);
 
     /* 3 ouro + 1 prata = 4 contratos: 75% e 25%. */
@@ -142,9 +144,7 @@ describe('Painel', () => {
 
     expect(text()).not.toContain('NaN');
     const bars = [
-      ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
-        '[style*="width"]',
-      ),
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('[style*="width"]'),
     ].map((element) => element.style.width);
     expect(bars.every((width) => width === '0%')).toBe(true);
   });

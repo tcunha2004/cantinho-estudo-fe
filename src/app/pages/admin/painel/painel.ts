@@ -30,10 +30,10 @@ export class Painel {
   private readonly activeStudents = toSignal(this.studentService.getActiveCount(), {
     initialValue: 0,
   });
-  private readonly weekClasses = toSignal(this.classService.getCurrentWeekCount(), {
+  private readonly monthClasses = toSignal(this.classService.getCurrentMonthCount(), {
     initialValue: 0,
   });
-  private readonly monthRevenue = toSignal(this.classService.getCurrentMonthRevenue(), {
+  private readonly activeTeachers = toSignal(this.teacherService.getActiveCount(), {
     initialValue: 0,
   });
   private readonly teachersPayout = toSignal(this.teacherService.getEarningsByMonth());
@@ -50,16 +50,16 @@ export class Painel {
       currency: false,
     },
     {
-      label: 'Aulas na semana',
-      value: this.weekClasses(),
-      dot: 'bg-subject-green',
+      label: 'Professores ativos',
+      value: this.activeTeachers(),
+      dot: 'bg-subject-amber',
       currency: false,
     },
     {
-      label: 'Receita do mês',
-      value: this.monthRevenue(),
-      dot: 'bg-subject-amber',
-      currency: true,
+      label: 'Aulas no mês',
+      value: this.monthClasses(),
+      dot: 'bg-subject-green',
+      currency: false,
     },
     {
       label: 'A pagar professores',

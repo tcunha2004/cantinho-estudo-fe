@@ -23,8 +23,8 @@ export interface ClassPayload {
 export class ClassService {
   private readonly api = inject(ApiClient);
 
-  getCurrentWeekCount(): Observable<number> {
-    return this.api.getField<number>('/classes/current-week/count', 'count');
+  getCurrentMonthCount(): Observable<number> {
+    return this.api.getField<number>('/classes/current-month/count', 'count');
   }
 
   getCurrentMonthRevenue(): Observable<number> {

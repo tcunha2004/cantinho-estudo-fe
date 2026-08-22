@@ -71,6 +71,15 @@ describe('serviços de API', () => {
   });
 
   describe('TeacherService', () => {
+    it('desembrulha a contagem de professores ativos', () => {
+      const service = TestBed.inject(TeacherService);
+
+      let teachers: number | undefined;
+      service.getActiveCount().subscribe((value) => (teachers = value));
+      expectCall('GET', '/teachers/active/count', { count: 4 });
+      expect(teachers).toBe(4);
+    });
+
     it('pede os ganhos do mês corrente por padrão', () => {
       const service = TestBed.inject(TeacherService);
       const month = new Date().toISOString().slice(0, 7);
@@ -116,10 +125,10 @@ describe('serviços de API', () => {
     it('desembrulha os números do painel', () => {
       const service = TestBed.inject(ClassService);
 
-      let week: number | undefined;
-      service.getCurrentWeekCount().subscribe((value) => (week = value));
-      expectCall('GET', '/classes/current-week/count', { count: 9 });
-      expect(week).toBe(9);
+      let classes: number | undefined;
+      service.getCurrentMonthCount().subscribe((value) => (classes = value));
+      expectCall('GET', '/classes/current-month/count', { count: 9 });
+      expect(classes).toBe(9);
 
       let revenue: number | undefined;
       service.getCurrentMonthRevenue().subscribe((value) => (revenue = value));
@@ -159,9 +168,7 @@ describe('serviços de API', () => {
       const service = TestBed.inject(ClassService);
 
       service.getAgenda({ from: '2026-08-10', to: '2026-08-16' }).subscribe();
-      const req = http.expectOne(
-        (request) => request.url === `${API_BASE_URL}/classes/agenda`,
-      );
+      const req = http.expectOne((request) => request.url === `${API_BASE_URL}/classes/agenda`);
       expect(req.request.params.get('from')).toBe('2026-08-10');
       expect(req.request.params.get('to')).toBe('2026-08-16');
       req.flush([]);

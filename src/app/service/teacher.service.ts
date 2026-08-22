@@ -19,6 +19,10 @@ export interface UpdateTeacherPayload {
 export class TeacherService {
   private readonly api = inject(ApiClient);
 
+  getActiveCount(): Observable<number> {
+    return this.api.getField<number>('/teachers/active/count', 'count');
+  }
+
   getEarningsByMonth(month = currentMonth()): Observable<TeachersEarningsSummaryDto> {
     return this.api.get<TeachersEarningsSummaryDto>('/teachers/all/monthly-earnings', { month });
   }
