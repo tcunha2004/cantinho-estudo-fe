@@ -1,17 +1,27 @@
 <app-page-header title="Professores">
-  <button
-    type="button"
-    (click)="showCommissionInfo.set(true)"
-    class="flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"
-  >
-    Comissão
-    <app-icon name="help-circle" class="size-4" />
-  </button>
+  <div class="flex items-center gap-4">
+    <input
+      type="month"
+      aria-label="Mês de referência"
+      class="field w-auto"
+      [value]="selectedMonth()"
+      [max]="maxMonth"
+      (change)="selectedMonth.set($any($event.target).value || maxMonth)"
+    />
+    <button
+      type="button"
+      (click)="showCommissionInfo.set(true)"
+      class="flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"
+    >
+      Comissão
+      <app-icon name="help-circle" class="size-4" />
+    </button>
+  </div>
 </app-page-header>
 
 <!-- Total a pagar no mês -->
 <section class="panel mt-6 bg-accent-soft">
-  <p class="text-ink-soft">Total a pagar aos professores · {{ today | date: 'MMMM' }}</p>
+  <p class="text-ink-soft">Total a pagar aos professores · {{ monthDate() | date: 'MMMM/yyyy' }}</p>
   <p class="mt-1 font-display text-4xl font-extrabold text-accent">{{ totalDue() | currency }}</p>
 </section>
 
