@@ -33,6 +33,71 @@
   <p class="mt-6 text-ink-soft">Carregando seu plano…</p>
 }
 
+<!-- Consumo do plano -->
+@if (usage(); as use) {
+  <app-card class="mt-6">
+    <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+      <h2 class="font-display text-2xl font-bold">{{ usageTitle() }}</h2>
+      @if (use.remaining !== null) {
+        <p class="font-bold text-ink-soft">
+          @if (use.remaining) {
+            {{ use.remaining }} {{ use.remaining === 1 ? 'aula' : 'aulas' }} ainda disponíveis
+          } @else {
+            Você já usou todas as aulas
+          }
+        </p>
+      }
+    </div>
+
+    <p class="mt-3 font-display text-3xl font-extrabold">
+      {{ use.used
+      }}<span class="text-sm font-bold text-ink-soft">
+        @if (use.total !== null) {
+          de {{ use.total }} aulas usadas
+        } @else {
+          {{ use.used === 1 ? 'aula realizada' : 'aulas realizadas' }}
+        }
+      </span>
+    </p>
+
+    @if (use.total !== null) {
+      <div
+        class="mt-4 h-3 overflow-hidden rounded-full bg-cream"
+        role="progressbar"
+        [attr.aria-valuenow]="use.used"
+        [attr.aria-valuemax]="use.total"
+        [attr.aria-label]="usageTitle()"
+      >
+        <div class="h-full rounded-full bg-subject-green" [style.width.%]="use.percent"></div>
+      </div>
+    }
+
+    <dl class="mt-5 grid gap-3 sm:grid-cols-3">
+      <div class="list-tile">
+        <span class="h-10 w-1.5 shrink-0 rounded-full bg-subject-green"></span>
+        <div class="min-w-0">
+          <dt class="text-sm text-ink-soft">Realizadas</dt>
+          <dd class="font-bold">{{ use.completed }}</dd>
+        </div>
+      </div>
+      <div class="list-tile">
+        <span class="h-10 w-1.5 shrink-0 rounded-full bg-accent"></span>
+        <div class="min-w-0">
+          <dt class="text-sm text-ink-soft">Faltas cobradas</dt>
+          <dd class="font-bold">{{ use.noShow }}</dd>
+        </div>
+      </div>
+      <div class="list-tile">
+        <span class="h-10 w-1.5 shrink-0 rounded-full bg-subject-blue"></span>
+        <div class="min-w-0">
+          <dt class="text-sm text-ink-soft">Agendadas</dt>
+          <dd class="font-bold">{{ use.scheduled }}</dd>
+        </div>
+      </div>
+    </dl>
+  </app-card>
+}
+
 <!-- O que está incluído -->
 <app-card class="mt-6">
   <div class="grid gap-8 sm:grid-cols-2">
