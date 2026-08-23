@@ -1,35 +1,46 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { PLAN_TYPES } from '../../../model/entity/plan.model';
 import { StudentService } from '../../../service/student.service';
 import { Card } from '../../../shared/card/card';
 import { CONTRACT_STATUS_DISPLAY, PLAN_DISPLAY } from '../../../shared/domain-display';
 import { Icon } from '../../../shared/icon/icon';
 import { PageHeader } from '../../../shared/page-header/page-header';
 
-/** Vale para qualquer plano; a contagem de aulas entra só quando o plano tem pacote. */
-const BASE_BENEFITS = ['Professor fixo por matéria', 'Agenda online com remarcação'];
+/**
+ * Vale para qualquer plano; a contagem de aulas entra só quando o plano tem
+ * pacote. O professor é definido em cada aula (classes.teacher_id) — não existe
+ * professor amarrado ao contrato, então a lista não promete um professor fixo.
+ */
+const BASE_BENEFITS = [
+  'Professor por matéria, definido em cada aula',
+  'Aula no Cantinho ou na casa do aluno',
+  'Agenda online: agendar e remarcar pela plataforma',
+];
+
+/** Linha do bloco de detalhes do contrato. Valor nulo não vira linha. */
+interface Detail {
+  label: string;
+  value: string | null;
+}
 
 @Component({
   selector: 'app-plano',
   imports: [Card, Icon, PageHeader, CurrencyPipe],
+  /* O pipe também é usado em código, pra formatar a hora-aula na lista de
+   * detalhes com o mesmo locale/moeda do template. */
+  providers: [CurrencyPipe],
   templateUrl: './plano.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Plano {
   private readonly studentService = inject(StudentService);
+  private readonly currency = inject(CurrencyPipe);
 
   protected readonly planDisplay = PLAN_DISPLAY;
   protected readonly contractStatus = CONTRACT_STATUS_DISPLAY;
 
   protected readonly plan = toSignal(this.studentService.getMyPlan());
-
-  /** Os demais planos que o aluno pode contratar: a lista fixa menos o atual. */
-  protected readonly otherPlans = computed(() => {
-    const current = this.plan()?.planType;
-    return current ? PLAN_TYPES.filter((type) => type !== current) : [];
-  });
 
   /** Pacote (Bronze) conta as aulas na validade toda; os mensais, por mês. */
   protected readonly benefits = computed(() => {
@@ -84,6 +95,41 @@ export class Plano {
     return 'Valor fixo por mês, independente de quantas aulas você faz e de onde elas acontecem.';
   });
 
+  /**
+   * Dados do contrato que a API já devolve: a região explica o preço (a tabela
+   * varia por região), o desconto explica a diferença entre o preço de tabela e
+   * o que o aluno paga, e a vigência só tem fim no pacote (Bronze).
+   */
+  protected readonly details = computed<Detail[]>(() => {
+    const plan = this.plan();
+
+    if (!plan) {
+      return [];
+    }
+
+    const discount = Number(plan.discountPercentage ?? 0);
+
+    return [
+      { label: 'Região de atendimento', value: plan.region },
+      {
+        /* Nos planos mensais é referência: o aluno paga a mensalidade cheia. */
+        label: plan.planType === 'avulsa' ? 'Valor da hora-aula' : 'Hora-aula de referência',
+        value: this.currency.transform(plan.hourPrice),
+      },
+      {
+        label: 'Desconto aplicado',
+        value: discount ? `${discount}% já embutido no valor acima` : null,
+      },
+      { label: 'Início do contrato', value: this.date(plan.startDate) },
+      { label: 'Vigência até', value: this.date(plan.endDate) },
+    ].filter((detail) => detail.value !== null);
+  });
+
   protected readonly cancellationRule =
-    'avise com 24h de antecedência. Aulas desmarcadas em cima da hora são cobradas normalmente.';
+    'avise com 24h de antecedência. Aula desmarcada em cima da hora, ou falta sem aviso, entra como aula cobrada.';
+
+  /** `YYYY-MM-DD` ingênuo em dd/mm/aaaa, sem passar por Date (nada de fuso). */
+  private date(value: string | null): string | null {
+    return value ? value.slice(0, 10).split('-').reverse().join('/') : null;
+  }
 }

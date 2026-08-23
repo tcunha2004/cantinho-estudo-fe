@@ -101,8 +101,7 @@ export class StudentDetailModal {
    */
   protected readonly pickedRegionId = signal('');
 
-  /* Planos são escolhidos dentro da região do aluno — mesma regra que
-   * `findOtherPlans` usa no backend. */
+  /* Planos são escolhidos dentro da região do aluno. */
   protected readonly availablePlans = computed(
     () => this.regions().find((region) => region.id === this.pickedRegionId())?.plans ?? [],
   );

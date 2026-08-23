@@ -17,3 +17,8 @@ export function nowNaive(): string {
 
   return `${date}T${time}`;
 }
+
+/** Só a data de hoje (`YYYY-MM-DD`) — é como o backend guarda vencimentos. */
+export function todayNaive(): string {
+  return nowNaive().slice(0, 10);
+}

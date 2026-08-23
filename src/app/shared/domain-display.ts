@@ -3,6 +3,7 @@ import { ClassStatus } from '../model/entity/class.model';
 import { PaymentStatus } from '../model/entity/payment.model';
 import { PlanType } from '../model/entity/plan.model';
 import { ContractStatus } from '../model/entity/student-contract.model';
+import { todayNaive } from './naive-date';
 
 /*
  * Como cada enum do domínio aparece na tela: rótulo em português e as classes
@@ -95,3 +96,21 @@ export const PAYMENT_STATUS_DISPLAY: Record<PaymentStatus, { label: string; badg
   paid: { label: 'Pago', badge: 'bg-subject-green/15 text-subject-green' },
   cancelled: { label: 'Cancelado', badge: 'bg-slate-200 text-slate-500' },
 };
+
+/*
+ * Como a parcela aparece para quem só lê o status. "Em aberto" é o status no
+ * banco, mas a partir do dia seguinte ao vencimento a parcela está em atraso —
+ * e é isso que o aluno precisa ver. Comparação por string, no formato ingênuo
+ * do backend (ver naive-date).
+ *
+ * O `PAYMENT_STATUS_DISPLAY` cru continua servindo o seletor de status do modal
+ * financeiro do admin, onde "Em aberto" é uma opção escolhível, não um rótulo.
+ */
+export function paymentStatusDisplay(
+  status: PaymentStatus,
+  dueDate: string,
+): { label: string; badge: string } {
+  return status === 'pending' && dueDate < todayNaive()
+    ? { label: 'Em atraso', badge: 'bg-accent-soft text-accent' }
+    : PAYMENT_STATUS_DISPLAY[status];
+}

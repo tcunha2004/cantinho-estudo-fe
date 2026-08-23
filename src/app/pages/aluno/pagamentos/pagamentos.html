@@ -1,15 +1,20 @@
 <app-page-header title="Pagamentos" subtitle="Mensalidades do seu plano" />
 
 <!-- Próximo vencimento -->
-@if (nextPayment(); as next) {
-  <section class="panel mt-6 flex flex-wrap items-center justify-between gap-6 bg-accent-soft">
+@if (dueInfo(); as due) {
+  @let next = due.payment;
+  <section class="panel mt-6 flex flex-wrap items-center justify-between gap-6" [class]="due.tint">
     <div>
-      <p class="text-ink-soft">Próximo vencimento</p>
-      <p class="mt-1 font-display text-3xl font-extrabold">
-        {{ next.amount | currency
-        }}<span class="text-lg font-bold text-ink-soft"> · {{ next.dueDate | date: 'dd/MM' }}</span>
+      <p class="text-ink-soft">{{ due.title }}</p>
+      <p class="mt-1 font-display text-3xl font-extrabold">{{ next.amount | currency }}</p>
+      <p class="mt-1 font-bold text-ink-soft">
+        {{ due.prefix }} {{ next.dueDate | date: 'dd/MM/yyyy' }} · competência de
+        {{ next.dueDate | date: 'MMMM' }}
       </p>
     </div>
+    <span class="badge shrink-0" [class]="paymentStatus(next.status, next.dueDate).badge">
+      {{ paymentStatus(next.status, next.dueDate).label }}
+    </span>
   </section>
 }
 
@@ -19,7 +24,7 @@
 
   <ul class="mt-5 divide-y divide-line/70 border-t border-line/70">
     @for (payment of payments(); track payment.id) {
-      @let status = paymentStatus[payment.status];
+      @let status = paymentStatus(payment.status, payment.dueDate);
       <li class="flex items-center gap-4 py-4">
         <span
           class="flex size-11 shrink-0 items-center justify-center rounded-full bg-cream text-xs font-extrabold text-ink-soft"
@@ -32,9 +37,9 @@
             @if (payment.paidAt) {
               Pago em {{ payment.paidAt | date: 'dd/MM/yyyy' }}
             } @else {
-              Vence em {{ payment.dueDate | date: 'dd/MM/yyyy' }}
+              Vencimento {{ payment.dueDate | date: 'dd/MM/yyyy' }}
             }
-            · {{ payment.classesCount }} aulas no mês
+            · {{ payment.classesCount }} {{ payment.classesCount === 1 ? 'aula' : 'aulas' }} no mês
           </p>
         </div>
         <p class="ml-auto whitespace-nowrap font-bold">{{ payment.amount | currency }}</p>

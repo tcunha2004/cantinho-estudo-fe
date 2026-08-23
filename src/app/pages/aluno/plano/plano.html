@@ -33,43 +33,43 @@
   <p class="mt-6 text-ink-soft">Carregando seu plano…</p>
 }
 
-<div class="mt-6 grid items-start gap-5 lg:grid-cols-2">
-  <!-- O que está incluído -->
-  <app-card>
-    <h2 class="font-display text-2xl font-bold">O que está incluído</h2>
+<!-- O que está incluído -->
+<app-card class="mt-6">
+  <div class="grid gap-8 sm:grid-cols-2">
+    <div>
+      <h2 class="font-display text-2xl font-bold">O que está incluído</h2>
 
-    <ul class="mt-5 space-y-4">
-      @for (benefit of benefits(); track benefit) {
-        <li class="flex items-center gap-3">
-          <span
-            class="flex size-6 shrink-0 items-center justify-center rounded-full bg-subject-green/15 text-subject-green"
-          >
-            <app-icon name="check" class="size-4" />
-          </span>
-          <span class="font-bold">{{ benefit }}</span>
-        </li>
-      }
-    </ul>
-
-    <p class="mt-6 rounded-2xl bg-accent-soft px-5 py-4 text-sm text-ink">
-      <span class="font-bold">Regra de cancelamento:</span> {{ cancellationRule }}
-    </p>
-  </app-card>
-
-  <!-- Outros planos -->
-  <app-card>
-    <h2 class="font-display text-2xl font-bold">Outros planos</h2>
-
-    <div class="mt-5 space-y-3">
-      @for (type of otherPlans(); track type) {
-        @let otherDisplay = planDisplay[type];
-        <div class="list-tile">
-          <span class="h-10 w-1.5 shrink-0 rounded-full" [class]="otherDisplay.bar"></span>
-          <p class="truncate font-bold">{{ otherDisplay.label }}</p>
-        </div>
-      }
+      <ul class="mt-5 space-y-4">
+        @for (benefit of benefits(); track benefit) {
+          <li class="flex items-start gap-3">
+            <span
+              class="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-subject-green/15 text-subject-green"
+            >
+              <app-icon name="check" class="size-4" />
+            </span>
+            <span class="font-bold">{{ benefit }}</span>
+          </li>
+        }
+      </ul>
     </div>
 
-    <button type="button" class="btn-primary mt-5 w-full">Solicitar troca de plano</button>
-  </app-card>
-</div>
+    <div>
+      <h2 class="font-display text-2xl font-bold">Seu contrato</h2>
+
+      <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+        @for (detail of details(); track detail.label) {
+          <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-3">
+            <dt class="text-sm text-ink-soft">{{ detail.label }}</dt>
+            <dd class="font-bold">{{ detail.value }}</dd>
+          </div>
+        } @empty {
+          <p class="py-3 text-ink-soft">Carregando os dados do contrato…</p>
+        }
+      </dl>
+    </div>
+  </div>
+
+  <p class="mt-8 rounded-2xl bg-accent-soft px-5 py-4 text-sm text-ink">
+    <span class="font-bold">Regra de cancelamento:</span> {{ cancellationRule }}
+  </p>
+</app-card>
