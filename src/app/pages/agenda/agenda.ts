@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { AgendaClassDto, ClassDetailDto } from '../../model/dto/agenda-class.dto';
 import { ClassFormOptionsDto } from '../../model/dto/class-form-options.dto';
 import { ClassService } from '../../service/class.service';
+import { TeacherService } from '../../service/teacher.service';
 import { Session } from '../../core/session';
 import { Icon } from '../../shared/icon/icon';
 import { Modal } from '../../shared/modal/modal';
@@ -45,11 +46,30 @@ type ModalState =
 })
 export class Agenda {
   private readonly classService = inject(ClassService);
+  private readonly teacherService = inject(TeacherService);
 
   protected readonly role = inject(Session).role;
+
+  /*
+   * Só o professor precisa saber: o admin nunca está inativo e o aluno já não
+   * agenda. Se a requisição falhar, o padrão é não travar a tela — o backend
+   * continua barrando o agendamento de qualquer jeito.
+   */
+  private readonly teacherActive = rxResource({
+    params: () => (this.role() === 'professor' ? true : undefined),
+    stream: () => this.teacherService.isActive(),
+    defaultValue: true,
+  });
+
+  /* Trava a agenda inteira, não só o agendamento: sem cadastro ativo não há
+   * aula para marcar, editar nem cancelar. */
+  protected readonly blocked = computed(
+    () => this.role() === 'professor' && !this.teacherActive.value(),
+  );
+
   protected readonly canSchedule = computed(() => {
     const role = this.role();
-    return role === 'admin' || role === 'professor';
+    return role === 'admin' || (role === 'professor' && !this.blocked());
   });
   protected readonly subtitle = computed(() => {
     const role = this.role();

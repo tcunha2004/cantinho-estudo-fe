@@ -8,6 +8,16 @@
       [max]="maxMonth"
       (change)="selectedMonth.set($any($event.target).value || maxMonth)"
     />
+    <select
+      aria-label="Filtrar por situação"
+      class="field w-auto"
+      [value]="statusFilter()"
+      (change)="statusFilter.set($any($event.target).value)"
+    >
+      <option value="active">Ativos</option>
+      <option value="inactive">Inativos</option>
+      <option value="all">Todos</option>
+    </select>
     <button
       type="button"
       (click)="showCommissionInfo.set(true)"
@@ -27,7 +37,7 @@
 
 <!-- Cards de professores -->
 <div class="mt-6 grid grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] gap-5">
-  @for (teacher of teachers(); track teacher.id) {
+  @for (teacher of visibleTeachers(); track teacher.id) {
     <app-card
       (click)="selectedTeacherId.set(teacher.id)"
       class="cursor-pointer transition-colors hover:bg-cream/60"
@@ -42,6 +52,9 @@
         <div class="min-w-0">
           <h2 class="truncate text-xl font-bold">{{ teacher.name }}</h2>
           <p class="truncate text-ink-soft">{{ teacher.subject }}</p>
+          @if (!teacher.active) {
+            <span class="badge mt-1 bg-slate-200 text-slate-500">Inativo</span>
+          }
         </div>
       </div>
 
@@ -57,7 +70,7 @@
       </dl>
     </app-card>
   } @empty {
-    <p class="text-ink-soft">Nenhum professor com aulas neste mês.</p>
+    <p class="text-ink-soft">Nenhum professor nesta situação.</p>
   }
 </div>
 

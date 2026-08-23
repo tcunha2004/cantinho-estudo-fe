@@ -42,6 +42,9 @@ export class Professores {
   protected readonly selectedMonth = signal(currentMonth());
   protected readonly maxMonth = currentMonth();
 
+  /* Padrão "ativos": a folha do dia a dia é dos ativos, os inativos são consulta. */
+  protected readonly statusFilter = signal<'active' | 'inactive' | 'all'>('active');
+
   protected readonly selectedTeacherId = signal<string | null>(null);
   protected readonly showCommissionInfo = signal(false);
 
@@ -50,7 +53,18 @@ export class Professores {
     stream: ({ params }) => this.teacherService.getEarningsByMonth(params),
   });
 
-  protected readonly teachers = computed(() => this.earnings.value()?.teachers ?? []);
+  private readonly teachers = computed(() => this.earnings.value()?.teachers ?? []);
+
+  /* O total acima é a folha inteira do mês e não acompanha este filtro:
+   * professor inativado no meio do mês ainda recebe pelas aulas que deu. */
+  protected readonly visibleTeachers = computed(() => {
+    const status = this.statusFilter();
+
+    return status === 'all'
+      ? this.teachers()
+      : this.teachers().filter((teacher) => teacher.active === (status === 'active'));
+  });
+
   protected readonly totalDue = computed(() => this.earnings.value()?.totalAmountToReceive ?? 0);
 
   /* Só para o `DatePipe` escrever o nome do mês selecionado no título. */

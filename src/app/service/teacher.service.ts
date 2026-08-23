@@ -23,6 +23,11 @@ export class TeacherService {
     return this.api.getField<number>('/teachers/active/count', 'count');
   }
 
+  /* Do professor logado — a agenda bloqueia quando ele está inativo. */
+  isActive(): Observable<boolean> {
+    return this.api.getField<boolean>('/teachers/me/active', 'active');
+  }
+
   getEarningsByMonth(month = currentMonth()): Observable<TeachersEarningsSummaryDto> {
     return this.api.get<TeachersEarningsSummaryDto>('/teachers/all/monthly-earnings', { month });
   }

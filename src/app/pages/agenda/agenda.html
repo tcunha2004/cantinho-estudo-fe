@@ -1,128 +1,158 @@
-<app-page-header title="Agenda" [subtitle]="subtitle()">
-  <button type="button" (click)="openNew()" class="btn-primary flex items-center gap-2 px-5 py-2.5">
-    <app-icon name="plus" class="size-4.5" />
-    Nova aula
-  </button>
-</app-page-header>
-
-<div class="mt-6 flex flex-wrap items-center justify-between gap-4">
-  <!-- Navegação do período -->
-  <div class="flex flex-wrap items-center gap-3">
-    <div class="flex items-center gap-1.5">
+<!-- Professor inativo vê a agenda, mas não mexe nela: o `inert` nativo corta
+     clique, foco e teclado do conteúdo inteiro de uma vez, e o menu lateral
+     continua funcionando porque o bloqueio mora aqui dentro, não na página. -->
+<div class="relative">
+  <div [attr.inert]="blocked() ? '' : null">
+    <app-page-header title="Agenda" [subtitle]="subtitle()">
       <button
         type="button"
-        (click)="shift(-1)"
-        aria-label="Período anterior"
-        class="flex size-11 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+        (click)="openNew()"
+        class="btn-primary flex items-center gap-2 px-5 py-2.5"
       >
-        <app-icon name="chevron-left" class="size-4.5" />
+        <app-icon name="plus" class="size-4.5" />
+        Nova aula
       </button>
-      <button
-        type="button"
-        (click)="shift(1)"
-        aria-label="Próximo período"
-        class="flex size-11 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-      >
-        <app-icon name="chevron-right" class="size-4.5" />
-      </button>
-    </div>
+    </app-page-header>
 
-    <button
-      type="button"
-      (click)="goToday()"
-      class="rounded-full border border-line bg-white px-5 py-2.5 text-sm font-bold text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent"
-    >
-      Hoje
-    </button>
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
+      <!-- Navegação do período -->
+      <div class="flex flex-wrap items-center gap-3">
+        <div class="flex items-center gap-1.5">
+          <button
+            type="button"
+            (click)="shift(-1)"
+            aria-label="Período anterior"
+            class="flex size-11 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          >
+            <app-icon name="chevron-left" class="size-4.5" />
+          </button>
+          <button
+            type="button"
+            (click)="shift(1)"
+            aria-label="Próximo período"
+            class="flex size-11 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+          >
+            <app-icon name="chevron-right" class="size-4.5" />
+          </button>
+        </div>
 
-    @let period = range();
-    <p class="font-display text-lg font-bold">
-      @if (viewMode() === 'day') {
-        {{ period.days[0] | date: "EEEE, d 'de' MMMM 'de' y" }}
-      } @else {
-        {{ period.days[0] | date: 'd MMM' }} –
-        {{ period.days[6] | date: "d 'de' MMMM 'de' y" }}
-      }
-    </p>
-
-    @if (loading()) {
-      <span class="text-sm text-ink-soft">Carregando…</span>
-    }
-  </div>
-
-  <div class="flex flex-wrap items-center gap-3">
-    <!-- Filtros: só o admin vê aulas de outras pessoas -->
-    @if (role() === 'admin') {
-      <select
-        aria-label="Filtrar por professor"
-        class="field w-44 rounded-full py-2.5"
-        [value]="teacherFilter()"
-        (change)="teacherFilter.set($any($event.target).value)"
-      >
-        <option value="">Todos os professores</option>
-        @for (teacher of formOptions().teachers; track teacher.id) {
-          <option [value]="teacher.id">{{ teacher.name }}</option>
-        }
-      </select>
-
-      <select
-        aria-label="Filtrar por aluno"
-        class="field w-40 rounded-full py-2.5"
-        [value]="studentFilter()"
-        (change)="studentFilter.set($any($event.target).value)"
-      >
-        <option value="">Todos os alunos</option>
-        @for (student of formOptions().students; track student.id) {
-          <option [value]="student.id">{{ student.name }}</option>
-        }
-      </select>
-    }
-
-    <!-- Dia / Semana -->
-    <div
-      class="flex gap-1 rounded-full border border-line bg-white p-1.5 shadow-xs"
-      role="group"
-      aria-label="Visualização"
-    >
-      @for (
-        mode of [
-          { value: 'day', label: 'Dia' },
-          { value: 'week', label: 'Semana' },
-        ];
-        track mode.value
-      ) {
         <button
           type="button"
-          (click)="setViewMode($any(mode.value))"
-          [attr.aria-pressed]="viewMode() === mode.value"
-          class="rounded-full px-4 py-2 text-sm font-bold transition-colors"
-          [class]="
-            viewMode() === mode.value
-              ? 'bg-accent-soft text-accent'
-              : 'text-ink-soft hover:bg-cream'
-          "
+          (click)="goToday()"
+          class="rounded-full border border-line bg-white px-5 py-2.5 text-sm font-bold text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent"
         >
-          {{ mode.label }}
+          Hoje
         </button>
-      }
+
+        @let period = range();
+        <p class="font-display text-lg font-bold">
+          @if (viewMode() === 'day') {
+            {{ period.days[0] | date: "EEEE, d 'de' MMMM 'de' y" }}
+          } @else {
+            {{ period.days[0] | date: 'd MMM' }} –
+            {{ period.days[6] | date: "d 'de' MMMM 'de' y" }}
+          }
+        </p>
+
+        @if (loading()) {
+          <span class="text-sm text-ink-soft">Carregando…</span>
+        }
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Filtros: só o admin vê aulas de outras pessoas -->
+        @if (role() === 'admin') {
+          <select
+            aria-label="Filtrar por professor"
+            class="field w-44 rounded-full py-2.5"
+            [value]="teacherFilter()"
+            (change)="teacherFilter.set($any($event.target).value)"
+          >
+            <option value="">Todos os professores</option>
+            @for (teacher of formOptions().teachers; track teacher.id) {
+              <option [value]="teacher.id">{{ teacher.name }}</option>
+            }
+          </select>
+
+          <select
+            aria-label="Filtrar por aluno"
+            class="field w-40 rounded-full py-2.5"
+            [value]="studentFilter()"
+            (change)="studentFilter.set($any($event.target).value)"
+          >
+            <option value="">Todos os alunos</option>
+            @for (student of formOptions().students; track student.id) {
+              <option [value]="student.id">{{ student.name }}</option>
+            }
+          </select>
+        }
+
+        <!-- Dia / Semana -->
+        <div
+          class="flex gap-1 rounded-full border border-line bg-white p-1.5 shadow-xs"
+          role="group"
+          aria-label="Visualização"
+        >
+          @for (
+            mode of [
+              { value: 'day', label: 'Dia' },
+              { value: 'week', label: 'Semana' },
+            ];
+            track mode.value
+          ) {
+            <button
+              type="button"
+              (click)="setViewMode($any(mode.value))"
+              [attr.aria-pressed]="viewMode() === mode.value"
+              class="rounded-full px-4 py-2 text-sm font-bold transition-colors"
+              [class]="
+                viewMode() === mode.value
+                  ? 'bg-accent-soft text-accent'
+                  : 'text-ink-soft hover:bg-cream'
+              "
+            >
+              {{ mode.label }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (feedback(); as message) {
+      <p
+        class="mt-4 rounded-xl bg-subject-green/10 px-4 py-2.5 text-sm font-bold text-subject-green"
+      >
+        {{ message }}
+      </p>
+    }
+
+    @if (loadError()) {
+      <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+        Não foi possível carregar a agenda. Recarregue a página.
+      </p>
+    }
+
+    <div class="mt-4">
+      <app-calendar-grid [days]="days()" [role]="role()" (selected)="openDetails($event)" />
     </div>
   </div>
-</div>
 
-@if (feedback(); as message) {
-  <p class="mt-4 rounded-xl bg-subject-green/10 px-4 py-2.5 text-sm font-bold text-subject-green">
-    {{ message }}
-  </p>
-}
-
-@if (loadError()) {
-  <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
-    Não foi possível carregar a agenda. Recarregue a página.
-  </p>
-}
-
-<div class="mt-4">
-  <app-calendar-grid [days]="days()" [role]="role()" (selected)="openDetails($event)" />
+  @if (blocked()) {
+    <div class="absolute inset-0 flex items-center justify-center rounded-3xl p-4">
+      <div
+        role="dialog"
+        aria-labelledby="agenda-blocked-title"
+        class="panel max-w-lg bg-white border-0 shadow-2xl"
+      >
+        <h2 id="agenda-blocked-title" class="font-display text-2xl font-bold">Cadastro inativo</h2>
+        <p class="mt-4 text-ink-soft">
+          Seu cadastro de professor está inativo, então a agenda fica indisponível — não é possível
+          marcar, editar ou cancelar aulas. Fale com a secretaria do Cantinho para reativar o seu
+          cadastro.
+        </p>
+      </div>
+    </div>
+  }
 </div>
 
 @if (modal(); as state) {
