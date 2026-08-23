@@ -1,4 +1,13 @@
-<app-page-header title="Meus ganhos" subtitle="Aulas dadas e pagamentos" />
+<app-page-header title="Meus ganhos" subtitle="Aulas dadas e pagamentos">
+  <input
+    type="month"
+    aria-label="Mês de referência"
+    class="field w-auto"
+    [value]="selectedMonth()"
+    [max]="maxMonth"
+    (change)="selectedMonth.set($any($event.target).value || maxMonth)"
+  />
+</app-page-header>
 
 <div class="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
   <app-card>
@@ -15,7 +24,7 @@
 </div>
 
 <app-card class="mt-6">
-  <h2 class="font-display text-2xl font-bold">Aulas por semana · {{ today | date: 'MMMM' }}</h2>
+  <h2 class="font-display text-2xl font-bold">Aulas por semana · {{ monthDate() | date: 'MMMM' }}</h2>
 
   <div class="mt-6 flex items-end justify-between gap-6 px-6 py-8">
     @for (week of weeklyCounts(); track week.week) {

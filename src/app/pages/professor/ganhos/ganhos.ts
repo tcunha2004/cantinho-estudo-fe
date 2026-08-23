@@ -1,8 +1,9 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { ClassService } from '../../../service/class.service';
 import { Card } from '../../../shared/card/card';
+import { currentMonth } from '../../../shared/month';
 import { PageHeader } from '../../../shared/page-header/page-header';
 
 @Component({
@@ -14,20 +15,36 @@ import { PageHeader } from '../../../shared/page-header/page-header';
 export class Ganhos {
   private readonly classService = inject(ClassService);
 
-  protected readonly today = new Date();
+  /* Mês de referência, em `YYYY-MM` — o valor do `<input type="month">` é o
+   * mesmo formato que a API espera, então vai direto para a requisição. */
+  protected readonly selectedMonth = signal(currentMonth());
+  protected readonly maxMonth = currentMonth();
 
-  protected readonly lessonsInMonth = toSignal(this.classService.getTeacherMonthlyCount(), {
-    initialValue: 0,
+  private readonly monthlyCount = rxResource({
+    params: () => this.selectedMonth(),
+    stream: ({ params }) => this.classService.getTeacherMonthlyCount(params),
   });
-  protected readonly amountToReceive = toSignal(this.classService.getTeacherMonthlyEarnings(), {
-    initialValue: 0,
+  private readonly monthlyEarnings = rxResource({
+    params: () => this.selectedMonth(),
+    stream: ({ params }) => this.classService.getTeacherMonthlyEarnings(params),
   });
-  protected readonly weeklyCounts = toSignal(this.classService.getTeacherWeeklyCounts(), {
-    initialValue: [],
+  private readonly weekly = rxResource({
+    params: () => this.selectedMonth(),
+    stream: ({ params }) => this.classService.getTeacherWeeklyCounts(params),
   });
+
+  protected readonly lessonsInMonth = computed(() => this.monthlyCount.value() ?? 0);
+  protected readonly amountToReceive = computed(() => this.monthlyEarnings.value() ?? 0);
+  protected readonly weeklyCounts = computed(() => this.weekly.value() ?? []);
 
   /** Altura de referência do gráfico: nunca zero, para não dividir por zero. */
   protected readonly busiestWeek = computed(() =>
     Math.max(1, ...this.weeklyCounts().map((week) => week.count ?? 0)),
   );
+
+  /** Só para o `DatePipe` escrever o nome do mês selecionado no título. */
+  protected readonly monthDate = computed(() => {
+    const [year, month] = this.selectedMonth().split('-').map(Number);
+    return new Date(year, month - 1, 1);
+  });
 }

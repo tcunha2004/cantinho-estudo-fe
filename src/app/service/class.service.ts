@@ -39,8 +39,8 @@ export class ClassService {
     return this.api.get<Class[]>('/classes/teacher/upcoming');
   }
 
-  getTeacherRecent(): Observable<Class[]> {
-    return this.api.get<Class[]>('/classes/teacher/recent-history');
+  getTeacherRecent(month = currentMonth()): Observable<Class[]> {
+    return this.api.get<Class[]>('/classes/teacher/recent-history', { month });
   }
 
   getTeacherMonthlyCount(month = currentMonth()): Observable<number> {

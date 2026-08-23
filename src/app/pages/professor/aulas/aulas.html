@@ -31,11 +31,21 @@
     </div>
   </app-card>
 
-  <!-- Histórico recente -->
+  <!-- Histórico do mês -->
   <app-card>
-    <h2 class="font-display text-2xl font-bold">Histórico recente</h2>
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 class="font-display text-2xl font-bold">Histórico</h2>
+      <input
+        type="month"
+        aria-label="Mês do histórico"
+        class="field w-auto"
+        [value]="selectedMonth()"
+        [max]="maxMonth"
+        (change)="selectedMonth.set($any($event.target).value || maxMonth)"
+      />
+    </div>
 
-    <dl class="mt-5 divide-y divide-line/70 border-t border-line/70">
+    <dl class="mt-5 max-h-96 divide-y divide-line/70 overflow-y-auto border-t border-line/70">
       @for (item of history(); track item.id) {
         <div class="flex items-baseline justify-between gap-4 py-4">
           <div class="min-w-0">
@@ -49,7 +59,7 @@
           </span>
         </div>
       } @empty {
-        <p class="mt-6 text-center text-ink-soft">Nenhum histórico de aulas.</p>
+        <p class="mt-6 text-center text-ink-soft">Nenhuma aula neste mês.</p>
       }
     </dl>
   </app-card>
