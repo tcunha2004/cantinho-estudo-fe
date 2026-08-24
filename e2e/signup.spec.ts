@@ -21,10 +21,21 @@ function email(tag: string): string {
   return `e2e.${tag}.${STAMP}@teste.com`;
 }
 
-/* Gera um link pela API — atalho para os testes cujo assunto não é gerar. */
-async function novoLink(request: APIRequestContext): Promise<string> {
+/*
+ * Gera um link pela API — atalho para os testes cujo assunto não é gerar.
+ *
+ * O e-mail identifica o link, e gerar outro para o mesmo e-mail revoga o
+ * anterior: por isso cada chamada sem tag ganha um e-mail próprio, senão um
+ * teste derrubaria o link do seguinte.
+ */
+let linkSeq = 0;
+
+async function novoLink(request: APIRequestContext, tag?: string): Promise<string> {
   const headers = await adminHeaders(request);
-  const response = await request.post(`${API}/signup-links`, { headers });
+  const response = await request.post(`${API}/signup-links`, {
+    headers,
+    data: { studentEmail: email(tag ?? `link${++linkSeq}`) },
+  });
   expect(response.status(), await response.text()).toBe(201);
   const { id } = (await response.json()) as { id: string };
   return `/cadastro/${id}`;
@@ -32,7 +43,7 @@ async function novoLink(request: APIRequestContext): Promise<string> {
 
 /* Cadastro já enviado, esperando aprovação — atalho para os testes do sino. */
 async function cadastroAguardando(request: APIRequestContext, tag: string): Promise<string> {
-  const url = await novoLink(request);
+  const url = await novoLink(request, tag);
   const id = url.split('/').pop()!;
 
   const form = (await (await request.get(`${API}/signup-links/${id}/form`)).json()) as {
@@ -122,7 +133,12 @@ test.describe('cadastro por link · tela', () => {
       await page.getByRole('button', { name: 'Novo contrato' }).click();
       const modal = page.getByRole('dialog');
       await expect(modal).toContainText('aparece nas suas notificações');
-      await modal.getByRole('button', { name: 'Gerar' }).click();
+
+      /* O e-mail identifica o link: sem ele o botão nem habilita. */
+      const gerar = modal.getByRole('button', { name: 'Gerar' });
+      await expect(gerar).toBeDisabled();
+      await modal.locator('#linkStudentEmail').fill(email(tag));
+      await gerar.click();
 
       const linkInput = modal.getByLabel('Link de cadastro');
       await expect(linkInput).toBeVisible();

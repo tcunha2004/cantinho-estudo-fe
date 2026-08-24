@@ -11,13 +11,13 @@ import { Cadastro } from './cadastro';
  * aquela fase preencheu — é isso que faz fechar a aba não custar o formulário.
  */
 
+/* Como o endpoint público entrega: sem `classCommission`. */
 const regions = [
   {
     id: 'r-vila',
     name: 'Vila da Serra',
     slug: 'vila-da-serra',
     enrollmentFee: '200.00',
-    classCommission: '85.00',
     plans: [
       {
         id: 'plano-ouro',
@@ -44,7 +44,6 @@ const regions = [
     name: 'Cantinho',
     slug: 'cantinho',
     enrollmentFee: '165.00',
-    classCommission: '47.00',
     plans: [
       {
         id: 'plano-cantinho',

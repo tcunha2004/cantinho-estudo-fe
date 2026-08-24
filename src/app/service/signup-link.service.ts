@@ -15,9 +15,17 @@ export class SignupLinkService {
    */
   readonly approvals = signal(0);
 
-  /* Admin — gera o link que será enviado ao aluno. */
-  create(): Observable<{ id: string }> {
-    return this.api.post<{ id: string }>('/signup-links', {});
+  /*
+   * Admin — gera o link que será enviado ao aluno. O e-mail identifica o aluno:
+   * gerar de novo para o mesmo e-mail revoga o link anterior.
+   */
+  create(studentEmail: string): Observable<{ id: string }> {
+    return this.api.post<{ id: string }>('/signup-links', { studentEmail });
+  }
+
+  /* Admin — mata um link pendente antes do prazo. */
+  revoke(id: string): Observable<void> {
+    return this.api.patch<void>(`/signup-links/${id}/revoke`, {});
   }
 
   /* Público — rascunho + regiões/planos da tela de cadastro. */

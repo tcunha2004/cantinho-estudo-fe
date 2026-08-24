@@ -61,20 +61,36 @@ describe('NewContractModal', () => {
     fixture.detectChanges();
   }
 
+  function fillEmail(value: string): void {
+    const input = host().querySelector('#linkStudentEmail') as HTMLInputElement;
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  }
+
   async function generate(): Promise<void> {
+    fillEmail('ana@teste.com');
     click('Gerar');
-    http.expectOne(`${API_BASE_URL}/signup-links`).flush({ id: 'link-1' });
+    const request = http.expectOne(`${API_BASE_URL}/signup-links`);
+    expect(request.request.body).toEqual({ studentEmail: 'ana@teste.com' });
+    request.flush({ id: 'link-1' });
     await Promise.resolve();
     fixture.detectChanges();
   }
 
   it('explica o fluxo antes de gerar', () => {
     expect(host().textContent).toContain('aparece nas suas notificações');
-    expect(host().querySelector('input')).toBeNull();
+    expect(host().querySelector('#linkStudentEmail')).toBeTruthy();
   });
 
   it('cancelar não cria link nenhum', () => {
     click('Cancelar');
+    http.expectNone(`${API_BASE_URL}/signup-links`);
+  });
+
+  /* Sem e-mail não há aluno para identificar o link — nem requisição. */
+  it('não gera sem e-mail', () => {
+    click('Gerar');
     http.expectNone(`${API_BASE_URL}/signup-links`);
   });
 
@@ -98,6 +114,7 @@ describe('NewContractModal', () => {
   });
 
   it('avisa quando não consegue gerar', async () => {
+    fillEmail('ana@teste.com');
     click('Gerar');
     http
       .expectOne(`${API_BASE_URL}/signup-links`)
@@ -106,5 +123,18 @@ describe('NewContractModal', () => {
     fixture.detectChanges();
 
     expect(host().textContent).toContain('Não foi possível gerar o link');
+  });
+
+  /* 409 é o e-mail que já é de um usuário — erro do admin, não falha de rede. */
+  it('distingue e-mail já cadastrado de falha genérica', async () => {
+    fillEmail('ana@teste.com');
+    click('Gerar');
+    http
+      .expectOne(`${API_BASE_URL}/signup-links`)
+      .flush({ message: 'conflito' }, { status: 409, statusText: 'conflito' });
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(host().textContent).toContain('Já existe um usuário com este e-mail');
   });
 });

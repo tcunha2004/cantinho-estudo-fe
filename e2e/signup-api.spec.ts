@@ -16,7 +16,11 @@ async function completeDraft(
   suffix: string,
 ): Promise<{ id: string; regionId: string; planId: string; email: string }> {
   const headers = await adminHeaders(request);
-  const created = await request.post(`${API}/signup-links`, { headers });
+  const email = `api.${suffix}.${STAMP}@teste.com`;
+  const created = await request.post(`${API}/signup-links`, {
+    headers,
+    data: { studentEmail: email },
+  });
   expect(created.status(), await created.text()).toBe(201);
   const { id } = (await created.json()) as { id: string };
 
@@ -25,7 +29,6 @@ async function completeDraft(
   };
   const region = form.regions.find((item) => item.name === 'Vila da Serra')!;
   const plan = region.plans.find((item) => item.planType === 'prata')!;
-  const email = `api.${suffix}.${STAMP}@teste.com`;
 
   const patch = await request.patch(`${API}/signup-links/${id}`, {
     data: {

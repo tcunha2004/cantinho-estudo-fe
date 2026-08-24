@@ -126,8 +126,11 @@ describe('serviços de API', () => {
     it('gera o link, lê o rascunho, salva a fase e envia', () => {
       const service = TestBed.inject(SignupLinkService);
 
-      service.create().subscribe();
+      service.create('ana@teste.com').subscribe();
       expectCall('POST', '/signup-links', { id: 'link-1' });
+
+      service.revoke('link-1').subscribe();
+      expectCall('PATCH', '/signup-links/link-1/revoke');
 
       service.getForm('link-1').subscribe();
       expectCall('GET', '/signup-links/link-1/form');

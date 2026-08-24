@@ -1,4 +1,4 @@
-import { RegionPricingDto } from './region-pricing.dto';
+import { PublicRegionPricingDto } from './region-pricing.dto';
 import { SignupGuardian } from '../entity/signup-link.model';
 
 /* O que a tela pública de cadastro recebe: o rascunho e a tabela de preços. */
@@ -13,7 +13,8 @@ export interface SignupFormDto {
   guardians: SignupGuardian[] | null;
   /* Se o aluno já definiu uma senha — o valor em si nunca volta do backend. */
   hasPassword: boolean;
-  regions: RegionPricingDto[];
+  /* Sem `classCommission`: a tela pública não vê o que a escola paga ao professor. */
+  regions: PublicRegionPricingDto[];
 }
 
 /* Uma fase salva: só o que aquela fase preencheu. */
