@@ -1,0 +1,134 @@
+<app-page-header title="Meu perfil" subtitle="Suas informações e a segurança da sua conta" />
+
+<div class="mt-6 grid gap-6 lg:grid-cols-2">
+  <!-- Minhas informações -->
+  <app-card>
+    <h2 class="font-display text-2xl font-bold">Minhas informações</h2>
+
+    @if (user(); as user) {
+      <dl class="mt-5 space-y-3">
+        <div class="list-tile">
+          <app-icon name="user" class="size-5 shrink-0 text-ink-soft" />
+          <div class="min-w-0">
+            <dt class="text-sm text-ink-soft">Nome</dt>
+            <dd class="font-bold">{{ user.name }}</dd>
+          </div>
+        </div>
+        <div class="list-tile">
+          <app-icon name="info" class="size-5 shrink-0 text-ink-soft" />
+          <div class="min-w-0">
+            <dt class="text-sm text-ink-soft">E-mail</dt>
+            <dd class="truncate font-bold">{{ user.email }}</dd>
+          </div>
+        </div>
+        <div class="list-tile">
+          <app-icon name="shield" class="size-5 shrink-0 text-ink-soft" />
+          <div class="min-w-0">
+            <dt class="text-sm text-ink-soft">Perfil de acesso</dt>
+            <dd class="font-bold">{{ roleLabel[user.role] }}</dd>
+          </div>
+        </div>
+      </dl>
+
+      <p class="mt-4 text-sm text-ink-soft">
+        Para corrigir nome ou e-mail, fale com a secretaria do Cantinho.
+      </p>
+    }
+  </app-card>
+
+  <!-- Alterar senha -->
+  <app-card>
+    <h2 class="font-display text-2xl font-bold">Alterar senha</h2>
+
+    <form class="mt-5" [formGroup]="form" (ngSubmit)="handleSubmit()">
+      <!-- Senha atual -->
+      <div>
+        <label for="currentPassword" class="mb-1.5 block text-sm font-bold">Senha atual</label>
+        <input
+          id="currentPassword"
+          [type]="showPasswords() ? 'text' : 'password'"
+          formControlName="currentPassword"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          class="field"
+        />
+        @if (form.controls.currentPassword.touched && form.controls.currentPassword.invalid) {
+          <p class="field-error">Informe sua senha atual.</p>
+        }
+      </div>
+
+      <!-- Nova senha -->
+      <div class="mt-4">
+        <label for="newPassword" class="mb-1.5 block text-sm font-bold">Nova senha</label>
+        <div class="relative">
+          <input
+            id="newPassword"
+            [type]="showPasswords() ? 'text' : 'password'"
+            formControlName="newPassword"
+            autocomplete="new-password"
+            placeholder="Ao menos 6 caracteres"
+            class="field pr-11"
+          />
+          <button
+            type="button"
+            (click)="showPasswords.set(!showPasswords())"
+            class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-soft transition-colors hover:text-ink"
+            [attr.aria-label]="showPasswords() ? 'Ocultar senhas' : 'Mostrar senhas'"
+          >
+            <app-icon [name]="showPasswords() ? 'eye-off' : 'eye'" class="size-5" />
+          </button>
+        </div>
+        @if (form.controls.newPassword.touched && form.controls.newPassword.invalid) {
+          <p class="field-error">
+            @if (form.controls.newPassword.hasError('required')) {
+              Informe a nova senha.
+            } @else {
+              A senha deve ter ao menos 6 caracteres.
+            }
+          </p>
+        }
+      </div>
+
+      <!-- Confirmação -->
+      <div class="mt-4">
+        <label for="confirmPassword" class="mb-1.5 block text-sm font-bold"
+          >Confirmar nova senha</label
+        >
+        <input
+          id="confirmPassword"
+          [type]="showPasswords() ? 'text' : 'password'"
+          formControlName="confirmPassword"
+          autocomplete="new-password"
+          placeholder="••••••••"
+          class="field"
+        />
+        @if (form.controls.confirmPassword.touched) {
+          @if (form.controls.confirmPassword.hasError('required')) {
+            <p class="field-error">Repita a nova senha.</p>
+          } @else if (form.hasError('mismatch')) {
+            <p class="field-error">As senhas não conferem.</p>
+          }
+        }
+      </div>
+
+      @if (errorMessage(); as message) {
+        <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+          {{ message }}
+        </p>
+      }
+      @if (successMessage(); as message) {
+        <p class="mt-4 rounded-xl bg-accent-soft px-4 py-2.5 text-sm font-bold text-accent">
+          {{ message }}
+        </p>
+      }
+
+      <button type="submit" [disabled]="saving()" class="btn-primary mt-5 w-full">
+        {{ saving() ? 'Salvando…' : 'Alterar senha' }}
+      </button>
+
+      <p class="mt-3 text-center text-xs text-ink-soft">
+        Você continua conectado neste dispositivo após a troca.
+      </p>
+    </form>
+  </app-card>
+</div>

@@ -23,7 +23,15 @@
     </nav>
 
     <!-- Rodapé -->
-    <div class="border-t border-line p-4">
+    <div class="space-y-1.5 border-t border-line p-4">
+      <a
+        routerLink="/perfil"
+        routerLinkActive="active"
+        class="nav-link flex items-center gap-3.5 rounded-2xl px-4 py-2.5 font-bold text-ink-soft transition-colors hover:bg-cream"
+      >
+        <app-icon name="user" class="size-5 shrink-0" />
+        Meu perfil
+      </a>
       <button
         type="button"
         (click)="logout()"

@@ -80,6 +80,12 @@ export const routes: Routes = [
         roles: ['admin', 'professor', 'student'],
         loadComponent: () => import('./pages/agenda/agenda').then((m) => m.Agenda),
       }),
+      page({
+        path: 'perfil',
+        title: 'Meu perfil',
+        roles: ['admin', 'professor', 'student'],
+        loadComponent: () => import('./pages/perfil/perfil').then((m) => m.Perfil),
+      }),
       // professor
       page({
         path: 'aulas',
