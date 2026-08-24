@@ -1,0 +1,513 @@
+<main class="min-h-dvh bg-cream p-6">
+  <div class="mx-auto w-full max-w-4xl">
+    <header class="mb-8 flex flex-col items-center text-center">
+      <img
+        src="cantinho-estudo-logo.jpeg"
+        alt="Cantinho do Estudo — desde 2003"
+        class="w-full max-w-56"
+      />
+    </header>
+
+    @if (loading()) {
+      <p class="text-center text-ink-soft">Carregando…</p>
+    } @else if (loadError(); as message) {
+      <div
+        class="mx-auto max-w-md rounded-3xl border border-line bg-white p-8 text-center shadow-sm"
+      >
+        <h1 class="font-display text-2xl font-bold">Link indisponível</h1>
+        <p class="mt-3 text-ink-soft">{{ message }}</p>
+      </div>
+    } @else if (sent()) {
+      <div
+        class="mx-auto max-w-md rounded-3xl border border-line bg-white p-8 text-center shadow-sm"
+      >
+        <span
+          class="mx-auto flex size-14 items-center justify-center rounded-full bg-subject-green/15 text-subject-green"
+        >
+          <app-icon name="check" class="size-7" />
+        </span>
+        <h1 class="mt-5 font-display text-2xl font-bold">Seus dados foram enviados</h1>
+        <p class="mt-3 text-ink-soft">
+          A escola vai conferir o cadastro e gerar o seu contrato. Em breve entramos em contato.
+        </p>
+      </div>
+    } @else {
+      <div class="grid gap-6 md:grid-cols-[15rem_1fr]">
+        <!-- Fases -->
+        <nav
+          aria-label="Etapas do cadastro"
+          class="h-fit rounded-3xl border border-line bg-white p-4 shadow-xs"
+        >
+          <ol class="space-y-1">
+            @for (item of phases; track item; let index = $index) {
+              <li>
+                <button
+                  type="button"
+                  (click)="goTo(index)"
+                  [disabled]="index >= phase()"
+                  [attr.aria-current]="index === phase() ? 'step' : null"
+                  class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-bold transition-colors"
+                  [class]="
+                    index === phase()
+                      ? 'bg-accent-soft text-accent'
+                      : index < phase()
+                        ? 'text-ink-soft hover:bg-cream'
+                        : 'text-ink-soft/50'
+                  "
+                >
+                  <span
+                    class="flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-extrabold"
+                    [class]="
+                      index < phase()
+                        ? 'bg-subject-green/15 text-subject-green'
+                        : index === phase()
+                          ? 'bg-accent text-white'
+                          : 'bg-cream text-ink-soft'
+                    "
+                  >
+                    @if (index < phase()) {
+                      <app-icon name="check" class="size-4" />
+                    } @else {
+                      {{ index + 1 }}
+                    }
+                  </span>
+                  {{ item }}
+                </button>
+              </li>
+            }
+          </ol>
+        </nav>
+
+        <!-- Formulário -->
+        <form
+          [formGroup]="form"
+          (ngSubmit)="phase() === 3 ? submit() : next()"
+          class="rounded-3xl border border-line bg-white p-6 shadow-sm"
+        >
+          <!-- 1 · Dados do aluno -->
+          @if (phase() === 0) {
+            <div formGroupName="dados">
+              <h1 class="font-display text-2xl font-bold">Dados do aluno</h1>
+              <p class="mt-1 text-sm text-ink-soft">
+                O e-mail e a senha serão usados pelo aluno para entrar no sistema.
+              </p>
+
+              <div class="mt-6 grid gap-4 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <label for="studentName" class="mb-1.5 block text-sm font-bold"
+                    >Nome completo</label
+                  >
+                  <input id="studentName" type="text" formControlName="studentName" class="field" />
+                  @if (
+                    form.controls.dados.controls.studentName.touched &&
+                    form.controls.dados.controls.studentName.invalid
+                  ) {
+                    <p class="field-error">Informe o nome do aluno (mínimo 3 caracteres).</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="studentEmail" class="mb-1.5 block text-sm font-bold">E-mail</label>
+                  <input
+                    id="studentEmail"
+                    type="email"
+                    formControlName="studentEmail"
+                    autocomplete="email"
+                    placeholder="voce@exemplo.com"
+                    class="field"
+                  />
+                  @if (
+                    form.controls.dados.controls.studentEmail.touched &&
+                    form.controls.dados.controls.studentEmail.invalid
+                  ) {
+                    <p class="field-error">E-mail inválido.</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="studentPhone" class="mb-1.5 block text-sm font-bold">Telefone</label>
+                  <input
+                    id="studentPhone"
+                    type="tel"
+                    formControlName="studentPhone"
+                    placeholder="(31) 90000-0000"
+                    class="field"
+                  />
+                  @if (
+                    form.controls.dados.controls.studentPhone.touched &&
+                    form.controls.dados.controls.studentPhone.invalid
+                  ) {
+                    <p class="field-error">Informe um telefone válido.</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="password" class="mb-1.5 block text-sm font-bold">Senha</label>
+                  <input
+                    id="password"
+                    type="password"
+                    formControlName="password"
+                    autocomplete="new-password"
+                    placeholder="••••••••"
+                    class="field"
+                  />
+                  @if (
+                    form.controls.dados.controls.password.touched &&
+                    form.controls.dados.controls.password.invalid
+                  ) {
+                    <p class="field-error">A senha deve ter ao menos 6 caracteres.</p>
+                  }
+                </div>
+
+                <div>
+                  <label for="passwordConfirm" class="mb-1.5 block text-sm font-bold">
+                    Confirmar senha
+                  </label>
+                  <input
+                    id="passwordConfirm"
+                    type="password"
+                    formControlName="passwordConfirm"
+                    autocomplete="new-password"
+                    placeholder="••••••••"
+                    class="field"
+                  />
+                  @if (
+                    form.controls.dados.controls.passwordConfirm.touched &&
+                    form.controls.dados.hasError('passwordMismatch')
+                  ) {
+                    <p class="field-error">As senhas não conferem.</p>
+                  }
+                </div>
+
+                <div class="sm:col-span-2">
+                  <label for="regionId" class="mb-1.5 block text-sm font-bold">Região</label>
+                  <select id="regionId" formControlName="regionId" class="field">
+                    <option value="">Selecione a região</option>
+                    @for (region of regions(); track region.id) {
+                      <option [value]="region.id">{{ region.name }}</option>
+                    }
+                  </select>
+                  @if (
+                    form.controls.dados.controls.regionId.touched &&
+                    form.controls.dados.controls.regionId.invalid
+                  ) {
+                    <p class="field-error">Escolha a região onde as aulas acontecem.</p>
+                  }
+                </div>
+
+                <div class="sm:col-span-2">
+                  <label for="studentAddress" class="mb-1.5 block text-sm font-bold">
+                    Endereço <span class="font-normal text-ink-soft">(opcional)</span>
+                  </label>
+                  <input
+                    id="studentAddress"
+                    type="text"
+                    formControlName="studentAddress"
+                    placeholder="Rua, número, bairro — para aulas em casa"
+                    class="field"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- 2 · Responsáveis -->
+          @if (phase() === 1) {
+            <div formGroupName="responsaveis">
+              <h1 class="font-display text-2xl font-bold">Responsáveis</h1>
+              <p class="mt-1 text-sm text-ink-soft">
+                Marque quem responde financeiramente pelo contrato.
+              </p>
+
+              <div class="mt-6 space-y-5" formArrayName="guardians">
+                @for (item of guardians.controls; track $index; let index = $index) {
+                  <fieldset [formGroupName]="index" class="rounded-2xl bg-cream p-5">
+                    <legend class="sr-only">Responsável {{ index + 1 }}</legend>
+
+                    <div class="flex items-center justify-between gap-4">
+                      <label class="flex items-center gap-2 text-sm font-bold">
+                        <input
+                          type="radio"
+                          name="financial"
+                          [checked]="financialIndex() === index"
+                          (change)="financialIndex.set(index)"
+                          class="size-4 accent-[var(--color-accent)]"
+                        />
+                        Responsável financeiro
+                      </label>
+
+                      @if (guardians.length > 1) {
+                        <button
+                          type="button"
+                          (click)="removeGuardian(index)"
+                          class="text-sm font-bold text-ink-soft hover:text-accent"
+                        >
+                          Remover
+                        </button>
+                      }
+                    </div>
+
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                      <div class="sm:col-span-2">
+                        <label
+                          [attr.for]="'guardianName' + index"
+                          class="mb-1.5 block text-sm font-bold"
+                        >
+                          Nome completo
+                        </label>
+                        <input
+                          [id]="'guardianName' + index"
+                          type="text"
+                          formControlName="name"
+                          class="field"
+                        />
+                        @if (item.controls.name.touched && item.controls.name.invalid) {
+                          <p class="field-error">Informe o nome do responsável.</p>
+                        }
+                      </div>
+
+                      <div>
+                        <label
+                          [attr.for]="'guardianPhone' + index"
+                          class="mb-1.5 block text-sm font-bold"
+                        >
+                          Telefone
+                        </label>
+                        <input
+                          [id]="'guardianPhone' + index"
+                          type="tel"
+                          formControlName="phone"
+                          placeholder="(31) 90000-0000"
+                          class="field"
+                        />
+                        @if (item.controls.phone.touched && item.controls.phone.invalid) {
+                          <p class="field-error">Informe um telefone válido.</p>
+                        }
+                      </div>
+
+                      <div>
+                        <label
+                          [attr.for]="'guardianCpf' + index"
+                          class="mb-1.5 block text-sm font-bold"
+                        >
+                          CPF
+                        </label>
+                        <input
+                          [id]="'guardianCpf' + index"
+                          type="text"
+                          formControlName="cpf"
+                          placeholder="000.000.000-00"
+                          class="field"
+                        />
+                        @if (item.controls.cpf.touched && item.controls.cpf.invalid) {
+                          <p class="field-error">CPF inválido.</p>
+                        }
+                      </div>
+
+                      <div class="sm:col-span-2">
+                        <label
+                          [attr.for]="'guardianRg' + index"
+                          class="mb-1.5 block text-sm font-bold"
+                        >
+                          RG <span class="font-normal text-ink-soft">(opcional)</span>
+                        </label>
+                        <input
+                          [id]="'guardianRg' + index"
+                          type="text"
+                          formControlName="rg"
+                          class="field"
+                        />
+                      </div>
+                    </div>
+                  </fieldset>
+                }
+              </div>
+
+              <button
+                type="button"
+                (click)="addGuardian()"
+                class="mt-4 flex items-center gap-2 font-bold text-accent hover:text-accent-strong"
+              >
+                <app-icon name="plus" class="size-4" />
+                Adicionar responsável
+              </button>
+            </div>
+          }
+
+          <!-- 3 · Plano -->
+          @if (phase() === 2) {
+            <div formGroupName="plano">
+              <h1 class="font-display text-2xl font-bold">Plano</h1>
+              <p class="mt-1 text-sm text-ink-soft">
+                Planos disponíveis em {{ pickedRegion()?.name }}.
+              </p>
+
+              <div class="mt-6 grid gap-3 sm:grid-cols-2">
+                @for (plan of availablePlans(); track plan.id) {
+                  <button
+                    type="button"
+                    (click)="pickPlan(plan.id)"
+                    [attr.aria-pressed]="form.controls.plano.controls.planId.value === plan.id"
+                    class="rounded-2xl border p-5 text-left transition-colors"
+                    [class]="
+                      form.controls.plano.controls.planId.value === plan.id
+                        ? 'border-accent bg-accent-soft'
+                        : 'border-line hover:bg-cream'
+                    "
+                  >
+                    <span class="badge" [class]="planDisplay[plan.planType].badge">
+                      {{ planLabel(plan) }}
+                    </span>
+                    @if (priceView(plan); as price) {
+                      <p class="mt-3 font-display text-2xl font-extrabold">
+                        {{ price.amount | currency
+                        }}<span class="ml-1 text-sm font-bold text-ink-soft">{{
+                          price.suffix
+                        }}</span>
+                      </p>
+                      <p class="mt-1 text-sm text-ink-soft">
+                        {{ price.detail }}
+                        @if (price.showsHourReference) {
+                          · {{ plan.hourPrice | currency }} por aula de referência
+                        }
+                      </p>
+                    }
+                  </button>
+                }
+              </div>
+
+              @if (
+                form.controls.plano.controls.planId.touched &&
+                form.controls.plano.controls.planId.invalid
+              ) {
+                <p class="field-error">Escolha um plano para continuar.</p>
+              }
+
+              @if (pickedRegion(); as region) {
+                <p class="mt-5 rounded-2xl bg-cream px-5 py-4 text-sm text-ink-soft">
+                  <strong class="font-bold text-ink"
+                    >Taxa de matrícula: {{ region.enrollmentFee | currency }}</strong
+                  >
+                  — cobrada uma única vez na contratação, diretamente pela escola.
+                </p>
+              }
+            </div>
+          }
+
+          <!-- 4 · Revisão -->
+          @if (phase() === 3) {
+            <div>
+              <h1 class="font-display text-2xl font-bold">Revisão</h1>
+              <p class="mt-1 text-sm text-ink-soft">
+                Confira os dados antes de enviar. Depois do envio não é possível editar.
+              </p>
+
+              <section class="mt-6">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Aluno</h2>
+                <dl class="mt-2 divide-y divide-line/70 border-t border-line/70">
+                  <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-ink-soft">Nome</dt>
+                    <dd class="text-right font-bold">
+                      {{ form.controls.dados.controls.studentName.value }}
+                    </dd>
+                  </div>
+                  <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-ink-soft">E-mail</dt>
+                    <dd class="text-right font-bold">
+                      {{ form.controls.dados.controls.studentEmail.value }}
+                    </dd>
+                  </div>
+                  <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-ink-soft">Telefone</dt>
+                    <dd class="text-right font-bold">
+                      {{ form.controls.dados.controls.studentPhone.value }}
+                    </dd>
+                  </div>
+                  <div class="flex justify-between gap-4 py-2.5">
+                    <dt class="text-ink-soft">Região</dt>
+                    <dd class="text-right font-bold">{{ pickedRegion()?.name }}</dd>
+                  </div>
+                  @if (form.controls.dados.controls.studentAddress.value) {
+                    <div class="flex justify-between gap-4 py-2.5">
+                      <dt class="text-ink-soft">Endereço</dt>
+                      <dd class="text-right font-bold">
+                        {{ form.controls.dados.controls.studentAddress.value }}
+                      </dd>
+                    </div>
+                  }
+                </dl>
+              </section>
+
+              <section class="mt-6">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-ink-soft">
+                  Responsáveis
+                </h2>
+                <ul class="mt-2 divide-y divide-line/70 border-t border-line/70">
+                  @for (guardian of guardianValues(); track $index) {
+                    <li class="flex items-baseline justify-between gap-4 py-2.5">
+                      <span class="font-bold">
+                        {{ guardian.name }}
+                        @if (guardian.isFinancialResponsible) {
+                          <span class="badge ml-2 bg-accent-soft text-accent">Financeiro</span>
+                        }
+                      </span>
+                      <span class="text-right text-ink-soft">
+                        {{ guardian.phone }} · {{ guardian.cpf }}
+                      </span>
+                    </li>
+                  }
+                </ul>
+              </section>
+
+              <section class="mt-6">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Plano</h2>
+                @if (pickedPlan(); as plan) {
+                  <div
+                    class="mt-2 flex items-center justify-between gap-4 rounded-2xl bg-cream px-5 py-4"
+                  >
+                    <span class="badge" [class]="planDisplay[plan.planType].badge">
+                      {{ planLabel(plan) }}
+                    </span>
+                    <span class="font-display text-xl font-extrabold">
+                      {{ priceView(plan).amount | currency
+                      }}<span class="ml-1 text-sm font-bold text-ink-soft">{{
+                        priceView(plan).suffix
+                      }}</span>
+                    </span>
+                  </div>
+                  <p class="mt-2 text-sm text-ink-soft">
+                    Taxa de matrícula de {{ pickedRegion()?.enrollmentFee | currency }} cobrada à
+                    parte, na contratação.
+                  </p>
+                }
+              </section>
+            </div>
+          }
+
+          @if (errorMessage(); as message) {
+            <p class="mt-6 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+              {{ message }}
+            </p>
+          }
+
+          <!-- Navegação -->
+          <div class="mt-8 flex items-center justify-between gap-3 border-t border-line pt-6">
+            <button type="button" class="btn-secondary" [disabled]="phase() === 0" (click)="back()">
+              Voltar
+            </button>
+
+            <button type="submit" class="btn-primary" [disabled]="saving() || !currentPhaseValid()">
+              @if (saving()) {
+                Salvando…
+              } @else if (phase() === 3) {
+                Enviar
+              } @else {
+                Próximo
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+  </div>
+</main>

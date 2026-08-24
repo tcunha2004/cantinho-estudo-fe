@@ -54,6 +54,56 @@ export const PLAN_DISPLAY: Record<PlanType, PlanDisplay> = {
   },
 };
 
+/*
+ * Como o preço de um plano é cobrado. Não é sempre mensalidade: a avulsa é por
+ * aula (o `monthlyPrice` dela repete o valor da hora e nunca vira mensalidade —
+ * ver `monthlyAmount` no backend) e o Bronze é um pacote de parcela única. É a
+ * mesma leitura que a tela Informações faz, agora em um lugar só.
+ */
+export interface PlanPriceView {
+  /* Valor que o aluno paga de fato, sem desconto. */
+  amount: number;
+  /* Como esse valor é cobrado. */
+  suffix: string;
+  /* O que o plano entrega. */
+  detail: string;
+  /* `hourPrice` é preço real só na avulsa; nos demais é referência. */
+  showsHourReference: boolean;
+}
+
+export function planPriceView(plan: {
+  planType: PlanType;
+  monthlyPrice: string;
+  hourPrice: string;
+  classesCount: number | null;
+  validityMonths: number | null;
+}): PlanPriceView {
+  if (plan.planType === 'avulsa') {
+    return {
+      amount: Number(plan.hourPrice),
+      suffix: 'por aula',
+      detail: 'Aula individual, sem plano',
+      showsHourReference: false,
+    };
+  }
+
+  if (plan.planType === 'bronze') {
+    return {
+      amount: Number(plan.monthlyPrice),
+      suffix: 'parcela única',
+      detail: `Pacote de ${plan.classesCount} aulas · validade de ${plan.validityMonths} meses`,
+      showsHourReference: true,
+    };
+  }
+
+  return {
+    amount: Number(plan.monthlyPrice),
+    suffix: 'por mês',
+    detail: `${plan.classesCount} aulas no mês`,
+    showsHourReference: true,
+  };
+}
+
 export const STUDENT_STATUS_DISPLAY: Record<StudentStatus, { label: string; badge: string }> = {
   active: { label: 'Ativo', badge: 'bg-subject-green/15 text-subject-green' },
   inactive: { label: 'Inativo', badge: 'bg-slate-200 text-slate-500' },

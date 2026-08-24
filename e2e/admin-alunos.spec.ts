@@ -1,4 +1,4 @@
-import { adminHeaders, API, expect, login, reactivate, test } from './helpers';
+import { adminHeaders, API, expect, login, test } from './helpers';
 
 /*
  * Tela de alunos do admin: a lista, o modal de detalhes e a edição completa
@@ -27,7 +27,7 @@ test.describe('admin · alunos', () => {
     await expect(page.getByRole('row').filter({ hasText: 'Aluno Teste' })).toBeVisible();
 
     await page.getByPlaceholder('Buscar aluno...').fill('ninguém com esse nome');
-    await expect(page.getByText('Nenhum aluno ativo encontrado.')).toBeVisible();
+    await expect(page.getByText('Nenhum aluno encontrado.')).toBeVisible();
   });
 
   test('clicar na linha abre o detalhe do aluno', async ({ page }) => {
@@ -37,13 +37,19 @@ test.describe('admin · alunos', () => {
     await expect(modal.getByRole('heading', { name: 'Detalhes do aluno' })).toBeVisible();
     await expect(modal).toContainText('aluno@teste.com');
     await expect(modal).toContainText('Vila da Serra');
-    await expect(modal).toContainText('Contratos');
-    await expect(modal).toContainText('Ouro');
+    await expect(modal).toContainText('Ativo');
+
+    /* Contrato e parcelas moram no modal Financeiro, aberto daqui. */
+    await modal.getByRole('button', { name: 'Financeiro' }).click();
+    const financeiro = page.getByRole('dialog').filter({ hasText: 'Financeiro do aluno' });
+    await expect(financeiro).toContainText('Ouro');
+    await expect(financeiro).toContainText('Parcelas');
   });
 
-  test('edita telefone, endereço e desconto e o valor persiste', async ({ page }) => {
+  test('edita telefone e endereço, e o desconto fica agendado', async ({ page }) => {
     await page.getByRole('row').filter({ hasText: 'Aluno Teste' }).click();
-    const modal = page.getByRole('dialog');
+    /* O aviso de troca agendada abre uma segunda janela — o detalhe é a primeira. */
+    const modal = page.getByRole('dialog').first();
     await modal.getByRole('button', { name: 'Editar' }).click();
 
     await modal.locator('#phone').fill('(31) 91234-5678');
@@ -51,22 +57,40 @@ test.describe('admin · alunos', () => {
     await modal.locator('#discountPercentage').fill('12.5');
     await modal.getByRole('button', { name: 'Salvar' }).click();
 
-    /* Volta para o modo leitura com os dados novos. */
+    /*
+     * Desconto não muta o contrato na hora: entra como troca agendada, que só
+     * vale quando a parcela em aberto for paga. O aviso explica isso.
+     */
+    const aviso = page.getByRole('dialog').filter({ hasText: 'Troca de plano agendada' });
+    await expect(aviso).toBeVisible();
+    await aviso.getByRole('button', { name: 'Entendi' }).click();
+
+    /* Cadastro volta para leitura com os dados novos. */
     await expect(modal.getByRole('heading', { name: 'Detalhes do aluno' })).toBeVisible();
     await expect(modal).toContainText('(31) 91234-5678');
     await expect(modal).toContainText('Rua do Teste E2E, 100');
-    await expect(modal).toContainText('Desconto: 12.50%');
 
     /* Reabre da API para garantir que gravou, não só pintou na tela. */
     await page.reload();
     await page.getByRole('row').filter({ hasText: 'Aluno Teste' }).click();
-    await expect(page.getByRole('dialog')).toContainText('(31) 91234-5678');
-    await expect(page.getByRole('dialog')).toContainText('Desconto: 12.50%');
+    const reaberto = page.getByRole('dialog').first();
+    await expect(reaberto).toContainText('(31) 91234-5678');
+
+    await reaberto.getByRole('button', { name: 'Editar' }).click();
+    await expect(reaberto.locator('#discountPercentage')).toHaveValue(/^12\.50?$/);
+    await expect(reaberto).toContainText('já agendada');
+
+    /* Desistir: voltar ao valor atual do contrato limpa o agendamento. */
+    await reaberto.locator('#discountPercentage').fill('');
+    await reaberto.getByRole('button', { name: 'Salvar' }).click();
+    await expect(reaberto.getByRole('heading', { name: 'Detalhes do aluno' })).toBeVisible();
+    await reaberto.getByRole('button', { name: 'Editar' }).click();
+    await expect(reaberto).not.toContainText('já agendada');
   });
 
-  test('trocar o plano do contrato cria um contrato novo e fecha o antigo', async ({ page }) => {
+  test('trocar o plano agenda a troca em vez de aplicar na hora', async ({ page }) => {
     await page.getByRole('row').filter({ hasText: 'Aluno Teste' }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.getByRole('dialog').first();
     await modal.getByRole('button', { name: 'Editar' }).click();
 
     /* Troca para um plano diferente do atual — Prata e Bronze existem em toda região. */
@@ -81,10 +105,24 @@ test.describe('admin · alunos', () => {
 
     await modal.getByRole('button', { name: 'Salvar' }).click();
 
+    /*
+     * A troca não vale na hora: fica agendada até a mensalidade do mês ser
+     * paga, de modo que o mês da solicitação é cobrado pelo plano antigo.
+     */
+    const aviso = page.getByRole('dialog').filter({ hasText: 'Troca de plano agendada' });
+    await expect(aviso).toContainText(alvo);
+    await aviso.getByRole('button', { name: 'Entendi' }).click();
+
     await expect(modal.getByRole('heading', { name: 'Detalhes do aluno' })).toBeVisible();
-    /* Passa a ter um contrato novo no plano escolhido e o antigo cancelado. */
-    await expect(modal.getByText(alvo).first()).toBeVisible();
-    await expect(modal.getByText('Cancelado').first()).toBeVisible();
+    await modal.getByRole('button', { name: 'Editar' }).click();
+    await expect(modal).toContainText('já agendada');
+
+    /* Desistir: escolher o plano atual de volta limpa o agendamento. */
+    await modal.locator('#planId').selectOption(atual);
+    await modal.getByRole('button', { name: 'Salvar' }).click();
+    await expect(modal.getByRole('heading', { name: 'Detalhes do aluno' })).toBeVisible();
+    await modal.getByRole('button', { name: 'Editar' }).click();
+    await expect(modal).not.toContainText('já agendada');
   });
 
   test('e-mail inválido não é salvo', async ({ page }) => {
@@ -99,8 +137,8 @@ test.describe('admin · alunos', () => {
     await expect(modal.getByRole('heading', { name: 'Editar aluno' })).toBeVisible();
   });
 
-  test('inativar tira o aluno da lista de ativos', async ({ page, request }) => {
-    /* Pega o id antes: depois de inativado o aluno sai das listas da API. */
+  test('inativar marca o aluno como inativo na lista', async ({ page, request }) => {
+    /* Pega o id antes: depois de inativado o aluno sai das listas de ativos. */
     const headers = await adminHeaders(request);
     const ativos = (await (
       await request.get(`${API}/students/active`, { headers })
@@ -108,7 +146,7 @@ test.describe('admin · alunos', () => {
     const aluno = ativos.find((item) => item.name === 'Aluno Teste')!;
 
     await page.getByRole('row').filter({ hasText: 'Aluno Teste' }).click();
-    const modal = page.getByRole('dialog');
+    const modal = page.getByRole('dialog').first();
 
     await modal.getByRole('button', { name: 'Inativar aluno' }).click();
     await expect(modal.getByText('Inativar este aluno?')).toBeVisible();
@@ -117,11 +155,21 @@ test.describe('admin · alunos', () => {
     await expect(modal).toContainText('Inativo');
     await modal.getByRole('button', { name: 'Fechar' }).click();
 
-    await expect(page.getByRole('row').filter({ hasText: 'Aluno Teste' })).toHaveCount(0);
+    /* A tabela lista todos os alunos: a linha fica, com o status novo. */
+    await expect(page.getByRole('row').filter({ hasText: 'Aluno Teste' })).toContainText('Inativo');
 
-    /* Devolve o aluno para os próximos testes. */
-    await reactivate(request, 'students', aluno.id);
+    /*
+     * Devolve o aluno E o contrato: inativar cancela o contrato vigente, e sem
+     * contrato ativo as suítes de agenda, aluno e professor ficam sem aluno com
+     * quem trabalhar.
+     */
+    const restaurado = await request.patch(`${API}/students/${aluno.id}`, {
+      headers,
+      data: { active: true, contractStatus: 'active' },
+    });
+    expect(restaurado.status(), await restaurado.text()).toBe(200);
+
     await page.reload();
-    await expect(page.getByRole('row').filter({ hasText: 'Aluno Teste' })).toBeVisible();
+    await expect(page.getByRole('row').filter({ hasText: 'Aluno Teste' })).toContainText('Ativo');
   });
 });

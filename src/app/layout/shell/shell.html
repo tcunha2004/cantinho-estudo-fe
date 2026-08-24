@@ -37,6 +37,13 @@
 
   <!-- Área de conteúdo -->
   <main class="ml-64 min-h-dvh p-8 print:ml-0 print:min-h-0 print:p-0">
+    <!-- Barra fixa do painel: acompanha o admin em todas as páginas. -->
+    @if (isAdmin()) {
+      <div class="mb-5 flex justify-end print:hidden">
+        <app-notifications />
+      </div>
+    }
+
     <router-outlet />
   </main>
 </div>

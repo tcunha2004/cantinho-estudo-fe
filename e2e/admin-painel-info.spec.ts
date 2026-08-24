@@ -6,8 +6,8 @@ test.describe('admin · painel e informações', () => {
     await login(page, 'admin');
 
     await expect(page.getByRole('heading', { name: 'Alunos ativos' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Aulas na semana' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Receita do mês' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Professores ativos' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Aulas no mês' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'A pagar professores' })).toBeVisible();
 
     const conteudo = (await page.locator('main').textContent()) ?? '';

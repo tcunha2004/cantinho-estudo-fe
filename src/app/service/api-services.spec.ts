@@ -5,6 +5,7 @@ import { API_BASE_URL } from './api.config';
 import { ClassService } from './class.service';
 import { RegionService } from './region.service';
 import { StudentContractService } from './student-contract.service';
+import { SignupLinkService } from './signup-link.service';
 import { StudentService } from './student.service';
 import { SubjectService } from './subject.service';
 import { TeacherService } from './teacher.service';
@@ -118,6 +119,41 @@ describe('serviços de API', () => {
 
       TestBed.inject(StudentContractService).getActiveCountByPlanType().subscribe();
       expectCall('GET', '/student-contracts/active/count-by-plan-type');
+    });
+  });
+
+  describe('SignupLinkService', () => {
+    it('gera o link, lê o rascunho, salva a fase e envia', () => {
+      const service = TestBed.inject(SignupLinkService);
+
+      service.create().subscribe();
+      expectCall('POST', '/signup-links', { id: 'link-1' });
+
+      service.getForm('link-1').subscribe();
+      expectCall('GET', '/signup-links/link-1/form');
+
+      service.saveDraft('link-1', { studentName: 'Ana Souza' }).subscribe();
+      const draft = expectCall('PATCH', '/signup-links/link-1');
+      expect(draft.request.body).toEqual({ studentName: 'Ana Souza' });
+
+      service.submit('link-1').subscribe();
+      expectCall('POST', '/signup-links/link-1/submit');
+    });
+
+    it('lista os aguardando e aprova com desconto', () => {
+      const service = TestBed.inject(SignupLinkService);
+
+      service.getWaiting().subscribe();
+      expectCall('GET', '/signup-links/waiting', []);
+
+      /* O contador só sobe quando a aprovação volta — é o que faz as telas de
+       * aluno se atualizarem sem recarregar a página. */
+      expect(service.approvals()).toBe(0);
+
+      service.approve('link-1', '10.00').subscribe();
+      const approve = expectCall('POST', '/signup-links/link-1/approve', { studentId: 's1' });
+      expect(approve.request.body).toEqual({ discountPercentage: '10.00' });
+      expect(service.approvals()).toBe(1);
     });
   });
 

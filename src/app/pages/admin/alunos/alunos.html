@@ -15,6 +15,15 @@
       class="field w-64 rounded-full py-2.5 pl-11 pr-4"
     />
   </label>
+
+  <button
+    type="button"
+    class="btn-primary flex items-center gap-2"
+    (click)="creatingLink.set(true)"
+  >
+    <app-icon name="plus" class="size-5" />
+    Novo contrato
+  </button>
 </app-page-header>
 
 <!-- Tabela de alunos -->
@@ -79,6 +88,10 @@
     </tbody>
   </table>
 </app-card>
+
+@if (creatingLink()) {
+  <app-new-contract-modal (closed)="creatingLink.set(false)" />
+}
 
 @if (selectedStudentId(); as id) {
   <app-student-detail-modal

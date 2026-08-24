@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { SignupLinkService } from '../../../service/signup-link.service';
 import { StudentService } from '../../../service/student.service';
+import { NewContractModal } from './new-contract-modal';
 import { StudentDetailModal } from './student-detail-modal';
 import { Card } from '../../../shared/card/card';
 import {
@@ -14,12 +16,13 @@ import { PageHeader } from '../../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-alunos',
-  imports: [Card, Icon, PageHeader, StudentDetailModal],
+  imports: [Card, Icon, NewContractModal, PageHeader, StudentDetailModal],
   templateUrl: './alunos.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Alunos {
   private readonly studentService = inject(StudentService);
+  private readonly signupLinkService = inject(SignupLinkService);
 
   protected readonly planDisplay = PLAN_DISPLAY;
   protected readonly studentStatus = STUDENT_STATUS_DISPLAY;
@@ -27,9 +30,12 @@ export class Alunos {
 
   protected readonly search = signal('');
   protected readonly selectedStudentId = signal<string | null>(null);
+  protected readonly creatingLink = signal(false);
 
+  /* Refaz a busca quando um cadastro é aprovado pelo sino — o aluno novo
+   * precisa aparecer aqui sem depender de o admin recarregar a página. */
   private readonly activeStudents = rxResource({
-    params: () => true,
+    params: () => this.signupLinkService.approvals(),
     stream: () => this.studentService.getAll(),
     defaultValue: [],
   });

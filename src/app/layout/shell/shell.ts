@@ -3,6 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { Session } from '../../core/session';
 import { UserRole } from '../../model/entity/user.model';
 import { Icon, IconName } from '../../shared/icon/icon';
+import { Notifications } from './notifications';
 
 interface NavItem {
   label: string;
@@ -32,7 +33,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Notifications],
   templateUrl: './shell.html',
   styleUrl: './shell.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +41,9 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
 export class Shell {
   private readonly router = inject(Router);
   private readonly session = inject(Session);
+
+  /* O sino de cadastros é do admin — os outros papéis não veem a barra. */
+  protected readonly isAdmin = computed(() => this.session.role() === 'admin');
 
   protected readonly navItems = computed(() => {
     const role = this.session.role();
