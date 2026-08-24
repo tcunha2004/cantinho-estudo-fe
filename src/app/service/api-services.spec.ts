@@ -126,8 +126,19 @@ describe('serviços de API', () => {
     it('gera o link, lê o rascunho, salva a fase e envia', () => {
       const service = TestBed.inject(SignupLinkService);
 
-      service.create('ana@teste.com').subscribe();
-      expectCall('POST', '/signup-links', { id: 'link-1' });
+      service.create('ana@teste.com', 'student').subscribe();
+      const created = expectCall('POST', '/signup-links', { id: 'link-1' });
+      expect(created.request.body).toEqual({
+        studentEmail: 'ana@teste.com',
+        role: 'student',
+      });
+
+      service.create('carlos@teste.com', 'professor').subscribe();
+      const teacherLink = expectCall('POST', '/signup-links', { id: 'link-2' });
+      expect(teacherLink.request.body).toEqual({
+        studentEmail: 'carlos@teste.com',
+        role: 'professor',
+      });
 
       service.revoke('link-1').subscribe();
       expectCall('PATCH', '/signup-links/link-1/revoke');
@@ -154,7 +165,7 @@ describe('serviços de API', () => {
       expect(service.approvals()).toBe(0);
 
       service.approve('link-1', '10.00').subscribe();
-      const approve = expectCall('POST', '/signup-links/link-1/approve', { studentId: 's1' });
+      const approve = expectCall('POST', '/signup-links/link-1/approve', { id: 's1' });
       expect(approve.request.body).toEqual({ discountPercentage: '10.00' });
       expect(service.approvals()).toBe(1);
     });

@@ -90,7 +90,7 @@
 </app-card>
 
 @if (creatingLink()) {
-  <app-new-contract-modal (closed)="creatingLink.set(false)" />
+  <app-signup-link-modal (closed)="creatingLink.set(false)" />
 }
 
 @if (selectedStudentId(); as id) {

@@ -1,16 +1,16 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { API_BASE_URL } from '../../../service/api.config';
-import { NewContractModal } from './new-contract-modal';
+import { API_BASE_URL } from '../../service/api.config';
+import { SignupLinkModal } from './signup-link-modal';
 
 /*
- * O começo do contrato. Gerar não cria aluno nenhum — cria só o link que o
- * aluno vai preencher. O que importa aqui é o link certo chegar à área de
- * transferência do admin.
+ * O começo do cadastro, de aluno ou de professor. Gerar não cria ninguém —
+ * cria só o link que a pessoa vai preencher. O que importa aqui é o link certo
+ * chegar à área de transferência do admin.
  */
-describe('NewContractModal', () => {
-  let fixture: ComponentFixture<NewContractModal>;
+describe('SignupLinkModal', () => {
+  let fixture: ComponentFixture<SignupLinkModal>;
   let http: HttpTestingController;
   let copied: string[];
 
@@ -42,7 +42,7 @@ describe('NewContractModal', () => {
     });
     http = TestBed.inject(HttpTestingController);
 
-    fixture = TestBed.createComponent(NewContractModal);
+    fixture = TestBed.createComponent(SignupLinkModal);
     fixture.detectChanges();
   });
 
@@ -72,7 +72,10 @@ describe('NewContractModal', () => {
     fillEmail('ana@teste.com');
     click('Gerar');
     const request = http.expectOne(`${API_BASE_URL}/signup-links`);
-    expect(request.request.body).toEqual({ studentEmail: 'ana@teste.com' });
+    expect(request.request.body).toEqual({
+      studentEmail: 'ana@teste.com',
+      role: 'student',
+    });
     request.flush({ id: 'link-1' });
     await Promise.resolve();
     fixture.detectChanges();

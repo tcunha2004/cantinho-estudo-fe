@@ -25,106 +25,143 @@
   >
     @if (selected(); as item) {
       <!-- Conferência de um cadastro -->
-      <p class="mt-1 text-sm text-ink-soft">
-        Confira os dados enviados pelo aluno. Ao confirmar, o contrato é gerado e o aluno passa a
-        ficar ativo.
-      </p>
+      @if (item.role === 'professor') {
+        <p class="mt-1 text-sm text-ink-soft">
+          Confira os dados enviados pelo professor. Ao confirmar, ele passa a existir no sistema e
+          já pode entrar.
+        </p>
 
-      <section class="mt-5">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Aluno</h3>
-        <dl class="mt-2 divide-y divide-line/70 border-t border-line/70">
-          <div class="flex justify-between gap-4 py-2.5">
-            <dt class="text-ink-soft">Nome</dt>
-            <dd class="text-right font-bold">{{ item.studentName }}</dd>
-          </div>
-          <div class="flex justify-between gap-4 py-2.5">
-            <dt class="text-ink-soft">E-mail</dt>
-            <dd class="text-right font-bold">{{ item.studentEmail }}</dd>
-          </div>
-          <div class="flex justify-between gap-4 py-2.5">
-            <dt class="text-ink-soft">Telefone</dt>
-            <dd class="text-right font-bold">{{ item.studentPhone }}</dd>
-          </div>
-          <div class="flex justify-between gap-4 py-2.5">
-            <dt class="text-ink-soft">Região</dt>
-            <dd class="text-right font-bold">{{ item.regionName }}</dd>
-          </div>
-          @if (item.studentAddress) {
+        <section class="mt-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Professor</h3>
+          <dl class="mt-2 divide-y divide-line/70 border-t border-line/70">
             <div class="flex justify-between gap-4 py-2.5">
-              <dt class="text-ink-soft">Endereço</dt>
-              <dd class="text-right font-bold">{{ item.studentAddress }}</dd>
+              <dt class="text-ink-soft">Nome</dt>
+              <dd class="text-right font-bold">{{ item.studentName }}</dd>
             </div>
-          }
-        </dl>
-      </section>
+            <div class="flex justify-between gap-4 py-2.5">
+              <dt class="text-ink-soft">E-mail</dt>
+              <dd class="text-right font-bold">{{ item.studentEmail }}</dd>
+            </div>
+          </dl>
+        </section>
 
-      <section class="mt-5">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Responsáveis</h3>
-        <ul class="mt-2 divide-y divide-line/70 border-t border-line/70">
-          @for (guardian of item.guardians; track guardian.cpf) {
-            <li class="flex items-baseline justify-between gap-4 py-2.5">
-              <span class="font-bold">
-                {{ guardian.name }}
-                @if (guardian.isFinancialResponsible) {
-                  <span class="badge ml-2 bg-accent-soft text-accent">Financeiro</span>
-                }
-              </span>
-              <span class="text-right text-ink-soft"
-                >{{ guardian.phone }} · {{ guardian.cpf }}</span
-              >
-            </li>
-          }
-        </ul>
-      </section>
-
-      <section class="mt-5">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Plano e desconto</h3>
-
-        <div
-          class="mt-2 flex flex-wrap items-end justify-between gap-4 rounded-2xl bg-cream px-5 py-4"
-        >
-          <div>
-            <span class="badge" [class]="planDisplay[item.planType].badge">
-              {{ planDisplay[item.planType].label }}
-              @if (item.frequency) {
-                · {{ item.frequency }}x por semana
-              }
-            </span>
-            <p class="mt-2 text-sm text-ink-soft">{{ price()?.detail }}</p>
-            <p class="mt-1 text-sm text-ink-soft">
-              Taxa de matrícula de {{ item.enrollmentFee | currency }}, cobrada fora do sistema.
-            </p>
-          </div>
-
-          <div class="text-right">
-            @if (price(); as full) {
-              @if (discountedPrice() !== full.amount) {
-                <p class="text-sm text-ink-soft line-through">{{ full.amount | currency }}</p>
-              }
-              <p class="font-display text-2xl font-extrabold">
-                {{ discountedPrice() | currency
-                }}<span class="ml-1 text-sm font-bold text-ink-soft">{{ full.suffix }}</span>
-              </p>
+        <section class="mt-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Matérias</h3>
+          <div class="mt-2 flex flex-wrap gap-2">
+            @for (subject of item.subjects; track subject.id) {
+              <span class="badge bg-accent-soft text-accent">{{ subject.name }}</span>
             }
           </div>
-        </div>
+        </section>
 
-        <div class="mt-4 max-w-48">
-          <label for="discountPercentage" class="mb-1.5 block text-sm font-bold">
-            Desconto (%) <span class="font-normal text-ink-soft">(opcional)</span>
-          </label>
-          <input
-            id="discountPercentage"
-            type="number"
-            min="0"
-            max="100"
-            step="0.01"
-            placeholder="0"
-            [formControl]="discount"
-            class="field"
-          />
-        </div>
-      </section>
+        <section class="mt-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Apresentação</h3>
+          <p class="mt-2 whitespace-pre-line rounded-2xl bg-cream px-5 py-4 text-ink-soft">
+            {{ item.bio }}
+          </p>
+        </section>
+      } @else {
+        <p class="mt-1 text-sm text-ink-soft">
+          Confira os dados enviados pelo aluno. Ao confirmar, o contrato é gerado e o aluno passa a
+          ficar ativo.
+        </p>
+
+        <section class="mt-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Aluno</h3>
+          <dl class="mt-2 divide-y divide-line/70 border-t border-line/70">
+            <div class="flex justify-between gap-4 py-2.5">
+              <dt class="text-ink-soft">Nome</dt>
+              <dd class="text-right font-bold">{{ item.studentName }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-2.5">
+              <dt class="text-ink-soft">E-mail</dt>
+              <dd class="text-right font-bold">{{ item.studentEmail }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-2.5">
+              <dt class="text-ink-soft">Telefone</dt>
+              <dd class="text-right font-bold">{{ item.studentPhone }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 py-2.5">
+              <dt class="text-ink-soft">Região</dt>
+              <dd class="text-right font-bold">{{ item.regionName }}</dd>
+            </div>
+            @if (item.studentAddress) {
+              <div class="flex justify-between gap-4 py-2.5">
+                <dt class="text-ink-soft">Endereço</dt>
+                <dd class="text-right font-bold">{{ item.studentAddress }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+
+        <section class="mt-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Responsáveis</h3>
+          <ul class="mt-2 divide-y divide-line/70 border-t border-line/70">
+            @for (guardian of item.guardians; track guardian.cpf) {
+              <li class="flex items-baseline justify-between gap-4 py-2.5">
+                <span class="font-bold">
+                  {{ guardian.name }}
+                  @if (guardian.isFinancialResponsible) {
+                    <span class="badge ml-2 bg-accent-soft text-accent">Financeiro</span>
+                  }
+                </span>
+                <span class="text-right text-ink-soft"
+                  >{{ guardian.phone }} · {{ guardian.cpf }}</span
+                >
+              </li>
+            }
+          </ul>
+        </section>
+
+        <section class="mt-5">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-ink-soft">Plano e desconto</h3>
+
+          <div
+            class="mt-2 flex flex-wrap items-end justify-between gap-4 rounded-2xl bg-cream px-5 py-4"
+          >
+            <div>
+              <span class="badge" [class]="planDisplay[item.planType].badge">
+                {{ planDisplay[item.planType].label }}
+                @if (item.frequency) {
+                  · {{ item.frequency }}x por semana
+                }
+              </span>
+              <p class="mt-2 text-sm text-ink-soft">{{ price()?.detail }}</p>
+              <p class="mt-1 text-sm text-ink-soft">
+                Taxa de matrícula de {{ item.enrollmentFee | currency }}, cobrada fora do sistema.
+              </p>
+            </div>
+
+            <div class="text-right">
+              @if (price(); as full) {
+                @if (discountedPrice() !== full.amount) {
+                  <p class="text-sm text-ink-soft line-through">{{ full.amount | currency }}</p>
+                }
+                <p class="font-display text-2xl font-extrabold">
+                  {{ discountedPrice() | currency
+                  }}<span class="ml-1 text-sm font-bold text-ink-soft">{{ full.suffix }}</span>
+                </p>
+              }
+            </div>
+          </div>
+
+          <div class="mt-4 max-w-48">
+            <label for="discountPercentage" class="mb-1.5 block text-sm font-bold">
+              Desconto (%) <span class="font-normal text-ink-soft">(opcional)</span>
+            </label>
+            <input
+              id="discountPercentage"
+              type="number"
+              min="0"
+              max="100"
+              step="0.01"
+              placeholder="0"
+              [formControl]="discount"
+              class="field"
+            />
+          </div>
+        </section>
+      }
 
       @if (errorMessage(); as message) {
         <p class="mt-5 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
@@ -135,21 +172,31 @@
       <div class="mt-6 flex justify-end gap-3">
         <button type="button" class="btn-secondary" (click)="backToList()">Voltar</button>
         <button type="button" class="btn-primary" [disabled]="approving()" (click)="approve()">
-          {{ approving() ? 'Confirmando…' : 'Confirmar e gerar contrato' }}
+          @if (approving()) {
+            Confirmando…
+          } @else if (item.role === 'professor') {
+            Confirmar e liberar acesso
+          } @else {
+            Confirmar e gerar contrato
+          }
         </button>
       </div>
     } @else {
       <!-- Lista -->
-      @if (approvedName(); as name) {
+      @if (approved(); as item) {
         <p
           class="mt-4 rounded-xl bg-subject-green/10 px-4 py-2.5 text-sm font-bold text-subject-green"
         >
-          {{ name }} agora está ativo, com contrato gerado.
+          @if (item.role === 'professor') {
+            {{ item.studentName }} agora está ativo e já pode entrar no sistema.
+          } @else {
+            {{ item.studentName }} agora está ativo, com contrato gerado.
+          }
         </p>
       }
 
       <p class="mt-1 text-sm text-ink-soft">
-        Alunos que preencheram o cadastro e aguardam a geração do contrato.
+        Alunos e professores que preencheram o cadastro e aguardam aprovação.
       </p>
 
       <ul class="mt-5 space-y-2">
@@ -163,7 +210,7 @@
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-lg font-bold">{{ item.studentName }}</span>
                 <span class="block truncate text-sm text-ink-soft">
-                  {{ item.regionName }} ·
+                  {{ item.role === 'professor' ? 'Professor' : item.regionName }} ·
                   @if (item.submittedAt) {
                     enviado em {{ item.submittedAt | date: 'dd/MM/yyyy' }}
                   } @else {
@@ -171,9 +218,13 @@
                   }
                 </span>
               </span>
-              <span class="badge" [class]="planDisplay[item.planType].badge">
-                {{ planDisplay[item.planType].label }}
-              </span>
+              @if (item.role === 'professor') {
+                <span class="badge bg-subject-blue/15 text-subject-blue">Professor</span>
+              } @else {
+                <span class="badge" [class]="planDisplay[item.planType].badge">
+                  {{ planDisplay[item.planType].label }}
+                </span>
+              }
               <app-icon name="chevron-right" class="size-5 shrink-0 text-ink-soft" />
             </button>
           </li>

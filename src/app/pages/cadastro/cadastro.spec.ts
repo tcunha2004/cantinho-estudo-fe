@@ -60,6 +60,7 @@ const regions = [
 
 const emptyForm = {
   id: 'link-1',
+  role: 'student',
   studentName: null,
   studentEmail: null,
   studentPhone: null,
@@ -67,8 +68,11 @@ const emptyForm = {
   regionId: null,
   planId: null,
   guardians: null,
+  bio: null,
+  subjectIds: null,
   hasPassword: false,
   regions,
+  subjects: [],
 };
 
 describe('Cadastro', () => {

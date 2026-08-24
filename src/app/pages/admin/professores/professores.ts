@@ -1,7 +1,9 @@
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { SignupLinkService } from '../../../service/signup-link.service';
 import { TeacherService } from '../../../service/teacher.service';
+import { SignupLinkModal } from '../signup-link-modal';
 import { CommissionInfoModal } from './commission-info-modal';
 import { TeacherDetailModal } from './teacher-detail-modal';
 import { Card } from '../../../shared/card/card';
@@ -27,6 +29,7 @@ const AVATAR_COLORS = [
     DatePipe,
     Icon,
     CommissionInfoModal,
+    SignupLinkModal,
     TeacherDetailModal,
   ],
   templateUrl: './professores.html',
@@ -34,6 +37,7 @@ const AVATAR_COLORS = [
 })
 export class Professores {
   private readonly teacherService = inject(TeacherService);
+  private readonly signupLinkService = inject(SignupLinkService);
 
   protected readonly initials = initials;
 
@@ -47,10 +51,16 @@ export class Professores {
 
   protected readonly selectedTeacherId = signal<string | null>(null);
   protected readonly showCommissionInfo = signal(false);
+  protected readonly creatingLink = signal(false);
 
+  /* `approvals` entra na chave para o professor recém-aprovado no sino aparecer
+   * aqui sem depender de o admin recarregar a página — mesmo motivo de `alunos`. */
   private readonly earnings = rxResource({
-    params: () => this.selectedMonth(),
-    stream: ({ params }) => this.teacherService.getEarningsByMonth(params),
+    params: () => ({
+      month: this.selectedMonth(),
+      approvals: this.signupLinkService.approvals(),
+    }),
+    stream: ({ params }) => this.teacherService.getEarningsByMonth(params.month),
   });
 
   private readonly teachers = computed(() => this.earnings.value()?.teachers ?? []);

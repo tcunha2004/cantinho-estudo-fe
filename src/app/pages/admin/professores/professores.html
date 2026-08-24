@@ -26,6 +26,14 @@
       Comissão
       <app-icon name="help-circle" class="size-4" />
     </button>
+    <button
+      type="button"
+      class="btn-primary flex items-center gap-2"
+      (click)="creatingLink.set(true)"
+    >
+      <app-icon name="plus" class="size-5" />
+      Novo professor
+    </button>
   </div>
 </app-page-header>
 
@@ -84,4 +92,8 @@
 
 @if (showCommissionInfo()) {
   <app-commission-info-modal (closed)="showCommissionInfo.set(false)" />
+}
+
+@if (creatingLink()) {
+  <app-signup-link-modal role="professor" (closed)="creatingLink.set(false)" />
 }

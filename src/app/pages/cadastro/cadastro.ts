@@ -9,14 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import {
-  AbstractControl,
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PlanPricingDto } from '../../model/dto/plan-pricing.dto';
 import { SignupDraftPayload, SignupFormDto } from '../../model/dto/signup-form.dto';
@@ -24,14 +17,9 @@ import { SignupGuardian } from '../../model/entity/signup-link.model';
 import { SignupLinkService } from '../../service/signup-link.service';
 import { PLAN_DISPLAY, planPriceView } from '../../shared/domain-display';
 import { Icon } from '../../shared/icon/icon';
+import { passwordsMatch } from '../../shared/passwords-match';
 
 const PHASES = ['Dados do aluno', 'Responsáveis', 'Plano', 'Revisão'] as const;
-
-/* As duas senhas têm que bater — validação do grupo, não de um campo só. */
-function passwordsMatch(group: AbstractControl): ValidationErrors | null {
-  const { password, passwordConfirm } = group.value as Record<string, string>;
-  return !password || password === passwordConfirm ? null : { passwordMismatch: true };
-}
 
 /**
  * Cadastro do aluno pelo link que o admin enviou. Tela pública: quem preenche

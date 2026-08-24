@@ -6,12 +6,14 @@ import { API_BASE_URL } from '../../service/api.config';
 import { Notifications } from './notifications';
 
 /*
- * O sino do admin. É por aqui que um cadastro enviado vira aluno ativo, então
- * o que este teste protege é o corpo da aprovação (o desconto) e o fato de a
- * contagem refletir o que ainda está esperando.
+ * O sino do admin. É por aqui que um cadastro enviado vira aluno ou professor
+ * ativo, então o que este teste protege é o corpo da aprovação (o desconto, que
+ * só aluno tem), as duas conferências e o fato de a contagem refletir o que
+ * ainda está esperando.
  */
 
 const waiting = {
+  role: 'student',
   id: 'link-1',
   studentName: 'Ana Souza',
   studentEmail: 'ana@teste.com',
@@ -36,6 +38,16 @@ const waiting = {
     },
   ],
   submittedAt: '2026-08-20T10:00:00',
+};
+
+const waitingTeacher = {
+  role: 'professor',
+  id: 'link-2',
+  studentName: 'Carlos Lima',
+  studentEmail: 'carlos@teste.com',
+  bio: 'Licenciado em Matemática, 10 anos de sala de aula.',
+  subjects: [{ id: 'sub-1', name: 'Matemática' }],
+  submittedAt: '2026-08-21T10:00:00',
 };
 
 describe('Notifications', () => {
@@ -146,7 +158,7 @@ describe('Notifications', () => {
     const request = http.expectOne(`${API_BASE_URL}/signup-links/link-1/approve`);
     expect(request.request.method).toBe('POST');
     expect(request.request.body).toEqual({ discountPercentage: '10' });
-    request.flush({ studentId: 's1' });
+    request.flush({ id: 's1' });
     await tick();
 
     /* Volta para a lista, agora vazia, e recarrega a contagem. */
@@ -165,11 +177,42 @@ describe('Notifications', () => {
 
     const request = http.expectOne(`${API_BASE_URL}/signup-links/link-1/approve`);
     expect(request.request.body).toEqual({ discountPercentage: null });
-    request.flush({ studentId: 's1' });
+    request.flush({ id: 's1' });
     await tick();
 
     http.expectOne(`${API_BASE_URL}/signup-links/waiting`).flush([]);
     await tick();
+  });
+
+  /* Professor não tem plano, região nem desconto — a conferência é outra. */
+  it('conferência de professor mostra matérias e apresentação, sem desconto', async () => {
+    await open([waitingTeacher]);
+    openModal();
+
+    expect(text()).toContain('Professor');
+    click('Carlos Lima');
+
+    expect(text()).toContain('carlos@teste.com');
+    expect(text()).toContain('Matemática');
+    expect(text()).toContain('10 anos de sala de aula');
+    expect(host().querySelector('#discountPercentage')).toBeNull();
+  });
+
+  it('aprovar professor não manda desconto', async () => {
+    await open([waitingTeacher]);
+    openModal();
+    click('Carlos Lima');
+    click('Confirmar e liberar acesso');
+
+    const request = http.expectOne(`${API_BASE_URL}/signup-links/link-2/approve`);
+    expect(request.request.body).toEqual({ discountPercentage: null });
+    request.flush({ id: 't1' });
+    await tick();
+
+    http.expectOne(`${API_BASE_URL}/signup-links/waiting`).flush([]);
+    await tick();
+
+    expect(text()).toContain('Carlos Lima agora está ativo');
   });
 
   it('erro na aprovação aparece sem sair da conferência', async () => {

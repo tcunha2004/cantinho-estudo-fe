@@ -12,13 +12,14 @@ import { Icon } from '../../shared/icon/icon';
 import { Modal } from '../../shared/modal/modal';
 
 /**
- * Sino de notificações do admin: cadastros que os alunos enviaram e estão
- * esperando o contrato ser gerado. A contagem é recarregada a cada navegação —
- * é o "ao carregar qualquer página do painel", sem polling.
+ * Sino de notificações do admin: cadastros que alunos e professores enviaram e
+ * estão esperando aprovação. A contagem é recarregada a cada navegação — é o
+ * "ao carregar qualquer página do painel", sem polling.
  *
- * Selecionar um cadastro abre a conferência na mesma janela: os dados que o
- * aluno preencheu, o desconto que o admin quiser dar e a confirmação. Confirmar
- * é o que cria o aluno de verdade (ver SignupLinksService.approve no backend).
+ * Selecionar um cadastro abre a conferência na mesma janela: os dados que a
+ * pessoa preencheu e a confirmação — no cadastro de aluno, também o desconto.
+ * Confirmar é o que cria o aluno ou o professor de verdade (ver
+ * SignupLinksService.approve no backend).
  */
 @Component({
   selector: 'app-notifications',
@@ -51,19 +52,20 @@ export class Notifications {
   protected readonly selected = signal<WaitingSignupDto | null>(null);
   protected readonly approving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  /* Nome do aluno recém-ativado — não nulo enquanto o aviso está na tela. */
-  protected readonly approvedName = signal<string | null>(null);
+  /* Cadastro recém-aprovado — não nulo enquanto o aviso está na tela. */
+  protected readonly approved = signal<WaitingSignupDto | null>(null);
 
   /* `input[type=number]` entrega número (ou nulo quando vazio), não texto. */
   protected readonly discount = new FormControl<number | null>(null);
 
   /*
    * Preço do plano — mensalidade, valor por aula ou pacote, conforme o tipo
-   * (ver planPriceView). É o valor cheio, sem desconto.
+   * (ver planPriceView). É o valor cheio, sem desconto. Só cadastro de aluno
+   * tem plano.
    */
   protected readonly price = computed(() => {
     const item = this.selected();
-    return item ? planPriceView(item) : null;
+    return item?.role === 'student' ? planPriceView(item) : null;
   });
 
   /* O mesmo preço com o desconto que o admin está digitando agora. */
@@ -76,13 +78,13 @@ export class Notifications {
   protected openModal(): void {
     this.open.set(true);
     this.selected.set(null);
-    this.approvedName.set(null);
+    this.approved.set(null);
     this.errorMessage.set(null);
   }
 
   protected select(item: WaitingSignupDto): void {
     this.selected.set(item);
-    this.approvedName.set(null);
+    this.approved.set(null);
     this.errorMessage.set(null);
     this.discount.setValue(null);
   }
@@ -102,13 +104,16 @@ export class Notifications {
     this.approving.set(true);
     this.errorMessage.set(null);
 
-    /* O backend guarda desconto como decimal em string. */
-    const discountPercentage = this.discount.value === null ? null : String(this.discount.value);
+    /* O backend guarda desconto como decimal em string. Professor não tem. */
+    const discountPercentage =
+      item.role === 'professor' || this.discount.value === null
+        ? null
+        : String(this.discount.value);
 
     this.signupLinkService.approve(item.id, discountPercentage).subscribe({
       next: () => {
         this.approving.set(false);
-        this.approvedName.set(item.studentName);
+        this.approved.set(item);
         this.selected.set(null);
         this.waiting.reload();
       },

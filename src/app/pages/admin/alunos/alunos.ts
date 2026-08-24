@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { rxResource } from '@angular/core/rxjs-interop';
 import { SignupLinkService } from '../../../service/signup-link.service';
 import { StudentService } from '../../../service/student.service';
-import { NewContractModal } from './new-contract-modal';
+import { SignupLinkModal } from '../signup-link-modal';
 import { StudentDetailModal } from './student-detail-modal';
 import { Card } from '../../../shared/card/card';
 import {
@@ -16,7 +16,7 @@ import { PageHeader } from '../../../shared/page-header/page-header';
 
 @Component({
   selector: 'app-alunos',
-  imports: [Card, Icon, NewContractModal, PageHeader, StudentDetailModal],
+  imports: [Card, Icon, PageHeader, SignupLinkModal, StudentDetailModal],
   templateUrl: './alunos.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

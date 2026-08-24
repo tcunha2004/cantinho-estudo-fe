@@ -30,7 +30,13 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     title: 'Entrar · Cantinho do Estudo',
   },
-  /* Cadastro do aluno pelo link do admin: pública, sem sessão e fora do shell. */
+  /* Cadastro pelo link do admin: público, sem sessão e fora do shell. */
+  {
+    path: 'cadastro/professor/:id',
+    loadComponent: () =>
+      import('./pages/cadastro-professor/cadastro-professor').then((m) => m.CadastroProfessor),
+    title: 'Cadastro de professor · Cantinho do Estudo',
+  },
   {
     path: 'cadastro/:id',
     loadComponent: () => import('./pages/cadastro/cadastro').then((m) => m.Cadastro),

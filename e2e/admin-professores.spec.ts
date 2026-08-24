@@ -1,6 +1,9 @@
 import { adminHeaders, API, expect, login, reactivate, test } from './helpers';
 
-/* Tela de professores: ganhos do mês, modal de comissão e edição do professor. */
+/*
+ * Tela de professores: ganhos do mês, modal de comissão, edição do professor e
+ * a geração do link de cadastro.
+ */
 test.describe('admin · professores', () => {
   test.beforeEach(async ({ page }) => {
     await login(page, 'admin');
@@ -94,6 +97,38 @@ test.describe('admin · professores', () => {
     await modal.getByRole('button', { name: 'Salvar' }).click();
 
     await expect(modal.getByRole('heading', { name: 'Editar professor' })).toBeVisible();
+  });
+
+  /*
+   * O começo do cadastro de professor. O teste para no link gerado e no
+   * formulário público: aprovar criaria um usuário de verdade no banco de
+   * desenvolvimento, e a aprovação já é coberta por teste de unidade.
+   */
+  test('gera o link de cadastro do professor', async ({ page }) => {
+    await page.getByRole('button', { name: 'Novo professor' }).click();
+
+    const modal = page.getByRole('dialog');
+    await expect(modal.getByRole('heading', { name: 'Novo professor' })).toBeVisible();
+    await expect(modal).toContainText('matérias que leciona');
+
+    /* O e-mail identifica o link: sem ele o botão nem habilita. */
+    const gerar = modal.getByRole('button', { name: 'Gerar' });
+    await expect(gerar).toBeDisabled();
+    await modal.locator('#linkStudentEmail').fill(`e2e.prof.${Date.now()}@teste.com`);
+    await gerar.click();
+
+    const linkInput = modal.getByLabel('Link de cadastro');
+    await expect(linkInput).toBeVisible();
+    const url = await linkInput.inputValue();
+    expect(url, 'link de cadastro do professor').toContain('/cadastro/professor/');
+
+    /* O formulário abre sem sessão nenhuma — é público. */
+    await page.evaluate(() => localStorage.clear());
+    await page.goto(url);
+
+    await expect(page.getByRole('heading', { name: 'Dados do professor' })).toBeVisible();
+    await expect(page.getByText('Matérias que você leciona')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Enviar' })).toBeDisabled();
   });
 
   test('inativar tira o professor da listagem de ganhos', async ({ page, request }) => {
