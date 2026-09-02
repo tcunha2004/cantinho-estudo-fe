@@ -1,0 +1,97 @@
+<app-page-header title="Aulas" [subtitle]="subtitle()">
+  <div class="flex flex-wrap items-center gap-3 print:hidden">
+    <input
+      type="date"
+      aria-label="Data inicial"
+      class="field w-40 rounded-full py-2.5"
+      [value]="from()"
+      (change)="from.set($any($event.target).value)"
+    />
+    <input
+      type="date"
+      aria-label="Data final"
+      class="field w-40 rounded-full py-2.5"
+      [value]="to()"
+      (change)="to.set($any($event.target).value)"
+    />
+
+    <select
+      aria-label="Filtrar por aluno"
+      class="field w-44 rounded-full py-2.5"
+      [value]="studentFilter()"
+      (change)="studentFilter.set($any($event.target).value)"
+    >
+      <option value="">Todos os alunos</option>
+      @for (student of students(); track student.id) {
+        <option [value]="student.id">{{ student.name }}</option>
+      }
+    </select>
+
+    <button
+      type="button"
+      (click)="downloadPdf()"
+      title="Baixar PDF"
+      aria-label="Baixar PDF"
+      class="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+    >
+      <app-icon name="download" class="size-4.5" />
+    </button>
+  </div>
+</app-page-header>
+
+@if (loading()) {
+  <p class="mt-4 text-sm text-ink-soft">Carregando…</p>
+}
+
+@if (loadError()) {
+  <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+    Não foi possível carregar as aulas. Recarregue a página.
+  </p>
+}
+
+<app-card class="mt-6 overflow-x-auto">
+  <table class="w-full text-left">
+    <thead>
+      <tr class="border-b border-line text-xs uppercase tracking-wider text-ink-soft">
+        <th scope="col" class="px-3 pb-4 font-bold">Data</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Hora</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Aluno</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Professor</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Matéria</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Local</th>
+        <th scope="col" class="px-3 pb-4 font-bold">Status</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-line/70">
+      @for (item of items(); track item.id) {
+        <tr (click)="openDetails(item)" class="cursor-pointer hover:bg-cream/60">
+          <td class="whitespace-nowrap px-3 py-4 font-bold">
+            {{ item.scheduledAt | date: 'dd/MM/y' }}
+          </td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
+            {{ item.scheduledAt | date: 'HH:mm' }}
+          </td>
+          <td class="whitespace-nowrap px-3 py-4">{{ item.student.name }}</td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ item.teacher.name }}</td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ item.subject.name }}</td>
+          <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
+            {{ item.locationType === 'home' ? 'Casa do aluno' : 'No Cantinho' }}
+          </td>
+          <td class="px-3 py-4">
+            <span class="badge" [class]="classStatus[item.status].badge">
+              {{ classStatus[item.status].label }}
+            </span>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="7" class="px-3 py-8 text-center text-ink-soft">Nenhuma aula no período.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</app-card>
+
+@if (selectedClassId(); as id) {
+  <app-class-details-modal [classId]="id" (closed)="closeDetails()" />
+}

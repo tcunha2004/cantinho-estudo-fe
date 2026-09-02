@@ -13,6 +13,7 @@ import { RegionService } from '../../../service/region.service';
 import { Card } from '../../../shared/card/card';
 import { Icon } from '../../../shared/icon/icon';
 import { PageHeader } from '../../../shared/page-header/page-header';
+import { downloadPdf as printPdf } from '../../../shared/print-pdf';
 
 @Component({
   selector: 'app-info',
@@ -58,28 +59,12 @@ export class Info {
     this.selectedSlug.set(slug);
   }
 
-  /**
-   * Gera o PDF da região selecionada pela impressão do navegador ("Salvar como PDF"),
-   * que preserva o layout da tela. O título do documento vira o nome do arquivo
-   * sugerido, então é trocado durante a impressão e restaurado depois.
-   */
   protected downloadPdf(): void {
     const region = this.region();
     if (!region) {
       return;
     }
 
-    const win = this.document.defaultView;
-    const previousTitle = this.document.title;
-
-    this.document.title = `Planos ${region.name} - Cantinho do Estudo`;
-
-    const restoreTitle = () => {
-      this.document.title = previousTitle;
-      win?.removeEventListener('afterprint', restoreTitle);
-    };
-
-    win?.addEventListener('afterprint', restoreTitle);
-    win?.print();
+    printPdf(this.document, `Planos ${region.name} - Cantinho do Estudo`);
   }
 }

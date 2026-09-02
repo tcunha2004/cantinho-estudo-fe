@@ -15,6 +15,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
   admin: [
     { label: 'Painel', path: '/painel', icon: 'house' },
     { label: 'Agenda', path: '/agenda', icon: 'calendar' },
+    { label: 'Aulas', path: '/admin/aulas', icon: 'book-open' },
     { label: 'Alunos', path: '/alunos', icon: 'users' },
     { label: 'Professores', path: '/professores', icon: 'presentation' },
     { label: 'Informações', path: '/info', icon: 'info' },

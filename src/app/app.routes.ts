@@ -73,6 +73,14 @@ export const routes: Routes = [
         roles: ['admin'],
         loadComponent: () => import('./pages/admin/info/info').then((m) => m.Info),
       }),
+      /* Path prefixado: 'aulas' já é a rota do professor, e como são irmãs
+       * sob o shell o roleGuard barraria em vez de cair na próxima. */
+      page({
+        path: 'admin/aulas',
+        title: 'Aulas',
+        roles: ['admin'],
+        loadComponent: () => import('./pages/admin/aulas/aulas').then((m) => m.Aulas),
+      }),
       // compartilhada (admin, professor e aluno)
       page({
         path: 'agenda',
