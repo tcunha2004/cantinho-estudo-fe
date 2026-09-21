@@ -73,6 +73,12 @@ export const routes: Routes = [
         roles: ['admin'],
         loadComponent: () => import('./pages/admin/info/info').then((m) => m.Info),
       }),
+      page({
+        path: 'senhas',
+        title: 'Acessos',
+        roles: ['admin'],
+        loadComponent: () => import('./pages/admin/senhas/senhas').then((m) => m.Senhas),
+      }),
       /* Path prefixado: 'aulas' já é a rota do professor, e como são irmãs
        * sob o shell o roleGuard barraria em vez de cair na próxima. */
       page({

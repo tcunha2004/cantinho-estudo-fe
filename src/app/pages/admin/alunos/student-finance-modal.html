@@ -112,6 +112,20 @@
                           class="flex flex-wrap items-center justify-end gap-3 rounded-xl bg-cream px-4 py-2.5"
                         >
                           <span class="text-sm text-ink-soft">Confirmar mudança de status?</span>
+                          @if (staged()?.status === 'paid') {
+                            <label class="flex items-center gap-2 text-sm text-ink-soft">
+                              Pago em
+                              <input
+                                type="date"
+                                class="field w-auto py-1.5 text-sm"
+                                [max]="hoje"
+                                [value]="paidAtInput()"
+                                (change)="paidAtInput.set($any($event.target).value)"
+                                [disabled]="confirmingId() === payment.id"
+                                aria-label="Data do pagamento"
+                              />
+                            </label>
+                          }
                           <button
                             type="button"
                             class="btn-secondary px-4 py-2 text-sm"

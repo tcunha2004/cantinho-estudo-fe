@@ -66,7 +66,7 @@
         <label for="durationMinutes" class="mb-1.5 block text-sm font-bold">Duração</label>
         <select id="durationMinutes" formControlName="durationMinutes" class="field">
           <!-- ngValue preserva o número; [value] mandaria "60" como texto -->
-          @for (duration of durations; track duration) {
+          @for (duration of durations(); track duration) {
             <option [ngValue]="duration">{{ duration }} min</option>
           }
         </select>
@@ -74,8 +74,8 @@
       <div>
         <label for="locationType" class="mb-1.5 block text-sm font-bold">Local</label>
         <select id="locationType" formControlName="locationType" class="field">
-          @for (location of locations; track location.value) {
-            <option [value]="location.value">{{ location.label }}</option>
+          @for (location of locations; track location) {
+            <option [value]="location">{{ locationLabel[location].label }}</option>
           }
         </select>
       </div>

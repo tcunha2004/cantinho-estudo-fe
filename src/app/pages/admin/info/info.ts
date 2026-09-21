@@ -7,17 +7,19 @@ import {
   signal,
 } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { rxResource } from '@angular/core/rxjs-interop';
+import { RegionPricingDto } from '../../../model/dto/region-pricing.dto';
 import { PlanType } from '../../../model/entity/plan.model';
 import { RegionService } from '../../../service/region.service';
 import { Card } from '../../../shared/card/card';
 import { Icon } from '../../../shared/icon/icon';
 import { PageHeader } from '../../../shared/page-header/page-header';
 import { downloadPdf as printPdf } from '../../../shared/print-pdf';
+import { PlanEditModal } from './plan-edit-modal';
 
 @Component({
   selector: 'app-info',
-  imports: [Card, CurrencyPipe, Icon, PageHeader],
+  imports: [Card, CurrencyPipe, Icon, PageHeader, PlanEditModal],
   templateUrl: './info.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -25,9 +27,17 @@ export class Info {
   private readonly document = inject(DOCUMENT);
   private readonly regionService = inject(RegionService);
 
-  protected readonly regions = toSignal(this.regionService.getPricing(), {
-    initialValue: [],
+  /* rxResource em vez de toSignal: depois de editar os valores a tela precisa
+   * recarregar, e toSignal não recarrega. */
+  private readonly pricing = rxResource({
+    params: () => ({}),
+    stream: () => this.regionService.getPricing(),
+    defaultValue: [] as RegionPricingDto[],
   });
+
+  protected readonly regions = this.pricing.value;
+
+  protected readonly editing = signal(false);
 
   private readonly selectedSlug = signal<string | null>(null);
 
@@ -66,5 +76,9 @@ export class Info {
     }
 
     printPdf(this.document, `Planos ${region.name} - Cantinho do Estudo`);
+  }
+
+  protected onSaved(): void {
+    this.pricing.reload();
   }
 }

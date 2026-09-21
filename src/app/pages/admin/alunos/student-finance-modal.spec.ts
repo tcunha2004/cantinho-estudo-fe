@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { API_BASE_URL } from '../../../service/api.config';
+import { todayNaive } from '../../../shared/naive-date';
 import { StudentFinanceModal } from './student-finance-modal';
 
 /*
@@ -222,7 +223,8 @@ describe('StudentFinanceModal', () => {
 
     const request = http.expectOne(`${API_BASE_URL}/students/s1/payments/pg3`);
     expect(request.request.method).toBe('PATCH');
-    expect(request.request.body).toEqual({ status: 'paid' });
+    /* Preparar a troca já carimba a data padrão (hoje) em `paidAtInput`. */
+    expect(request.request.body).toEqual({ status: 'paid', paidAt: todayNaive() });
     request.flush({ ...payments[0], status: 'paid', paidAt: '2026-08-18 09:00:00' });
     await tick();
 
@@ -263,5 +265,65 @@ describe('StudentFinanceModal', () => {
       'Parcela não encontrada para este aluno',
     );
     expect(statusSelect(section(0)).value).toBe('pending');
+  });
+
+  it('envia a data escolhida junto do status ao confirmar um pagamento', async () => {
+    await open();
+
+    const instance = fixture.componentInstance as unknown as {
+      staged: { set: (value: unknown) => void };
+      paidAtInput: { set: (value: string) => void };
+      confirmChange: () => void;
+    };
+
+    instance.staged.set({
+      paymentId: 'pg3',
+      status: 'paid',
+      originalStatus: 'pending',
+      select: document.createElement('select'),
+    });
+    instance.paidAtInput.set('2026-08-03');
+    fixture.detectChanges();
+
+    instance.confirmChange();
+
+    const request = http.expectOne(`${API_BASE_URL}/students/s1/payments/pg3`);
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ status: 'paid', paidAt: '2026-08-03' });
+    request.flush(payments[0]);
+    await tick();
+
+    /* confirmChange recarrega aluno e parcelas no sucesso. */
+    http.expectOne(`${API_BASE_URL}/students/s1`).flush(student);
+    http.expectOne(`${API_BASE_URL}/students/s1/payments`).flush(payments);
+    await tick();
+  });
+
+  it('não envia paidAt quando o status escolhido não é "pago"', async () => {
+    await open();
+
+    const instance = fixture.componentInstance as unknown as {
+      staged: { set: (value: unknown) => void };
+      confirmChange: () => void;
+    };
+
+    instance.staged.set({
+      paymentId: 'pg3',
+      status: 'cancelled',
+      originalStatus: 'pending',
+      select: document.createElement('select'),
+    });
+    fixture.detectChanges();
+
+    instance.confirmChange();
+
+    const request = http.expectOne(`${API_BASE_URL}/students/s1/payments/pg3`);
+    expect(request.request.body).toEqual({ status: 'cancelled' });
+    request.flush(payments[0]);
+    await tick();
+
+    http.expectOne(`${API_BASE_URL}/students/s1`).flush(student);
+    http.expectOne(`${API_BASE_URL}/students/s1/payments`).flush(payments);
+    await tick();
   });
 });

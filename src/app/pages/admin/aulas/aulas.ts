@@ -6,7 +6,7 @@ import { ClassService } from '../../../service/class.service';
 import { StudentService } from '../../../service/student.service';
 import { Card } from '../../../shared/card/card';
 import { ClassDetailsModal } from '../../agenda/class-details-modal';
-import { CLASS_STATUS_DISPLAY } from '../../../shared/domain-display';
+import { CLASS_STATUS_DISPLAY, LOCATION_TYPE_DISPLAY } from '../../../shared/domain-display';
 import { Icon } from '../../../shared/icon/icon';
 import { monthRange } from '../../../shared/month';
 import { PageHeader } from '../../../shared/page-header/page-header';
@@ -28,6 +28,7 @@ export class Aulas {
   private readonly classService = inject(ClassService);
 
   protected readonly classStatus = CLASS_STATUS_DISPLAY;
+  protected readonly locationLabel = LOCATION_TYPE_DISPLAY;
   protected readonly students = toSignal(inject(StudentService).getAll(), { initialValue: [] });
 
   protected readonly from = signal(monthRange().from);

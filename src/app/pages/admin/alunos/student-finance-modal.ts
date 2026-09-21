@@ -20,6 +20,7 @@ import {
   PLAN_DISPLAY,
 } from '../../../shared/domain-display';
 import { Modal } from '../../../shared/modal/modal';
+import { todayNaive } from '../../../shared/naive-date';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 
 type Contract = StudentDetailDto['contracts'][number];
@@ -72,6 +73,11 @@ export class StudentFinanceModal {
   /* Id da parcela cujo PATCH está em voo — trava o select e os botões dela. */
   protected readonly confirmingId = signal<string | null>(null);
   protected readonly errorMessage = signal<string | null>(null);
+  /* Dia em que o pagamento foi feito, editável na linha de confirmação. Começa
+   * em hoje: o caso comum é o admin fechar a parcela no dia em que recebeu. */
+  protected readonly paidAtInput = signal(todayNaive());
+  /* Teto do seletor de data: pagamento no futuro não existe. */
+  protected readonly hoje = todayNaive();
 
   protected readonly student = rxResource({
     params: () => this.studentId(),
@@ -136,6 +142,9 @@ export class StudentFinanceModal {
     const select = event.target as HTMLSelectElement;
     const status = select.value as PaymentStatus;
 
+    /* Cada preparação recomeça de hoje — a data da troca anterior não vaza. */
+    this.paidAtInput.set(todayNaive());
+
     const previous = this.staged();
     if (previous && previous.paymentId !== payment.id) {
       previous.select.value = previous.originalStatus;
@@ -184,7 +193,13 @@ export class StudentFinanceModal {
     this.errorMessage.set(null);
 
     this.studentService
-      .updatePaymentStatus(this.studentId(), staged.paymentId, staged.status)
+      .updatePaymentStatus(
+        this.studentId(),
+        staged.paymentId,
+        staged.status,
+        /* A data só faz sentido fechando a parcela; reabrir zera o paidAt. */
+        staged.status === 'paid' ? this.paidAtInput() : undefined,
+      )
       .subscribe({
         next: () => {
           this.confirmingId.set(null);

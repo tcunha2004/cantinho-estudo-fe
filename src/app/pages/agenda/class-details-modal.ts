@@ -13,17 +13,11 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ClassDetailDto } from '../../model/dto/agenda-class.dto';
-import { LocationType } from '../../model/entity/class.model';
 import { ClassService } from '../../service/class.service';
-import { CLASS_STATUS_DISPLAY } from '../../shared/domain-display';
+import { CLASS_STATUS_DISPLAY, LOCATION_TYPE_DISPLAY } from '../../shared/domain-display';
 import { Icon } from '../../shared/icon/icon';
 import { Modal } from '../../shared/modal/modal';
 import { nowNaive } from '../../shared/naive-date';
-
-const LOCATION_LABEL: Record<LocationType, string> = {
-  home: 'Casa do aluno',
-  school: 'No Cantinho',
-};
 
 export type ClassAction = 'complete' | 'no_show' | 'cancel' | 'reopen';
 
@@ -99,7 +93,7 @@ export class ClassDetailsModal {
   private readonly modal = viewChild.required(Modal);
 
   protected readonly classStatus = CLASS_STATUS_DISPLAY;
-  protected readonly locationLabel = LOCATION_LABEL;
+  protected readonly locationLabel = LOCATION_TYPE_DISPLAY;
   protected readonly actionCopy = ACTION_COPY;
 
   protected readonly pending = signal<ClassAction | null>(null);

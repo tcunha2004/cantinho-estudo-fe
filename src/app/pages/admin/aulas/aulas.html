@@ -75,7 +75,7 @@
           <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ item.teacher.name }}</td>
           <td class="whitespace-nowrap px-3 py-4 text-ink-soft">{{ item.subject.name }}</td>
           <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
-            {{ item.locationType === 'home' ? 'Casa do aluno' : 'No Cantinho' }}
+            {{ locationLabel[item.locationType].label }}
           </td>
           <td class="px-3 py-4">
             <span class="badge" [class]="classStatus[item.status].badge">

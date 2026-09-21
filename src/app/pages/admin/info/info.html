@@ -25,6 +25,18 @@
       }
     </div>
 
+    <!-- Reajuste dos valores da região selecionada -->
+    <button
+      type="button"
+      (click)="editing.set(true)"
+      [disabled]="!region()"
+      title="Editar valores"
+      [attr.aria-label]="'Editar valores' + (region() ? ' · ' + region()!.name : '')"
+      class="flex size-11 shrink-0 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-xs transition-colors hover:border-accent hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:opacity-50"
+    >
+      <app-icon name="pencil" class="size-4.5" />
+    </button>
+
     <!-- Baixar PDF da região selecionada -->
     <button
       type="button"
@@ -126,4 +138,12 @@
   </div>
 } @else {
   <p class="mt-6 text-ink-soft">Carregando tabela de preços...</p>
+}
+
+@if (editing() && region(); as regiaoEmEdicao) {
+  <app-plan-edit-modal
+    [region]="regiaoEmEdicao"
+    (saved)="onSaved()"
+    (closed)="editing.set(false)"
+  />
 }

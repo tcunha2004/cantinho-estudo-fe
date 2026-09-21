@@ -18,7 +18,7 @@ import { Modal } from '../../shared/modal/modal';
 const LABELS = {
   student: {
     title: 'Novo contrato',
-    emailLabel: 'E-mail do aluno',
+    emailLabel: 'E-mail de cadastro',
     emailPlaceholder: 'aluno@email.com',
     /* Cada papel tem o seu formulário público. */
     path: '/cadastro',
@@ -97,7 +97,8 @@ const LABELS = {
             class="field mt-1.5 w-full"
           />
           <span class="mt-1.5 block text-xs text-ink-soft">
-            Se já houver um link pendente para este e-mail, ele deixa de valer.
+            É o e-mail de acesso ao sistema — pode ser o do responsável, quando o aluno não tiver
+            um. Se já houver um link pendente para este e-mail, ele deixa de valer.
           </span>
         </label>
 

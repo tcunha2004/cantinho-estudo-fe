@@ -18,7 +18,7 @@ import { PageHeader } from '../../../shared/page-header/page-header';
  */
 const BASE_BENEFITS = [
   'Professor por matéria, definido em cada aula',
-  'Aula no Cantinho ou na casa do aluno',
+  'Aula no Cantinho ou domiciliar',
   'Agenda online: agendar e remarcar pela plataforma',
 ];
 

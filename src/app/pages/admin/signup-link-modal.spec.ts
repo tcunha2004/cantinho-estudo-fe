@@ -140,4 +140,18 @@ describe('SignupLinkModal', () => {
 
     expect(host().textContent).toContain('Já existe um usuário com este e-mail');
   });
+
+  it('pede o e-mail de cadastro, não o do aluno', () => {
+    const texto = host().textContent ?? '';
+
+    expect(texto).toContain('E-mail de cadastro');
+    expect(texto).not.toContain('E-mail do aluno');
+  });
+
+  it('mantém o rótulo próprio do fluxo de professor', () => {
+    fixture.componentRef.setInput('role', 'professor');
+    fixture.detectChanges();
+
+    expect(host().textContent).toContain('E-mail do professor');
+  });
 });

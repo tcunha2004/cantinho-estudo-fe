@@ -16,14 +16,13 @@ import { ClassDetailDto } from '../../model/dto/agenda-class.dto';
 import { ClassFormOptionsDto } from '../../model/dto/class-form-options.dto';
 import { LocationType } from '../../model/entity/class.model';
 import { ClassPayload, ClassService } from '../../service/class.service';
+import { LOCATION_TYPE_DISPLAY } from '../../shared/domain-display';
 import { Modal } from '../../shared/modal/modal';
 
-const DURATIONS = [30, 45, 60, 90, 120];
+const DURATIONS = [45, 60, 90, 120, 180];
 
-const LOCATIONS: { value: LocationType; label: string }[] = [
-  { value: 'school', label: 'No Cantinho' },
-  { value: 'home', label: 'Casa do aluno' },
-];
+/* Ordem das opções do select; os rótulos vêm do mapa central. */
+const LOCATIONS: LocationType[] = ['school', 'home'];
 
 /**
  * Formulário de aula, usado tanto para criar quanto para editar. Ele mesmo fala
@@ -53,8 +52,18 @@ export class ClassFormModal {
   private readonly classService = inject(ClassService);
   private readonly modal = viewChild.required(Modal);
 
-  protected readonly durations = DURATIONS;
+  /* Aula antiga pode ter duração que saiu da lista (30 min, por exemplo). Sem
+   * incluí-la, o <select> abriria em branco e salvar trocaria a duração sem o
+   * usuário pedir. */
+  protected readonly durations = computed(() => {
+    const current = this.initial()?.durationMinutes;
+
+    return current && !DURATIONS.includes(current)
+      ? [...DURATIONS, current].sort((a, b) => a - b)
+      : DURATIONS;
+  });
   protected readonly locations = LOCATIONS;
+  protected readonly locationLabel = LOCATION_TYPE_DISPLAY;
 
   protected readonly saving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);

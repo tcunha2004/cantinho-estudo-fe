@@ -1,4 +1,4 @@
-import { paymentStatusDisplay } from './domain-display';
+import { LOCATION_TYPE_DISPLAY, paymentStatusDisplay } from './domain-display';
 import { todayNaive } from './naive-date';
 
 /* Datas relativas a hoje: o rótulo depende da comparação com a data corrente. */
@@ -24,5 +24,15 @@ describe('paymentStatusDisplay', () => {
   it('parcela paga ou cancelada não vira atraso, mesmo vencida', () => {
     expect(paymentStatusDisplay('paid', shift(-30)).label).toBe('Pago');
     expect(paymentStatusDisplay('cancelled', shift(-30)).label).toBe('Cancelado');
+  });
+});
+
+describe('LOCATION_TYPE_DISPLAY', () => {
+  it('aula na casa do aluno aparece como "Domiciliar"', () => {
+    expect(LOCATION_TYPE_DISPLAY.home.label).toBe('Domiciliar');
+  });
+
+  it('aula na sede aparece como "No Cantinho"', () => {
+    expect(LOCATION_TYPE_DISPLAY.school.label).toBe('No Cantinho');
   });
 });

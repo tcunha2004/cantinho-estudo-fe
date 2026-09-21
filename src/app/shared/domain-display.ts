@@ -1,5 +1,5 @@
 import { StudentStatus } from '../model/dto/compact-student.dto';
-import { ClassStatus } from '../model/entity/class.model';
+import { ClassStatus, LocationType } from '../model/entity/class.model';
 import { PaymentStatus } from '../model/entity/payment.model';
 import { PlanType } from '../model/entity/plan.model';
 import { ContractStatus } from '../model/entity/student-contract.model';
@@ -164,3 +164,12 @@ export function paymentStatusDisplay(
     ? { label: 'Em atraso', badge: 'bg-accent-soft text-accent' }
     : PAYMENT_STATUS_DISPLAY[status];
 }
+
+/*
+ * Onde a aula acontece. Sem classes de cor: a modalidade é sempre texto
+ * corrido, nunca pílula. O valor no banco continua 'home' — só o rótulo mudou.
+ */
+export const LOCATION_TYPE_DISPLAY: Record<LocationType, { label: string }> = {
+  home: { label: 'Domiciliar' },
+  school: { label: 'No Cantinho' },
+};

@@ -59,14 +59,18 @@ export class StudentService {
     return this.api.get<PaymentHistoryDto[]>(`/students/${id}/payments`);
   }
 
-  /* Fecha (ou reabre) uma parcela. `paidAt` é derivado do status no backend. */
+  /* Fecha (ou reabre) uma parcela. `paidAt` (YYYY-MM-DD) registra o dia em que
+   * o aluno pagou de fato; sem ele o backend carimba o momento atual. Só vale
+   * para o status "pago". */
   updatePaymentStatus(
     studentId: string,
     paymentId: string,
     status: PaymentStatus,
+    paidAt?: string,
   ): Observable<PaymentHistoryDto> {
     return this.api.patch<PaymentHistoryDto>(`/students/${studentId}/payments/${paymentId}`, {
       status,
+      ...(paidAt ? { paidAt } : {}),
     });
   }
 
