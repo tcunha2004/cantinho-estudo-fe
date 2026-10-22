@@ -1,0 +1,134 @@
+<app-page-header title="WhatsApp" subtitle="Número que envia as mensagens do sistema aos alunos" />
+
+<app-card class="mt-6">
+  @if (errorMessage(); as message) {
+    <p role="alert" class="mb-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+      {{ message }}
+    </p>
+  }
+
+  @if (loading()) {
+    <p class="text-ink-soft">Consultando o WhatsApp...</p>
+  } @else {
+    @switch (state()) {
+      @case ('disconnected') {
+        <p class="text-ink-soft">Nenhum número conectado. As mensagens não estão sendo enviadas.</p>
+        <button type="button" class="btn-primary mt-4" [disabled]="working()" (click)="connect()">
+          @if (working()) {
+            Conectando…
+          } @else {
+            Conectar
+          }
+        </button>
+      }
+      @case ('connecting') {
+        <div class="text-center">
+          @if (status()?.qrcode; as qrcode) {
+            <img
+              [src]="qrSrc(qrcode)"
+              alt="QR code para conectar o WhatsApp"
+              class="mx-auto size-56 rounded-2xl border border-line"
+            />
+          } @else {
+            <p class="py-16 text-ink-soft">Gerando QR code…</p>
+          }
+          <p class="mt-3 text-sm text-ink-soft">
+            No celular: WhatsApp &gt; Aparelhos conectados &gt; Conectar aparelho
+          </p>
+          <p class="mt-1 text-sm text-ink-soft">A tela atualiza sozinha quando o celular lê.</p>
+          <button
+            type="button"
+            class="btn-secondary mt-4"
+            [disabled]="working()"
+            (click)="connect()"
+          >
+            Gerar outro QR
+          </button>
+        </div>
+      }
+      @case ('connected') {
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="badge bg-subject-green/15 text-subject-green">Conectado</span>
+            @if (status()?.phone; as phone) {
+              <p class="mt-2 font-display text-2xl font-extrabold">{{ formatPhone(phone) }}</p>
+            }
+            @if (status()?.profileName; as profileName) {
+              <p class="text-ink-soft">{{ profileName }}</p>
+            }
+          </div>
+          <button type="button" class="btn-secondary" [disabled]="working()" (click)="disconnect()">
+            Desconectar
+          </button>
+        </div>
+      }
+      @case ('not_configured') {
+        <p class="text-ink-soft">
+          O WhatsApp não está configurado no servidor. Fale com quem cuida da instalação.
+        </p>
+      }
+      @case ('unreachable') {
+        <p class="text-ink-soft">Não foi possível falar com o WhatsApp agora.</p>
+        <button type="button" class="btn-secondary mt-4" (click)="retry()">Tentar de novo</button>
+      }
+    }
+  }
+</app-card>
+
+<app-card class="mt-6">
+  <h2 class="font-display text-xl font-bold">Mensagens que não foram enviadas</h2>
+
+  @if (failuresError()) {
+    <p class="mt-4 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
+      Não foi possível carregar as mensagens.
+    </p>
+  } @else if (failures().length === 0) {
+    <p class="mt-4 text-ink-soft">Nenhuma mensagem com falha.</p>
+  } @else {
+    <div class="mt-4 overflow-x-auto">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="text-ink-soft">
+            <th scope="col" class="px-3 pb-2 font-bold">Aluno</th>
+            <th scope="col" class="px-3 pb-2 font-bold">Telefone</th>
+            <th scope="col" class="px-3 pb-2 font-bold">Motivo</th>
+            <th scope="col" class="px-3 pb-2 font-bold">Data</th>
+            <th scope="col" class="px-3 pb-2 font-bold">Mensagem</th>
+            <th scope="col" class="px-3 pb-2 font-bold"><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of failures(); track item.id) {
+            <tr class="border-b border-line/70 last:border-0">
+              <td class="px-3 py-4 font-bold">{{ item.studentName ?? '—' }}</td>
+              <td class="px-3 py-4 text-ink-soft">{{ item.phone }}</td>
+              <td class="px-3 py-4 text-red-600">{{ item.error }}</td>
+              <td class="whitespace-nowrap px-3 py-4 text-ink-soft">
+                {{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}
+              </td>
+              <td class="max-w-xs px-3 py-4 text-sm text-ink-soft">{{ item.text }}</td>
+              <td class="whitespace-nowrap px-3 py-4 text-right">
+                <button
+                  type="button"
+                  class="btn-secondary px-4 py-2 text-sm"
+                  [disabled]="busyIds().includes(item.id)"
+                  (click)="resend(item)"
+                >
+                  Reenviar
+                </button>
+                <button
+                  type="button"
+                  class="btn-secondary ml-2 px-4 py-2 text-sm"
+                  [disabled]="busyIds().includes(item.id)"
+                  (click)="discard(item)"
+                >
+                  Descartar
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</app-card>
