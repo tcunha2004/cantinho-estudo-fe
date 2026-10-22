@@ -48,4 +48,17 @@ describe('Aulas do admin', () => {
     expect(request.request.params.get('studentId')).toBe('s1');
     request.flush([]);
   });
+
+  it('mostra o motivo quando a API recusa o período', async () => {
+    http.expectOne((req) => req.url === `${API_BASE_URL}/classes/agenda`).flush(
+      { message: 'O intervalo pode ter no máximo 62 dias' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    http.expectOne(`${API_BASE_URL}/students/all`).flush([]);
+    await Promise.resolve();
+    await Promise.resolve();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('O intervalo pode ter no máximo 62 dias');
+  });
 });
