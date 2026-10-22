@@ -19,6 +19,9 @@ import { PLAN_DISPLAY, planPriceView } from '../../shared/domain-display';
 import { Icon } from '../../shared/icon/icon';
 import { passwordsMatch } from '../../shared/passwords-match';
 
+/* DDD + celular, só números: 31999999999. Mesma regra do backend. */
+const PHONE = /^\d{11}$/;
+
 const PHASES = ['Dados do aluno', 'Responsáveis', 'Plano', 'Revisão'] as const;
 
 /**
@@ -68,7 +71,7 @@ export class Cadastro {
       {
         studentName: ['', [Validators.required, Validators.minLength(3)]],
         studentEmail: ['', [Validators.required, Validators.email]],
-        studentPhone: ['', [Validators.required, Validators.minLength(8)]],
+        studentPhone: ['', [Validators.required, Validators.pattern(PHONE)]],
         studentAddress: [''],
         regionId: ['', Validators.required],
         password: ['', [Validators.required, Validators.minLength(6)]],
@@ -333,7 +336,7 @@ export class Cadastro {
   private guardianGroup() {
     return this.fb.nonNullable.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      phone: ['', [Validators.required, Validators.minLength(8)]],
+      phone: ['', [Validators.required, Validators.pattern(PHONE)]],
       cpf: ['', [Validators.required, Validators.minLength(11)]],
       rg: [''],
     });

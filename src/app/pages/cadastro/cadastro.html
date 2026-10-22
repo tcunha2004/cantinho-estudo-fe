@@ -130,14 +130,16 @@
                     id="studentPhone"
                     type="tel"
                     formControlName="studentPhone"
-                    placeholder="(31) 90000-0000"
+                    inputmode="numeric"
+                    maxlength="11"
+                    placeholder="31999999999"
                     class="field"
                   />
                   @if (
                     form.controls.dados.controls.studentPhone.touched &&
                     form.controls.dados.controls.studentPhone.invalid
                   ) {
-                    <p class="field-error">Informe um telefone válido.</p>
+                    <p class="field-error">Informe o telefone com DDD, só números (11 dígitos).</p>
                   }
                 </div>
 
@@ -277,11 +279,13 @@
                           [id]="'guardianPhone' + index"
                           type="tel"
                           formControlName="phone"
-                          placeholder="(31) 90000-0000"
+                          inputmode="numeric"
+                          maxlength="11"
+                          placeholder="31999999999"
                           class="field"
                         />
                         @if (item.controls.phone.touched && item.controls.phone.invalid) {
-                          <p class="field-error">Informe um telefone válido.</p>
+                          <p class="field-error">Informe o telefone com DDD, só números (11 dígitos).</p>
                         }
                       </div>
 

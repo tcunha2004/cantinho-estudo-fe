@@ -98,7 +98,7 @@ async function inativarPorNome(request: APIRequestContext, name: string): Promis
 async function preencherDados(page: Page, tag: string): Promise<void> {
   await page.locator('#studentName').fill(nome(tag));
   await page.locator('#studentEmail').fill(email(tag));
-  await page.locator('#studentPhone').fill('(31) 90000-1234');
+  await page.locator('#studentPhone').fill('31900001234');
   await page.locator('#password').fill('senha123');
   await page.locator('#passwordConfirm').fill('senha123');
   await page.locator('#regionId').selectOption({ label: 'Vila da Serra' });
@@ -116,7 +116,7 @@ function fase(page: Page, titulo: string) {
 
 async function preencherResponsavel(page: Page, index = 0, quem = 'Marta E2E'): Promise<void> {
   await page.locator(`#guardianName${index}`).fill(quem);
-  await page.locator(`#guardianPhone${index}`).fill('(31) 98888-7777');
+  await page.locator(`#guardianPhone${index}`).fill('31988887777');
   await page.locator(`#guardianCpf${index}`).fill(`111.222.333-4${index}`);
 }
 
@@ -541,7 +541,7 @@ test.describe('cadastro por link · tela', () => {
 
       const next = page.getByRole('button', { name: 'Próximo' });
       await page.locator('#guardianName0').fill('Marta E2E');
-      await page.locator('#guardianPhone0').fill('(31) 98888-7777');
+      await page.locator('#guardianPhone0').fill('31988887777');
       await expect(next, 'sem CPF').toBeDisabled();
 
       await page.locator('#guardianCpf0').fill('123');

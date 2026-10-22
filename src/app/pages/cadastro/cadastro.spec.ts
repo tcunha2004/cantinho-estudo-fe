@@ -215,6 +215,19 @@ describe('Cadastro', () => {
     expect(button('Próximo').disabled).toBe(true);
   });
 
+  it('só aceita telefone com 11 dígitos, sem máscara', async () => {
+    await open();
+    fillStudent();
+
+    for (const phone of ['3190000111', '319000011112', '(31) 90000-1111']) {
+      fill('#studentPhone', phone);
+      expect(button('Próximo').disabled, phone).toBe(true);
+    }
+
+    fill('#studentPhone', '31900001111');
+    expect(button('Próximo').disabled).toBe(false);
+  });
+
   it('salva os dados do aluno ao avançar', async () => {
     await open();
     fillStudent();

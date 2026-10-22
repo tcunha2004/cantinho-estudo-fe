@@ -153,7 +153,13 @@ test.describe('cadastro por link · API', () => {
         ['região que não é uuid', { regionId: 'qualquer-coisa' }],
         ['lista de responsáveis vazia', { guardians: [] }],
         ['responsável sem cpf', { guardians: [{ name: 'Marta', phone: '31988887777' }] }],
-        ['cpf curto', { guardians: [{ name: 'Marta', phone: '3198888', cpf: '123' }] }],
+        ['cpf curto', { guardians: [{ name: 'Marta', phone: '31988887777', cpf: '123' }] }],
+        ['telefone curto', { studentPhone: '3190000111' }],
+        ['telefone com máscara', { studentPhone: '(31) 90000-1111' }],
+        [
+          'telefone do responsável curto',
+          { guardians: [{ name: 'Marta', phone: '3198888', cpf: '11122233344' }] },
+        ],
         ['campo que não existe', { apelido: 'Aninha' }],
       ];
 
