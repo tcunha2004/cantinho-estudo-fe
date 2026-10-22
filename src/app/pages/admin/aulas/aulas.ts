@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe, DOCUMENT } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
@@ -46,9 +47,19 @@ export class Aulas {
     defaultValue: [] as AgendaClassDto[],
   });
 
-  protected readonly items = this.classes.value;
+  /* Ler `value()` com o recurso em erro lança e quebra a tela inteira. */
+  protected readonly items = computed(() => (this.classes.hasValue() ? this.classes.value() : []));
   protected readonly loading = this.classes.isLoading;
   protected readonly loadError = this.classes.error;
+  /* Período recusado pela API (ex.: mais de 62 dias) mostra o motivo, não "recarregue". */
+  protected readonly loadErrorMessage = computed(() => {
+    const error = this.loadError();
+    const message =
+      error instanceof HttpErrorResponse && error.status === 400
+        ? (error.error as { message?: string } | null)?.message
+        : null;
+    return message ?? 'Não foi possível carregar as aulas. Recarregue a página.';
+  });
 
   protected readonly subtitle = computed(() => {
     const count = this.items().length;
