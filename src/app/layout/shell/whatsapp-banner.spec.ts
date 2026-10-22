@@ -23,7 +23,10 @@ describe('WhatsappBanner', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter([{ path: 'whatsapp', children: [] }]),
+        provideRouter([
+          { path: 'whatsapp', children: [] },
+          { path: '', children: [] },
+        ]),
       ],
     });
     http = TestBed.inject(HttpTestingController);
@@ -81,19 +84,36 @@ describe('WhatsappBanner', () => {
     expect(host().querySelector('[role="alert"]')).toBeNull();
   });
 
-  it('some na própria página do WhatsApp, que já mostra o estado', async () => {
+  /* A página consulta com `fresh`; uma resposta com cache da faixa chegando por
+   * último poderia sobrescrever o status real. */
+  it('some na própria página do WhatsApp e não consulta lá', async () => {
     await open('disconnected');
     expect(host().querySelector('[role="alert"]')).toBeTruthy();
 
     await TestBed.inject(Router).navigateByUrl('/whatsapp');
     fixture.detectChanges();
-    http
-      .match(STATUS_URL)
-      .forEach((request) =>
-        request.flush({ state: 'disconnected', qrcode: null, phone: null, profileName: null }),
-      );
     await tick();
 
+    http.expectNone(STATUS_URL);
     expect(host().querySelector('[role="alert"]')).toBeNull();
+  });
+
+  it('volta a consultar ao sair da página do WhatsApp', async () => {
+    await open('connected');
+    const router = TestBed.inject(Router);
+
+    await router.navigateByUrl('/whatsapp');
+    fixture.detectChanges();
+    await tick();
+    http.expectNone(STATUS_URL);
+
+    await router.navigateByUrl('/');
+    fixture.detectChanges();
+    http
+      .expectOne(STATUS_URL)
+      .flush({ state: 'disconnected', qrcode: null, phone: null, profileName: null });
+    await tick();
+
+    expect(host().querySelector('[role="alert"]')).toBeTruthy();
   });
 });

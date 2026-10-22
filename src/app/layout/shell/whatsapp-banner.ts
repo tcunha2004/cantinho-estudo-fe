@@ -35,16 +35,20 @@ export class WhatsappBanner {
     { initialValue: null },
   );
 
-  /* O resultado vai para `whatsappService.status`; o valor do resource não é lido. */
-  private readonly check = rxResource({
-    params: () => this.navigation(),
-    stream: () => this.whatsappService.getStatus(),
-  });
-
-  /* A página do WhatsApp já mostra o estado por conta própria. */
+  /* A página do WhatsApp já mostra o estado — e consulta com `fresh`. */
   private readonly onWhatsappPage = computed(() =>
     (this.navigation()?.urlAfterRedirects ?? this.router.url).startsWith('/whatsapp'),
   );
+
+  /*
+   * O resultado vai para `whatsappService.status`; o valor do resource não é
+   * lido. Fica ocioso (params indefinido) na página do WhatsApp: uma resposta
+   * com cache chegando por último sobrescreveria o status fresco da página.
+   */
+  private readonly check = rxResource({
+    params: () => (this.onWhatsappPage() ? undefined : this.navigation()),
+    stream: () => this.whatsappService.getStatus(),
+  });
 
   protected readonly message = computed(() => {
     const state = this.whatsappService.status()?.state;
