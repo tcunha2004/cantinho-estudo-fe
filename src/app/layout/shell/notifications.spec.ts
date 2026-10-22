@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { API_BASE_URL } from '../../service/api.config';
+import { WhatsappService } from '../../service/whatsapp.service';
 import { Notifications } from './notifications';
 
 /*
@@ -231,5 +232,64 @@ describe('Notifications', () => {
 
     expect(text()).toContain('Já existe um usuário com este e-mail');
     expect(text()).toContain('Confirmar e gerar contrato');
+  });
+
+  describe('aviso de WhatsApp na conferência', () => {
+    const warning = 'o aluno não vai receber a mensagem de aprovação';
+
+    function setWhatsapp(state: 'connected' | 'disconnected'): void {
+      TestBed.inject(WhatsappService).status.set({
+        state,
+        qrcode: null,
+        phone: null,
+        profileName: null,
+      });
+    }
+
+    it('avisa na conferência do aluno quando o WhatsApp está desconectado', async () => {
+      setWhatsapp('disconnected');
+      await open();
+      openModal();
+      click('Ana Souza');
+
+      expect(text()).toContain(warning);
+    });
+
+    it('não avisa quando conectado', async () => {
+      setWhatsapp('connected');
+      await open();
+      openModal();
+      click('Ana Souza');
+
+      expect(text()).not.toContain('não vai receber a mensagem');
+    });
+
+    it('não avisa enquanto o status ainda não foi consultado', async () => {
+      await open();
+      openModal();
+      click('Ana Souza');
+
+      expect(text()).not.toContain('não vai receber a mensagem');
+    });
+
+    it('não avisa na conferência de professor', async () => {
+      setWhatsapp('disconnected');
+      await open([waitingTeacher]);
+      openModal();
+      click('Carlos Lima');
+
+      expect(text()).not.toContain('não vai receber a mensagem');
+    });
+
+    it('o aviso não bloqueia a aprovação', async () => {
+      setWhatsapp('disconnected');
+      await open();
+      openModal();
+      click('Ana Souza');
+
+      expect((host().querySelector('button.btn-primary') as HTMLButtonElement).disabled).toBe(
+        false,
+      );
+    });
   });
 });

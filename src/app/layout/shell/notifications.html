@@ -163,6 +163,12 @@
         </section>
       }
 
+      @if (item.role !== 'professor' && whatsappDown()) {
+        <p class="mt-5 rounded-xl bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-700">
+          O WhatsApp está desconectado: o aluno não vai receber a mensagem de aprovação.
+        </p>
+      }
+
       @if (errorMessage(); as message) {
         <p class="mt-5 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600">
           {{ message }}
