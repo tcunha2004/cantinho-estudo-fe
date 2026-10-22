@@ -4,6 +4,7 @@ import { Session } from '../../core/session';
 import { UserRole } from '../../model/entity/user.model';
 import { Icon, IconName } from '../../shared/icon/icon';
 import { Notifications } from './notifications';
+import { WhatsappBanner } from './whatsapp-banner';
 
 interface NavItem {
   label: string;
@@ -20,6 +21,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
     { label: 'Professores', path: '/professores', icon: 'presentation' },
     { label: 'Informações', path: '/info', icon: 'info' },
     { label: 'Acessos', path: '/senhas', icon: 'shield' },
+    { label: 'WhatsApp', path: '/whatsapp', icon: 'message-circle' },
   ],
   professor: [
     { label: 'Minha agenda', path: '/agenda', icon: 'calendar' },
@@ -35,7 +37,7 @@ const NAV_BY_ROLE: Record<UserRole, NavItem[]> = {
 
 @Component({
   selector: 'app-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Notifications],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, Notifications, WhatsappBanner],
   templateUrl: './shell.html',
   styleUrl: './shell.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

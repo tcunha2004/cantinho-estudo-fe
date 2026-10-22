@@ -7,6 +7,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs';
 import { WaitingSignupDto } from '../../model/dto/waiting-signup.dto';
 import { SignupLinkService } from '../../service/signup-link.service';
+import { WhatsappService } from '../../service/whatsapp.service';
 import { PLAN_DISPLAY, planPriceView } from '../../shared/domain-display';
 import { Icon } from '../../shared/icon/icon';
 import { Modal } from '../../shared/modal/modal';
@@ -30,6 +31,7 @@ import { Modal } from '../../shared/modal/modal';
 export class Notifications {
   private readonly router = inject(Router);
   private readonly signupLinkService = inject(SignupLinkService);
+  private readonly whatsappService = inject(WhatsappService);
 
   protected readonly planDisplay = PLAN_DISPLAY;
 
@@ -43,6 +45,16 @@ export class Notifications {
     params: () => this.navigation(),
     stream: () => this.signupLinkService.getWaiting(),
     defaultValue: [],
+  });
+
+  /*
+   * O aluno só recebe a mensagem de aprovação com o WhatsApp conectado. Lê o
+   * último status que a faixa do shell guardou, sem requisição nova; nulo
+   * (ainda não consultado) não avisa nada.
+   */
+  protected readonly whatsappDown = computed(() => {
+    const status = this.whatsappService.status();
+    return status !== null && status.state !== 'connected';
   });
 
   protected readonly items = this.waiting.value;
