@@ -15,7 +15,8 @@ export interface WhatsappStatusDto {
 
 export interface WhatsappFailureDto {
   id: string;
-  studentName: string | null;
+  /* Aluno ou professor dono da mensagem. */
+  recipientName: string | null;
   phone: string;
   text: string;
   error: string;

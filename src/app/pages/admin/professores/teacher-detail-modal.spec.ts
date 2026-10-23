@@ -10,6 +10,7 @@ const teacher = {
   id: 't1',
   name: 'Renata Lima',
   email: 'renata@teste.com',
+  phone: '31977776666',
   bio: 'Licenciada em Matemática',
   active: true,
   subjects: [{ id: 'sub-mat', name: 'Matemática' }],
@@ -114,6 +115,7 @@ describe('TeacherDetailModal', () => {
 
     expect(text()).toContain('Renata Lima');
     expect(text()).toContain('renata@teste.com');
+    expect(text()).toContain('31977776666');
     expect(text()).toContain('Matemática');
     expect(text()).toContain('Ativo');
   });
@@ -132,6 +134,7 @@ describe('TeacherDetailModal', () => {
     click('Editar');
 
     fill('#name', 'Renata L. Lima');
+    fill('#phone', '31988887777');
     fill('#bio', 'Mestre em Educação');
     toggle(1);
     submit();
@@ -141,6 +144,7 @@ describe('TeacherDetailModal', () => {
     expect(request.request.body).toEqual({
       name: 'Renata L. Lima',
       email: 'renata@teste.com',
+      phone: '31988887777',
       bio: 'Mestre em Educação',
       subjectIds: ['sub-mat', 'sub-fis'],
     });
@@ -182,6 +186,17 @@ describe('TeacherDetailModal', () => {
     click('Editar');
 
     fill('#email', 'sem-arroba');
+    submit();
+
+    http.expectNone(`${API_BASE_URL}/teachers/t1`);
+  });
+
+  /* Professor antigo, de antes do telefone existir: a edição exige preencher. */
+  it('não salva sem telefone', async () => {
+    await open();
+    click('Editar');
+
+    fill('#phone', '');
     submit();
 
     http.expectNone(`${API_BASE_URL}/teachers/t1`);

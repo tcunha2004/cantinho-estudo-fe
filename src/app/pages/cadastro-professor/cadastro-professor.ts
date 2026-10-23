@@ -15,6 +15,9 @@ import { SignupLinkService } from '../../service/signup-link.service';
 import { Icon } from '../../shared/icon/icon';
 import { passwordsMatch } from '../../shared/passwords-match';
 
+/* DDD + celular, só dígitos — o mesmo padrão do cadastro do aluno. */
+const PHONE = /^\d{11}$/;
+
 /**
  * Cadastro do professor pelo link que o admin enviou. Tela pública, como a do
  * aluno: quem preenche ainda não existe no sistema, então não há sessão — o
@@ -83,6 +86,23 @@ import { passwordsMatch } from '../../shared/passwords-match';
               <label class="block sm:col-span-2">
                 <span class="text-sm font-bold">E-mail</span>
                 <input formControlName="email" type="email" class="field mt-1.5 w-full" />
+              </label>
+
+              <label class="block sm:col-span-2">
+                <span class="text-sm font-bold">Telefone</span>
+                <input
+                  formControlName="phone"
+                  type="tel"
+                  inputmode="numeric"
+                  maxlength="11"
+                  placeholder="31999999999"
+                  class="field mt-1.5 w-full"
+                />
+                @if (form.controls.phone.touched && form.controls.phone.invalid) {
+                  <span class="field-error block"
+                    >Informe o telefone com DDD, só números (11 dígitos).</span
+                  >
+                }
               </label>
 
               <label class="block">
@@ -179,6 +199,7 @@ export class CadastroProfessor {
     {
       name: ['', [Validators.required, Validators.minLength(3)]],
       email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.required, Validators.pattern(PHONE)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       passwordConfirm: ['', Validators.required],
       bio: ['', [Validators.required, Validators.minLength(20)]],
@@ -259,7 +280,7 @@ export class CadastroProfessor {
       return;
     }
 
-    const { name, email, password, bio } = this.form.getRawValue();
+    const { name, email, phone, password, bio } = this.form.getRawValue();
 
     this.saving.set(true);
     this.errorMessage.set(null);
@@ -268,6 +289,7 @@ export class CadastroProfessor {
       .saveDraft(this.linkId, {
         studentName: name,
         studentEmail: email,
+        studentPhone: phone,
         password,
         bio: bio.trim(),
         subjectIds: [...this.picked()],
@@ -298,6 +320,7 @@ export class CadastroProfessor {
       {
         name: draft.studentName ?? '',
         email: draft.studentEmail ?? '',
+        phone: draft.studentPhone ?? '',
         bio: draft.bio ?? '',
       },
       { emitEvent: false },

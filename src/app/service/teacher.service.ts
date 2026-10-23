@@ -10,6 +10,7 @@ import { ApiClient } from './api-client';
 export interface UpdateTeacherPayload {
   name?: string;
   email?: string;
+  phone?: string;
   bio?: string | null;
   subjectIds?: string[];
   active?: boolean;
