@@ -21,7 +21,7 @@ function status(state: WhatsappStatusDto['state'], extra: Partial<WhatsappStatus
 
 const failure = (overrides: Partial<WhatsappFailureDto> = {}): WhatsappFailureDto => ({
   id: 'm1',
-  studentName: 'Ana',
+  recipientName: 'Ana',
   phone: '31',
   text: 't',
   error: 'Telefone inválido',
@@ -206,7 +206,7 @@ describe('Whatsapp (admin)', () => {
       failure(),
       failure({
         id: 'm2',
-        studentName: 'Bia',
+        recipientName: 'Bia',
         error: 'Envio interrompido',
         createdAt: '2026-10-22T09:00:00',
       }),

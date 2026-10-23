@@ -42,6 +42,10 @@
               <dt class="text-ink-soft">E-mail</dt>
               <dd class="text-right font-bold">{{ item.studentEmail }}</dd>
             </div>
+            <div class="flex justify-between gap-4 py-2.5">
+              <dt class="text-ink-soft">Telefone</dt>
+              <dd class="text-right font-bold">{{ item.studentPhone }}</dd>
+            </div>
           </dl>
         </section>
 
@@ -163,9 +167,9 @@
         </section>
       }
 
-      @if (item.role !== 'professor' && whatsappDown()) {
+      @if (whatsappDown()) {
         <p class="mt-5 rounded-xl bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-700">
-          O WhatsApp está desconectado: o aluno não vai receber a mensagem de aprovação.
+          O WhatsApp está desconectado: a pessoa cadastrada não vai receber a mensagem de aprovação.
         </p>
       }
 

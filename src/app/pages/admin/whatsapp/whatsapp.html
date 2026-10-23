@@ -1,4 +1,7 @@
-<app-page-header title="WhatsApp" subtitle="Número que envia as mensagens do sistema aos alunos" />
+<app-page-header
+  title="WhatsApp"
+  subtitle="Número que envia as mensagens do sistema aos alunos e professores"
+/>
 
 <app-card class="mt-6">
   @if (errorMessage(); as message) {
@@ -89,7 +92,7 @@
       <table class="w-full text-left">
         <thead>
           <tr class="text-ink-soft">
-            <th scope="col" class="px-3 pb-2 font-bold">Aluno</th>
+            <th scope="col" class="px-3 pb-2 font-bold">Destinatário</th>
             <th scope="col" class="px-3 pb-2 font-bold">Telefone</th>
             <th scope="col" class="px-3 pb-2 font-bold">Motivo</th>
             <th scope="col" class="px-3 pb-2 font-bold">Data</th>
@@ -100,7 +103,7 @@
         <tbody>
           @for (item of failures(); track item.id) {
             <tr class="border-b border-line/70 last:border-0">
-              <td class="px-3 py-4 font-bold">{{ item.studentName ?? '—' }}</td>
+              <td class="px-3 py-4 font-bold">{{ item.recipientName ?? '—' }}</td>
               <td class="px-3 py-4 text-ink-soft">{{ item.phone }}</td>
               <td class="px-3 py-4 text-red-600">{{ item.error }}</td>
               <td class="whitespace-nowrap px-3 py-4 text-ink-soft">

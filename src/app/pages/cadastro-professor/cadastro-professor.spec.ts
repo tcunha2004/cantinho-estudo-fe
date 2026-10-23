@@ -100,6 +100,7 @@ describe('CadastroProfessor', () => {
   function fillEverything(): void {
     fill('name', 'Carlos Lima');
     fill('email', 'carlos@teste.com');
+    fill('phone', '31977776666');
     fill('password', 'senha123');
     fill('passwordConfirm', 'senha123');
     fill('bio', 'Licenciado em Matemática, 10 anos de sala de aula.');
@@ -124,9 +125,19 @@ describe('CadastroProfessor', () => {
     await open();
     fill('name', 'Carlos Lima');
     fill('email', 'carlos@teste.com');
+    fill('phone', '31977776666');
     fill('password', 'senha123');
     fill('passwordConfirm', 'senha123');
     fill('bio', 'Licenciado em Matemática, 10 anos de sala de aula.');
+
+    expect(send().disabled).toBe(true);
+  });
+
+  /* O telefone é por onde chega o aviso de cadastro aprovado no WhatsApp. */
+  it('telefone fora do padrão bloqueia o envio', async () => {
+    await open();
+    fillEverything();
+    fill('phone', '3197777');
 
     expect(send().disabled).toBe(true);
   });
@@ -150,6 +161,7 @@ describe('CadastroProfessor', () => {
     expect(draft.request.body).toEqual({
       studentName: 'Carlos Lima',
       studentEmail: 'carlos@teste.com',
+      studentPhone: '31977776666',
       password: 'senha123',
       bio: 'Licenciado em Matemática, 10 anos de sala de aula.',
       subjectIds: ['sub-1'],
@@ -168,12 +180,15 @@ describe('CadastroProfessor', () => {
       ...emptyForm,
       studentName: 'Carlos Lima',
       studentEmail: 'carlos@teste.com',
+      studentPhone: '31977776666',
       bio: 'Licenciado em Matemática, 10 anos de sala de aula.',
       subjectIds: ['sub-2'],
       hasPassword: true,
     });
 
     const name = host().querySelector('[formcontrolname="name"]') as HTMLInputElement;
+    const phone = host().querySelector('[formcontrolname="phone"]') as HTMLInputElement;
+    expect(phone.value).toBe('31977776666');
     const password = host().querySelector('[formcontrolname="password"]') as HTMLInputElement;
     expect(name.value).toBe('Carlos Lima');
     expect(password.value).toBe('');

@@ -46,6 +46,7 @@ const waitingTeacher = {
   id: 'link-2',
   studentName: 'Carlos Lima',
   studentEmail: 'carlos@teste.com',
+  studentPhone: '31977776666',
   bio: 'Licenciado em Matemática, 10 anos de sala de aula.',
   subjects: [{ id: 'sub-1', name: 'Matemática' }],
   submittedAt: '2026-08-21T10:00:00',
@@ -194,6 +195,7 @@ describe('Notifications', () => {
     click('Carlos Lima');
 
     expect(text()).toContain('carlos@teste.com');
+    expect(text()).toContain('31977776666');
     expect(text()).toContain('Matemática');
     expect(text()).toContain('10 anos de sala de aula');
     expect(host().querySelector('#discountPercentage')).toBeNull();
@@ -235,7 +237,7 @@ describe('Notifications', () => {
   });
 
   describe('aviso de WhatsApp na conferência', () => {
-    const warning = 'o aluno não vai receber a mensagem de aprovação';
+    const warning = 'a pessoa cadastrada não vai receber a mensagem de aprovação';
 
     function setWhatsapp(state: 'connected' | 'disconnected'): void {
       TestBed.inject(WhatsappService).status.set({
@@ -272,13 +274,13 @@ describe('Notifications', () => {
       expect(text()).not.toContain('não vai receber a mensagem');
     });
 
-    it('não avisa na conferência de professor', async () => {
+    it('avisa também na conferência de professor', async () => {
       setWhatsapp('disconnected');
       await open([waitingTeacher]);
       openModal();
       click('Carlos Lima');
 
-      expect(text()).not.toContain('não vai receber a mensagem');
+      expect(text()).toContain(warning);
     });
 
     it('o aviso não bloqueia a aprovação', async () => {

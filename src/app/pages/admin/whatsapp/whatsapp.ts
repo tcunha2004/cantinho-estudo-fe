@@ -96,7 +96,7 @@ export class Whatsapp {
 
   protected disconnect(): void {
     const confirmed = window.confirm(
-      'Desconectar o WhatsApp? Os alunos deixam de receber mensagens até você conectar de novo.',
+      'Desconectar o WhatsApp? Alunos e professores deixam de receber mensagens até você conectar de novo.',
     );
 
     if (confirmed) {

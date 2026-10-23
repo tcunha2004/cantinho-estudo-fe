@@ -7,12 +7,12 @@ interface WaitingSignupBase {
   id: string;
   studentName: string;
   studentEmail: string;
+  studentPhone: string;
   submittedAt: string | null;
 }
 
 export interface WaitingStudentSignup extends WaitingSignupBase {
   role: 'student';
-  studentPhone: string;
   studentAddress: string | null;
   regionName: string;
   /* Taxa de matrícula da região — cobrada fora do sistema, aqui é informativa. */

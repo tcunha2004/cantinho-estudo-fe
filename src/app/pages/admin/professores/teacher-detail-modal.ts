@@ -63,13 +63,19 @@ export class TeacherDetailModal {
   protected readonly form = this.fb.nonNullable.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
+    phone: ['', Validators.required],
     bio: [''],
   });
 
   protected readonly selectedSubjectIds = signal<string[]>([]);
 
   protected startEdit(teacher: TeacherDetailDto): void {
-    this.form.setValue({ name: teacher.name, email: teacher.email, bio: teacher.bio ?? '' });
+    this.form.setValue({
+      name: teacher.name,
+      email: teacher.email,
+      phone: teacher.phone,
+      bio: teacher.bio ?? '',
+    });
     this.selectedSubjectIds.set(teacher.subjects.map((subject) => subject.id));
     this.errorMessage.set(null);
     this.editing.set(true);
@@ -98,10 +104,11 @@ export class TeacherDetailModal {
       return;
     }
 
-    const { name, email, bio } = this.form.getRawValue();
+    const { name, email, phone, bio } = this.form.getRawValue();
 
-    this.save({ name, email, bio: bio.trim() || null, subjectIds: this.selectedSubjectIds() }, () =>
-      this.editing.set(false),
+    this.save(
+      { name, email, phone, bio: bio.trim() || null, subjectIds: this.selectedSubjectIds() },
+      () => this.editing.set(false),
     );
   }
 
